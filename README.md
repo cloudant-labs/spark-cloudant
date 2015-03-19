@@ -30,7 +30,7 @@ com.cloudant.spark.CloudantPartitionedPrunedFilteredRP|path|PrunedFilteredScan| 
 
 ### Binary download:
 
-[Location] (https://github.com/cloudant/spark-cloudant/releases/download/v1.0/cloudant-spark.jar)
+[Location] (https://github.com/cloudant/spark-cloudant/releases/download/v0.1/cloudant-spark.jar)
 
 
 ### Build from source:
