@@ -56,9 +56,9 @@ com.cloudant.spark.CloudantPartitionedPrunedFilteredRP|path|PrunedFilteredScan| 
 	conf = SparkConf().setAppName("Cloudant Spark SQL External Datasource in Python")
 		
 	# define cloudant related configuration
-	conf.set("cloudant.host","yanglei.cloudant.com")
-	conf.set("cloudant.username", "vandstresenceandetbaboze")
-	conf.set("cloudant.password","PXxUJaWcH3AenD74yWlwTJRc")
+	conf.set("cloudant.host","ACCOUNT.cloudant.com")
+	conf.set("cloudant.username", "USERNAME")
+	conf.set("cloudant.password","PASSWORD")
 	
 	# create Spark context and SQL context
 	sc = SparkContext(conf=conf)
@@ -85,9 +85,9 @@ com.cloudant.spark.CloudantPartitionedPrunedFilteredRP|path|PrunedFilteredScan| 
 	val conf = new SparkConf().setAppName("Cloudant Spark SQL External Datasource in Scala")
 		
 	// define cloudant related configuration	
-    conf.set("cloudant.host","yanglei.cloudant.com")
-    conf.set("cloudant.username", "vandstresenceandetbaboze")
-    conf.set("cloudant.password","PXxUJaWcH3AenD74yWlwTJRc")
+    conf.set("cloudant.host","ACCOUNT.cloudant.com")
+    conf.set("cloudant.username", "USERNAME")
+    conf.set("cloudant.password","PASSWORD")
         
     // create Spark context and SQL context
     val sc = new SparkContext(conf)
@@ -113,9 +113,9 @@ com.cloudant.spark.CloudantPartitionedPrunedFilteredRP|path|PrunedFilteredScan| 
 	    
 	conf = SparkConf().setAppName("Cloudant Spark SQL External Datasource in Python")
 	# define coudant related configuration
-	conf.set("cloudant.host","yanglei.cloudant.com")
-	conf.set("cloudant.username", "vandstresenceandetbaboze")
-	conf.set("cloudant.password","PXxUJaWcH3AenD74yWlwTJRc")
+	conf.set("cloudant.host","ACCOUNT.cloudant.com")
+	conf.set("cloudant.username", "USERNAME")
+	conf.set("cloudant.password","PASSWORD")
 	
 	sc = SparkContext(conf=conf)
 	sqlContext = SQLContext(sc)
