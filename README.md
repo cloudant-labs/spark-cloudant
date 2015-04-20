@@ -31,7 +31,7 @@ com.cloudant.spark.CloudantPartitionedPrunedFilteredRP|path|PrunedFilteredScan| 
 ### Binary download:
 
 Spark Version | Release # | Binary Location
---- | ---
+--- | --- | ---
 1.3.0 | v0.1 | [Location] (https://github.com/cloudant/spark-cloudant/releases/download/v0.1/cloudant-spark.jar)
 1.3.1 | v1.3.1.1 | [Location] (https://github.com/cloudant/spark-cloudant/releases/download/v1.3.1.1/cloudant-spark.jar)
 
