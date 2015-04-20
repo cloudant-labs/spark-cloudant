@@ -28,14 +28,13 @@ import play.api.libs.json.JsArray
 import play.api.libs.json.JsValue
 import scala.collection.mutable.HashMap
 import play.api.libs.json.JsNull
-import play.api.libs.json.JsUndefined
-import play.api.libs.json.JsNumber
 import org.apache.spark.sql.sources._
 import org.apache.spark.SparkEnv
 import org.apache.spark.sql.Row
 import org.apache.spark.rdd.RDD
 import spray.httpx.marshalling.Marshaller
 import spray.http.StatusCodes.Success
+import play.api.libs.json.JsString
 
 
 /**
@@ -43,11 +42,10 @@ import spray.http.StatusCodes.Success
  */
 class JsonStoreDataAccess (config: JsonStoreConfig)  {
 
-      implicit val timeout = Timeout(JsonStoreConfigManager.timeoutInMillis)
-      implicit val system = SparkEnv.get.actorSystem
-      import system.dispatcher 
+      implicit lazy val timeout = {Timeout(JsonStoreConfigManager.timeoutInMillis)}
+      implicit lazy val system = {SparkEnv.get.actorSystem}
 
-      val logger = Logging(system, getClass)
+      lazy val logger = {Logging(system, getClass)}
       
       private lazy val validCredentials: BasicHttpCredentials = {
             if (config.username !=null) BasicHttpCredentials(config.username, config.password)
@@ -64,16 +62,24 @@ class JsonStoreDataAccess (config: JsonStoreConfig)  {
       }
 
       def getIterator(skip: Int, limit: Int, url: String)(implicit columns: Array[String] =null,attrToFilters: Map[String, Array[Filter]] =null) ={
+        implicit def convertSkip(skip: Int): String  = {
+          val url = config.getLastUrl(skip)
+          if (url == null) skip.toString()
+          else  this.getQueryResult[String](url,{result => config.getLastNum(Json.parse(result)).as[JsString].value})
+        }
         val newUrl = config.getSubSetUrl(url,skip, limit)
         this.getQueryResult[Iterator[String]](newUrl,processIterator)
       }
 
       def getTotalRows(url: String) : Int ={
-          this.getQueryResult[Int](url,{result => config.getTotalRows(Json.parse(result)).as[JsNumber].value.intValue()})
+          val totalUrl = config.getTotalUrl(url)
+          this.getQueryResult[Int](totalUrl,{result => config.getTotalRows(Json.parse(result))})
       }
+      
+      
       private def processAll (result: String)( implicit columns: Array[String], attrToFilters: Map[String, Array[Filter]] =null)= {
-          val json = Json.parse(result)
-          var rows = config.getRows(json )
+          val jsonResult = Json.parse(result)
+          var rows = config.getRows(jsonResult )
           if (attrToFilters != null)
           {
             val util = new FilterUtil(attrToFilters)
@@ -102,6 +108,7 @@ class JsonStoreDataAccess (config: JsonStoreConfig)  {
       
       private def  getQueryResult[T](url: String, postProcessor:(String) => T)(implicit columns: Array[String] =null, attrToFilters: Map[String, Array[Filter]] =null) : T={
           logger.info("Cloudant query: "+ url)
+          import system.dispatcher 
 
           var pipeline: HttpRequest => Future[HttpResponse] = null
           if (validCredentials!=null)
@@ -122,12 +129,14 @@ class JsonStoreDataAccess (config: JsonStoreConfig)  {
       }
       
       def saveAll(data: Array[String]) {
+          import system.dispatcher 
           val url =config.getPostUrl()
           logger.info(s"Post:$url")
-            import ContentTypes._
-            implicit val stringMarshaller = Marshaller.of[String](`application/json`) {
-              (value, ct, ctx) => ctx.marshalTo(HttpEntity(ct, value))
-            }
+          if (url == null) return
+          import ContentTypes._
+          implicit val stringMarshaller = Marshaller.of[String](`application/json`) {
+            (value, ct, ctx) => ctx.marshalTo(HttpEntity(ct, value))
+          }
           val allFutures = data.map { x => 
             var pipeline: HttpRequest => Future[HttpResponse] = null
             if (validCredentials!=null)
@@ -146,7 +155,7 @@ class JsonStoreDataAccess (config: JsonStoreConfig)  {
           } 
           val f= Future.sequence(allFutures.toList)
           val result = Await.result(f, timeout.duration)
-           logger.info(s"Save result:$result")
+          logger.info(s"Save result:"+result.length)
       }
 }
 

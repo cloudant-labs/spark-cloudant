@@ -130,7 +130,7 @@ class FilterUtil(filters: Map[String, Array[Filter]]){
         val field = JsonUtil.getField(r, attr).getOrElse(null)
         if (field == null)
         {
-          logger.info("field not exisit:$r::$attr")
+          logger.info(s"field not exisit:$r::$attr")
           false
         }else
         {

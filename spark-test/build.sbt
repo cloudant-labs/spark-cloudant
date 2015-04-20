@@ -14,7 +14,7 @@ resolvers ++= Seq(
 )
 
 libraryDependencies ++= {
-  val sparkV =  "1.3.0"
+  val sparkV =  "1.3.1"
   val hadoopV = "2.4.0"
   Seq(
     "org.apache.spark"    %%  "spark-core"	  %  sparkV % "provided",

@@ -14,7 +14,7 @@ resolvers ++= Seq(
 )
 
 libraryDependencies ++= {
-  val sparkV =  "1.3.0"
+  val sparkV =  "1.3.1"
   val sprayV = "1.3.2"
   val playJsonV = "2.2.3"
   Seq(

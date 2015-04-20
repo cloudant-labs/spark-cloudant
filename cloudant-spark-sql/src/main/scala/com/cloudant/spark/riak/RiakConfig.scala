@@ -25,6 +25,8 @@ import play.api.libs.json.JsUndefined
 import play.api.libs.json.JsArray
 import java.net.URLEncoder
 import com.cloudant.spark.common._
+import play.api.libs.json.JsNumber
+import play.api.libs.json.JsNumber
 
 
 /**
@@ -43,12 +45,12 @@ import com.cloudant.spark.common._
       (dbUrl+condition, true)
     }
     
-    def getSubSetUrl (url: String, skip: Int, limit: Int) : String ={
+    def getSubSetUrl (url: String, skip: Int, limit: Int)(implicit convertSkip:(Int) => String) : String ={
       url+"&start="+skip+"&rows="+limit
     }
     
-    def getTotalRows(result: JsValue): JsValue = {
-        result \ "response" \ "numFound"
+    def getTotalRows(result: JsValue): Int = {
+        (result \ "response" \ "numFound").as[JsNumber].value.intValue()
     }
     
     def getRows(result: JsValue): Seq[JsValue] = {

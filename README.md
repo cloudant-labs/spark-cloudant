@@ -45,7 +45,10 @@ com.cloudant.spark.CloudantPartitionedPrunedFilteredRP|path|PrunedFilteredScan| 
 
 ### Verified on Spark level
 
-1.3.0
+Spark Version | Release #
+--- | ---
+1.3.0 | v0.1
+1.3.1 | v1.3.1.1
 
 ## Sample application 
 
@@ -188,6 +191,11 @@ path||riak: search index name; cloudant: as database name if database does not p
 		at com.esotericsoftware.kryo.serializers.FieldSerializer.create(FieldSerializer.java:228)
 		at com.esotericsoftware.kryo.serializers.FieldSerializer.read(FieldSerializer.java:217)
 		at com.esotericsoftware.kryo.Kryo.readClassAndObject(Kryo.java:732)
+	
+* Parallel loading relation provider hit issue on mesos cluster:
+	com.typesafe.config.ConfigException$Missing: No configuration setting found for key 'spray'
+	at com.typesafe.config.impl.SimpleConfig.findKey(SimpleConfig.java:124)
+	at com.typesafe.config.impl.SimpleConfig.find(SimpleConfig.java:147)
 	
 * Schema is calculated on the first document w/o any predicate push down. Need a better approach
 

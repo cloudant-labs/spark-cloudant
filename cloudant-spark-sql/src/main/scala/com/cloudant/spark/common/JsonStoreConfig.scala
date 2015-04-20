@@ -38,11 +38,14 @@ trait JsonStoreConfig {
   implicit val maxInPartition: Int
   implicit val minInPartition: Int
   def getOneUrl(): String
-  def getPostUrl(): String = {""}
   def getRangeUrl(field: String, start: Any, startInclusive:Boolean=false, end:Any, endInclusive:Boolean=false, includeDoc: Boolean = true): (String, Boolean) 
-  def getSubSetUrl (url: String, skip: Int, limit: Int) : String
-  def getTotalRows(result: JsValue): JsValue
+  def getSubSetUrl (url: String, skip: Int, limit: Int)(implicit convertSkip:(Int) => String ) : String
+  def getTotalRows(result: JsValue): Int
   def getRows(result: JsValue): Seq[JsValue]
+  def getPostUrl(): String = {null}
+  def getLastUrl(skip: Int): String = {null}
+  def getLastNum(result: JsValue): JsValue = {null}
+  def getTotalUrl(url: String) = {url}
   
   val default_filter: String = "*:*"
   
