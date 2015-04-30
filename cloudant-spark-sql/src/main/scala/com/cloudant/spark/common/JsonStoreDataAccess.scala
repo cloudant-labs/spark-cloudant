@@ -35,6 +35,9 @@ import org.apache.spark.rdd.RDD
 import spray.httpx.marshalling.Marshaller
 import spray.http.StatusCodes.Success
 import play.api.libs.json.JsString
+import com.typesafe.config.ConfigFactory
+import java.util.UUID
+import scala.util.Random
 
 
 /**
@@ -43,9 +46,9 @@ import play.api.libs.json.JsString
 class JsonStoreDataAccess (config: JsonStoreConfig)  {
 
       implicit lazy val timeout = {Timeout(JsonStoreConfigManager.timeoutInMillis)}
-      implicit lazy val system = {SparkEnv.get.actorSystem}
+      lazy val envSystem = {SparkEnv.get.actorSystem}
 
-      lazy val logger = {Logging(system, getClass)}
+      lazy val logger = {Logging(envSystem, getClass)}
       
       private lazy val validCredentials: BasicHttpCredentials = {
             if (config.username !=null) BasicHttpCredentials(config.username, config.password)
@@ -106,8 +109,28 @@ class JsonStoreDataAccess (config: JsonStoreConfig)  {
         result
       }
       
+      private def getSystem(): (ActorSystem, Boolean) = {
+         val checkSprayConfig = envSystem.settings.config.withFallback(ConfigFactory.parseString("""
+            spray = NOT_FOUND
+         """) )
+         val sprayValue = checkSprayConfig.getValue("spray").unwrapped().toString()
+          if ( !sprayValue.equals("NOT_FOUND")) // The env actorSystem loaded spary config
+          {
+            logger.info("reuse SparkEnv ActorSystem as it contains spray")
+            (envSystem, true)
+          }
+          else{
+            logger.info("create new ActorSystem as the SparkEnv one does not contain spray")
+            val classLoader = this.getClass.getClassLoader
+            val myconfig = ConfigFactory.load(classLoader)// force config from my classloader
+            val nextRamdomNum = new Random().nextInt
+            (ActorSystem("CloudantSpark-"+nextRamdomNum,myconfig,classLoader), false)
+          }
+
+      }
       private def  getQueryResult[T](url: String, postProcessor:(String) => T)(implicit columns: Array[String] =null, attrToFilters: Map[String, Array[Filter]] =null) : T={
           logger.info("Cloudant query: "+ url)
+          implicit val ( system, existing) = getSystem()
           import system.dispatcher 
 
           var pipeline: HttpRequest => Future[HttpResponse] = null
@@ -125,10 +148,16 @@ class JsonStoreDataAccess (config: JsonStoreConfig)  {
           val result = Await.result(response, timeout.duration)
           val data = postProcessor(result.entity.asString)
           logger.debug(s"got result:$data")
+          if(!existing)
+          {
+            logger.info("shutdown newly created ActorSystem")
+            system.shutdown()
+          }
           data
       }
       
       def saveAll(data: Array[String]) {
+          implicit val (system, existing) = getSystem()
           import system.dispatcher 
           val url =config.getPostUrl()
           logger.info(s"Post:$url")
@@ -155,6 +184,11 @@ class JsonStoreDataAccess (config: JsonStoreConfig)  {
           } 
           val f= Future.sequence(allFutures.toList)
           val result = Await.result(f, timeout.duration)
+          if(!existing)
+          {
+            logger.info("shutdown newly created ActorSystem")
+            system.shutdown()
+          }
           logger.info(s"Save result:"+result.length)
       }
 }
