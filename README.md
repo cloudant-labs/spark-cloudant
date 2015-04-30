@@ -179,23 +179,9 @@ path||riak: search index name; cloudant: as database name if database does not p
 	HttpClientConnection: Aggregated response entity greater than configured limit of 1048576 bytes,closing connection
 	java.lang.RuntimeException: sendReceive doesn't support chunked response
 
-* ORDER BY does not work for PrunedFilteredScan
-	com.esotericsoftware.kryo.KryoException: Class cannot be created (missing no-arg constructor): 	
-   		org.apache.spark.sql.catalyst.expressions.GenericRowWithSchema
-		at com.esotericsoftware.kryo.Kryo.newInstantiator(Kryo.java:1050)
-		at com.esotericsoftware.kryo.Kryo.newInstance(Kryo.java:1062)
-		at com.esotericsoftware.kryo.serializers.FieldSerializer.create(FieldSerializer.java:228)
-		at com.esotericsoftware.kryo.serializers.FieldSerializer.read(FieldSerializer.java:217)
-		at com.esotericsoftware.kryo.Kryo.readClassAndObject(Kryo.java:732)
-	
-* Parallel loading relation provider hit issue on mesos cluster:
-	com.typesafe.config.ConfigException$Missing: No configuration setting found for key 'spray'
-	at com.typesafe.config.impl.SimpleConfig.findKey(SimpleConfig.java:124)
-	at com.typesafe.config.impl.SimpleConfig.find(SimpleConfig.java:147)
-	
 * Schema is calculated on the first document w/o any predicate push down. Need a better approach
 
-* Cloudant search index query does not support "paging" through skip and limit. Push down may not get the best performance anyway. Will try changes + bulk read api next.
+* Cloudant search index query does not support "paging" through skip and limit. Push down may not get the best performance anyway.
 		
 * Need to improve how partition is determined for parallel loading
 
