@@ -19,9 +19,9 @@ from pyspark import SparkContext, SparkConf
 
 conf = SparkConf().setAppName("Cloudant Spark SQL External Datasource in Python")
 # define coudant related configuration
-conf.set("cloudant.host","ACCOUNT.cloudant.com")
-conf.set("cloudant.username", "USERNAME")
-conf.set("cloudant.password","PASSWORD")
+conf.set("cloudant.host","your host")
+conf.set("cloudant.username", "your username")
+conf.set("cloudant.password","your password")
 
 sc = SparkContext(conf=conf)
 sqlContext = SQLContext(sc)

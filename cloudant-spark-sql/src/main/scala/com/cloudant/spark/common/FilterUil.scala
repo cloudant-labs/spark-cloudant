@@ -130,13 +130,13 @@ class FilterUtil(filters: Map[String, Array[Filter]]){
         val field = JsonUtil.getField(r, attr).getOrElse(null)
         if (field == null)
         {
-          logger.info(s"field not exisit:$r::$attr")
+          logger.info(s"field $attr not exisit:$r")
           false
         }else
         {
           if (field.isInstanceOf[JsNumber])  satisfiesAll(field.as[JsNumber].value.intValue(), filters)
           else if (field.isInstanceOf[JsBoolean])  satisfiesAll(field.as[JsBoolean].value, filters)
-          else if (field.isInstanceOf[JsString])satisfiesAll(field.as[JsString].value, filters)
+          else if (field.isInstanceOf[JsString]) satisfiesAll(field.as[JsString].value, filters)
           else true
         }
       }
@@ -161,12 +161,12 @@ class FilterUtil(filters: Map[String, Array[Filter]]){
     
   private def satisfiesAll(value: String, filters: Array[Filter]): Boolean = {
     val satisfied = filters.forall({
-      case EqualTo(attr, v) => value.equals(v.asInstanceOf[String])
-      case GreaterThan(attr, v) => new StringOps(value) > v.asInstanceOf[String]
-      case LessThan(attr, v) => new StringOps(value) < v.asInstanceOf[String]
-      case GreaterThanOrEqual(attr, v) => new StringOps(value) >= v.asInstanceOf[String]
-      case LessThanOrEqual(attr, v) => new StringOps(value) <= v.asInstanceOf[String]
-      case In(attr, vs) => vs.exists(v => value.equals(asInstanceOf[String]))
+      case EqualTo(attr, v:String) => value.equals(v.asInstanceOf[String])
+      case GreaterThan(attr, v:String) => new StringOps(value) > v.asInstanceOf[String]
+      case LessThan(attr, v:String) => new StringOps(value) < v.asInstanceOf[String]
+      case GreaterThanOrEqual(attr, v: String) => new StringOps(value) >= v.asInstanceOf[String]
+      case LessThanOrEqual(attr, v:String) => new StringOps(value) <= v.asInstanceOf[String]
+      //case In(attr, vs) => vs.exists(v => value.equals(v.asInstanceOf[String]))
       case IsNotNull(attr) => value!=null
       case IsNull(attr) => value == null
       case _ => true

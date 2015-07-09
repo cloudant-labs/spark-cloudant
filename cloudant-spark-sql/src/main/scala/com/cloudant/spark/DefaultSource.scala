@@ -57,7 +57,7 @@ case class CloudantReadWriteRelation (config:CloudantConfig, schema: StructType 
       implicit val attrToFilters = filterInterpreter.getFiltersForPostProcess(searchField)
       
       val cloudantRDD  = new JsonStoreRDD(sqlContext.sparkContext,config,url)
-      sqlContext.jsonRDD(cloudantRDD).rdd
+      sqlContext.read.json(cloudantRDD).rdd
     }
 
     def  insert( data:DataFrame, overwrite: Boolean) ={
@@ -92,7 +92,7 @@ class DefaultSource extends RelationProvider with CreatableRelationProvider with
           try{
             val dataAccess = new JsonStoreDataAccess(config)
             val aRDD = sqlContext.sparkContext.parallelize(dataAccess.getOne())
-            sqlContext.jsonRDD(aRDD).schema
+            sqlContext.read.json(aRDD).schema
           }catch
           {
             // We may not be able to derive a schema if it is an empty database

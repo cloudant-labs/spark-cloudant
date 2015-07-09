@@ -81,12 +81,14 @@ class JsonStoreDataAccess (config: JsonStoreConfig)  {
       
       
       private def processAll (result: String)( implicit columns: Array[String], attrToFilters: Map[String, Array[Filter]] =null)= {
+          logger.debug(s"processAll columns:$columns, attrToFilters:$attrToFilters")
           val jsonResult = Json.parse(result)
           var rows = config.getRows(jsonResult )
           if (attrToFilters != null)
           {
             val util = new FilterUtil(attrToFilters)
             rows = rows.filter(r => util.apply(r))
+            logger.debug(s"filtered: $rows")
           }
           rows.map(r =>  convert(r))
       }
@@ -97,7 +99,7 @@ class JsonStoreDataAccess (config: JsonStoreConfig)  {
 
 
       private def convert(rec:JsValue)(implicit columns: Array[String]): String = {
-        if (columns ==null) return Json.stringify(Json.toJson(rec))
+        if (columns == null) return Json.stringify(Json.toJson(rec))
         val m = new HashMap[String, JsValue]()
         for ( x <-columns)
         {
@@ -189,7 +191,7 @@ class JsonStoreDataAccess (config: JsonStoreConfig)  {
             logger.info("shutdown newly created ActorSystem")
             system.shutdown()
           }
-          logger.info(s"Save result:"+result.length)
+          logger.info("Save result "+result.length +"rows is full:"+(data.length==result.length))
       }
 }
 

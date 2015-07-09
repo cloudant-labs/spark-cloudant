@@ -19,8 +19,8 @@ from pyspark import SparkContext, SparkConf
 
 conf = SparkConf().setAppName("Riak Spark SQL External Datasource in Python")
 # define Riak related configuration
-conf.set("riak.host","169.53.146.83")
-conf.set("riak.port", "49168")
+conf.set("riak.host","your host")
+conf.set("riak.port", "your port")
 
 sc = SparkContext(conf=conf)
 sqlContext = SQLContext(sc)

@@ -41,7 +41,7 @@ case class CloudantPrunedFilteredScan (dbName: String, indexName: String)
 
   val schema: StructType = {
       val aRDD = sqlContext.sparkContext.parallelize(dataAccess.getOne())
-      sqlContext.jsonRDD(aRDD).schema
+      sqlContext.read.json(aRDD).schema
   }
 
     def buildScan(requiredColumns: Array[String], 
@@ -59,7 +59,7 @@ case class CloudantPrunedFilteredScan (dbName: String, indexName: String)
 
       val rows = dataAccess.getAll(url) 
       val sRDD = sqlContext.sparkContext.parallelize(rows)
-      sqlContext.jsonRDD(sRDD).rdd
+      sqlContext.read.json(sRDD).rdd
   }
 
 }

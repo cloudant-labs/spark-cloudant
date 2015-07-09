@@ -46,7 +46,7 @@ case class CloudantPartitionedPrunedFilteredScan (dbName: String, indexName: Str
   
   val schema: StructType = {
       val aRDD = sqlContext.sparkContext.parallelize(dataAccess.getOne())
-      sqlContext.jsonRDD(aRDD).schema
+      sqlContext.read.json(aRDD).schema
   }
 
     def buildScan(requiredColumns: Array[String], 
@@ -64,7 +64,7 @@ case class CloudantPartitionedPrunedFilteredScan (dbName: String, indexName: Str
       implicit val attrToFilters = filterInterpreter.getFiltersForPostProcess(searchField)
       
       val cloudantRDD  = new JsonStoreRDD(sqlContext.sparkContext,config,url)
-      sqlContext.jsonRDD(cloudantRDD).rdd
+      sqlContext.read.json(cloudantRDD).rdd
   }
 
 }

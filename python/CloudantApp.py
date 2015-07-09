@@ -19,9 +19,9 @@ from pyspark import SparkContext, SparkConf
 
 conf = SparkConf().setAppName("Cloudant Spark SQL External Datasource in Python")
 # define coudant related configuration
-conf.set("cloudant.host","ACCOUNT.cloudant.com")
-conf.set("cloudant.username", "USERNAME")
-conf.set("cloudant.password","PASSWORD")
+conf.set("cloudant.host","your host")
+conf.set("cloudant.username", "your username")
+conf.set("cloudant.password","your api key")
 
 sc = SparkContext(conf=conf)
 sqlContext = SQLContext(sc)
@@ -34,20 +34,20 @@ airportData.printSchema()
 for code in airportData.collect():
 	print code.airportCode
 
-print 'About to test com.cloudant.spark.CloudantRP for booking'
-sqlContext.sql(" CREATE TEMPORARY TABLE bookingTable USING com.cloudant.spark.CloudantRP OPTIONS ( database 'booking')")
+#print 'About to test com.cloudant.spark.CloudantRP for booking' - Spark 1.4.0 indexOutOfRange issue
+#sqlContext.sql(" CREATE TEMPORARY TABLE bookingTable USING com.cloudant.spark.CloudantRP OPTIONS ( database 'booking')")
       
-bookingData = sqlContext.sql("SELECT customerId, dateOfBooking FROM bookingTable WHERE customerId = 'uid0@email.com'")
-bookingData.printSchema()
-for code in bookingData.collect():
-	print code.customerId
-	print code.dateOfBooking
+#bookingData = sqlContext.sql("SELECT customerId, dateOfBooking FROM bookingTable WHERE customerId = 'uid0@email.com'")
+#bookingData.printSchema()
+#for code in bookingData.collect():
+#	print code.customerId
+#	print code.dateOfBooking
 
 
 print 'About to test com.cloudant.spark.CloudantPrunedFilteredRP for airportcodemapping'
 sqlContext.sql(" CREATE TEMPORARY TABLE airportTable1 USING com.cloudant.spark.CloudantPrunedFilteredRP OPTIONS ( database 'airportcodemapping')")
       
-airportData = sqlContext.sql("SELECT airportCode, airportName FROM airportTable1 WHERE airportCode >= 'CAA' AND airportCode <= 'GAA'")
+airportData = sqlContext.sql("SELECT airportCode, airportName FROM airportTable1 WHERE airportCode >= 'CAA' AND airportCode <= 'GAA' ORDER BY airportCode")
 airportData.printSchema()
 for code in airportData.collect():
 	print code.airportCode
@@ -73,7 +73,7 @@ for code in flightData.collect():
 print 'About to test com.cloudant.spark.CloudantPartitionedPrunedFilteredRP for airportcodemapping'
 sqlContext.sql(" CREATE TEMPORARY TABLE airportTable2 USING com.cloudant.spark.CloudantPartitionedPrunedFilteredRP OPTIONS ( database 'airportcodemapping')")
       
-airportData = sqlContext.sql("SELECT airportCode, airportName FROM airportTable2 WHERE airportCode >= 'CAA' AND airportCode <= 'GAA'")
+airportData = sqlContext.sql("SELECT airportCode, airportName FROM airportTable2 WHERE airportCode >= 'CAA' AND airportCode <= 'GAA' ORDER BY airportCode")
 airportData.printSchema()
 for code in airportData.collect():
 	print code.airportCode

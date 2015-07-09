@@ -38,13 +38,13 @@ case class CloudantTableScan (dbName: String)
 
   val schema: StructType = {
       val aRDD = sqlContext.sparkContext.parallelize(dataAccess.getOne())
-      sqlContext.jsonRDD(aRDD).schema
+      sqlContext.read.json(aRDD).schema
   }
 
   def buildScan: RDD[Row] = {
       val (url, _) = config.getRangeUrl()
       val aRDD = sqlContext.sparkContext.parallelize(dataAccess.getAll(url))
-      sqlContext.jsonRDD(aRDD).rdd
+      sqlContext.read.json(aRDD).rdd
   }
   
 }
