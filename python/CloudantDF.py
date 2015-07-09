@@ -22,6 +22,7 @@ conf = SparkConf().setAppName("Cloudant Spark SQL External Datasource in Python"
 conf.set("cloudant.host","your host")
 conf.set("cloudant.username", "your username")
 conf.set("cloudant.password","your password")
+conf.set("jsonstore.rdd.maxInPartition",1000)
 
 sc = SparkContext(conf=conf)
 sqlContext = SQLContext(sc)
@@ -31,3 +32,9 @@ df.printSchema()
 
 df.filter(df.airportCode >= 'CAA').select("airportCode",'airportName').show()
 df.filter(df.airportCode >= 'CAA').select("airportCode",'airportName').save("airportcodemapping_df", "com.cloudant.spark")
+
+df = sqlContext.load(source="com.cloudant.spark", database="flight")
+df.printSchema()
+
+total = df.filter(df.flightSegmentId >'A').select("flightSegmentId", "scheduledDepartureTime").orderBy(df.flightSegmentId).count()
+print "Total", total, "flights"

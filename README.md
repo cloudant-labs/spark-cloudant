@@ -176,10 +176,10 @@ path||riak: search index name; cloudant: as database name if database does not p
 
 ## Known limitations and improvement areas
 
-* Need to support chunked response. Get the following exception when query result is over limit:
+* Chunked response is not supported. For parallel partitioned loading, issue can be workarouded by setting jsonstore.rdd.maxInPartition.  The following is the exception when query result is over limit.
 	HttpClientConnection: Aggregated response entity greater than configured limit of 1048576 bytes,closing connection
 	java.lang.RuntimeException: sendReceive doesn't support chunked response
-
+	
 * Schema is calculated on the first document w/o any predicate push down. Need a better approach
 
 * Cloudant search index query does not support "paging" through skip and limit. Push down may not get the best performance anyway.
