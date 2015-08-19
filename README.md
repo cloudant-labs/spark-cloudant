@@ -17,7 +17,7 @@ Relation Provider Name | Table Option | Scan Type | Column Pruning | Predicates 
 com.cloudant.spark.DefaultSource|database or path, index|PrunedFilteredScan| Yes |_id or first predicate | Yes, except with index | Yes | [DefaultSource.scala](cloudant-spark-sql/src/main/scala/com/cloudant/spark/DefaultSource.scala)
 com.cloudant.spark.CloudantRP|database|TableScan| No | No | No | No | [CloudantDatasource.scala](cloudant-spark-sql/src/main/scala/com/cloudant/spark/CloudantDatasource.scala)
 com.cloudant.spark.CloudantPrunedFilteredRP|database|PrunedFilteredScan| Yes |_id or first predicate | No | No | [CloudantPrunedFilteredDatasource.scala](cloudant-spark-sql/src/main/scala/com/cloudant/spark/CloudantPrunedFilteredDatasource.scala)
-com.cloudant.spark.CloudantPartitionedPrunedFilteredRP|database, index|PrunedFilteredScan| Yes |_id or first predicate | Yes | No |[CloudantPartitionedPrunedFilteredDatasource.scala](cloudant-spark-sql/src/main/scala/com/cloudant/spark/CloudantPartitionedPrunedFilteredDatasource.scala)
+com.cloudant.spark.CloudantPartitionedPrunedFilteredRP|database, index|PrunedFilteredScan| Yes |_id or first predicate |  Yes, except with index  | No |[CloudantPartitionedPrunedFilteredDatasource.scala](cloudant-spark-sql/src/main/scala/com/cloudant/spark/CloudantPartitionedPrunedFilteredDatasource.scala)
 
 
 #### Riak
