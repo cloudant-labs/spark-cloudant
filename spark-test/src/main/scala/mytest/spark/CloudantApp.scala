@@ -28,9 +28,9 @@ object CloudantApp {
       def main(args: Array[String]) {
 
         val conf = new SparkConf().setAppName("Cloudant Spark SQL External Datasource")
-        conf.set("cloudant.host","your host")
-        conf.set("cloudant.username", "your user")
-        conf.set("cloudant.password","your api key")
+        conf.set("cloudant.host","ACCOUNT.cloudant.com")
+        conf.set("cloudant.username", "USERNAME")
+        conf.set("cloudant.password","PASSWORD")
         val sc = new SparkContext(conf)
         
         val sqlContext = new SQLContext(sc)
@@ -48,7 +48,7 @@ object CloudantApp {
       airportData.printSchema()
       airportData.map(t => "code: " + t(0) + ",name:" + t(1)).collect().foreach(println) 
 
-//       println("About to test com.cloudant.spark.CloudantRP for booking") -- Spark 1.4.0 IndexOutOfRange
+//       println("About to test com.cloudant.spark.CloudantRP for booking") -- ArrayIndexOutOfBoundsException on 1.4.1
 //        sqlContext.sql(
 //      s"""
 //        |CREATE TEMPORARY TABLE bookingTable

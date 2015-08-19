@@ -37,6 +37,7 @@ trait JsonStoreConfig {
   implicit val partitions: Int
   implicit val maxInPartition: Int
   implicit val minInPartition: Int
+  def allowPartition(): Boolean = {true}
   def getOneUrl(): String
   def getRangeUrl(field: String, start: Any, startInclusive:Boolean=false, end:Any, endInclusive:Boolean=false, includeDoc: Boolean = true): (String, Boolean) 
   def getSubSetUrl (url: String, skip: Int, limit: Int)(implicit convertSkip:(Int) => String ) : String

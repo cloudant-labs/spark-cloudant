@@ -14,7 +14,7 @@ All implementions are under [here] (cloudant-spark-sql/src/main/scala/com/clouda
 
 Relation Provider Name | Table Option | Scan Type | Column Pruning | Predicates Push Down | Parallel Loading | Insertable | Source Code Location
 --- | --- | --- | --- | --- | --- | --- | --- 
-com.cloudant.spark.DefaultSource|database or path, index|PrunedFilteredScan| Yes |_id or first predicate | Yes | Yes | [DefaultSource.scala](cloudant-spark-sql/src/main/scala/com/cloudant/spark/DefaultSource.scala)
+com.cloudant.spark.DefaultSource|database or path, index|PrunedFilteredScan| Yes |_id or first predicate | Yes, except with index | Yes | [DefaultSource.scala](cloudant-spark-sql/src/main/scala/com/cloudant/spark/DefaultSource.scala)
 com.cloudant.spark.CloudantRP|database|TableScan| No | No | No | No | [CloudantDatasource.scala](cloudant-spark-sql/src/main/scala/com/cloudant/spark/CloudantDatasource.scala)
 com.cloudant.spark.CloudantPrunedFilteredRP|database|PrunedFilteredScan| Yes |_id or first predicate | No | No | [CloudantPrunedFilteredDatasource.scala](cloudant-spark-sql/src/main/scala/com/cloudant/spark/CloudantPrunedFilteredDatasource.scala)
 com.cloudant.spark.CloudantPartitionedPrunedFilteredRP|database, index|PrunedFilteredScan| Yes |_id or first predicate | Yes | No |[CloudantPartitionedPrunedFilteredDatasource.scala](cloudant-spark-sql/src/main/scala/com/cloudant/spark/CloudantPartitionedPrunedFilteredDatasource.scala)
@@ -35,6 +35,7 @@ Spark Version | Release # | Binary Location
 1.3.0 | v0.1 | [Location] (https://github.com/cloudant/spark-cloudant/releases/download/v0.1/cloudant-spark.jar)
 1.3.1 | v1.3.1.2 | [Location] (https://github.com/cloudant/spark-cloudant/releases/download/v1.3.1.2/cloudant-spark.jar)
 1.4.0 | v1.4.0.0 | [Location] (https://github.com/cloudant/spark-cloudant/releases/download/1.4.0.0/cloudant-spark.jar)
+1.4.1 | v1.4.1.0 | [Location] (https://github.com/cloudant/spark-cloudant/releases/download/v1.4.1.0/cloudant-spark.jar)
 
 
 ### Build from source:
@@ -124,7 +125,30 @@ Spark Version | Release # | Binary Location
 	df.printSchema()
 	
 	df.filter(df.airportCode >= 'CAA').select("airportCode",'airportName').save("airportcodemapping_df", "com.cloudant.spark")	    
-	    
+	
+	
+### Using DataFrame In Scala 
+
+[Scala code](spark-test/src/main/scala/mytest/spark/CloudantDF.scala)
+	
+	val conf = new SparkConf().setAppName("Cloudant Spark SQL External Datasource in Scala")
+		
+	// define cloudant related configuration	
+    conf.set("cloudant.host","ACCOUNT.cloudant.com")
+    conf.set("cloudant.username", "USERNAME")
+    conf.set("cloudant.password","PASSWORD")
+        
+    // create Spark context and SQL context
+    val sc = new SparkContext(conf)
+    val sqlContext = new SQLContext(sc)
+    import sqlContext._
+        
+     val df = sqlContext.read.format("com.cloudant.spark").load("airportcodemapping")
+     df.printSchema()
+
+     df.filter(df("airportCode") >= "CAA").select("airportCode","airportName").show()
+     df.filter(df("airportCode") >= "CAA").select("airportCode","airportName").write.format("com.cloudant.spark").save("airportcodemapping_df")
+
 ### Note: 
 	
 In the above table creation, you can replace "USING com.cloudant.spark.CloudantRP" with other RelationProvider implementations
@@ -179,10 +203,12 @@ path||riak: search index name; cloudant: as database name if database does not p
 * Chunked response is not supported. For parallel partitioned loading, issue can be workarouded by setting jsonstore.rdd.maxInPartition.  The following is the exception when query result is over limit.
 	HttpClientConnection: Aggregated response entity greater than configured limit of 1048576 bytes,closing connection
 	java.lang.RuntimeException: sendReceive doesn't support chunked response
-	
+
+* TableScan in cases hits IndexOutOfRangeException 
+
 * Schema is calculated on the first document w/o any predicate push down. Need a better approach
 
-* Cloudant search index query does not support "paging" through skip and limit. Push down may not get the best performance anyway.
+* Cloudant search index query does not support "paging" through skip and limit.
 		
-* Need to improve how partition is determined for parallel loading
+* Need to improve how number of partitions is determined for parallel loading
 

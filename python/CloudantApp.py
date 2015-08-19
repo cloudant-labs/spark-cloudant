@@ -19,9 +19,9 @@ from pyspark import SparkContext, SparkConf
 
 conf = SparkConf().setAppName("Cloudant Spark SQL External Datasource in Python")
 # define coudant related configuration
-conf.set("cloudant.host","your host")
-conf.set("cloudant.username", "your username")
-conf.set("cloudant.password","your api key")
+conf.set("cloudant.host","ACCOUNT.cloudant.com")
+conf.set("cloudant.username", "USERNAME")
+conf.set("cloudant.password","PASSWORD")
 
 sc = SparkContext(conf=conf)
 sqlContext = SQLContext(sc)
@@ -34,10 +34,10 @@ airportData.printSchema()
 for code in airportData.collect():
 	print code.airportCode
 
-#print 'About to test com.cloudant.spark.CloudantRP for booking' - Spark 1.4.0 indexOutOfRange issue
-#sqlContext.sql(" CREATE TEMPORARY TABLE bookingTable USING com.cloudant.spark.CloudantRP OPTIONS ( database 'booking')")
+print 'About to test com.cloudant.spark.CloudantRP for booking'
+sqlContext.sql(" CREATE TEMPORARY TABLE bookingTable USING com.cloudant.spark.CloudantRP OPTIONS ( database 'booking')")
       
-#bookingData = sqlContext.sql("SELECT customerId, dateOfBooking FROM bookingTable WHERE customerId = 'uid0@email.com'")
+#bookingData = sqlContext.sql("SELECT customerId, dateOfBooking FROM bookingTable WHERE customerId = 'uid0@email.com'") -- ArrayIndexOutOfBoundsException on 1.4.1
 #bookingData.printSchema()
 #for code in bookingData.collect():
 #	print code.customerId

@@ -47,6 +47,7 @@ import play.api.libs.json.JsNumber
       else  url+"?limit=1"
     }
 
+    override def allowPartition(): Boolean = {indexName==null}
     def getOneUrl(): String = { dbUrl+ "/_all_docs?limit=1&include_docs=true"}
     
     def getRangeUrl(field: String = null, start: Any = null, startInclusive:Boolean = false, end:Any =null, endInclusive: Boolean =false,includeDoc: Boolean = true): (String, Boolean) = {

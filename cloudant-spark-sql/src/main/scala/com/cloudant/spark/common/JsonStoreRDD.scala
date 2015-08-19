@@ -47,7 +47,7 @@ class JsonStoreRDD(@transient sc: SparkContext, config: JsonStoreConfig, url: St
       new JsonStoreDataAccess(config).getTotalRows(url)
   }
   lazy val totalPartition = {
-    if (totalRows == 0 )  1
+    if (totalRows == 0 || ! config.allowPartition() )  1
     else if (totalRows < config.partitions * config.minInPartition){
       val total = totalRows / config.minInPartition
       if (total == 0 ) total+1
