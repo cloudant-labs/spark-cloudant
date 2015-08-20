@@ -14,6 +14,8 @@ contains the integration of clouding as spark-sql external datasource
 contains various test cases for exploring spark api:
 
 * mytest.spark.CloudantApp: cloudant as spark-sql external datastore application
+* mytest.spark.CloudantDF: cloudant as spark-sql external datastore application using DataFrame
+* mytest.spark.CloudantDFOption: cloudant as spark-sql external datastore application using DataFrame with option
 
 
 #### Python project:
@@ -23,7 +25,8 @@ contains various test cases for exploring spark api:
 Contains various test cases for exploring spark api:
 
 * CloudantApp.py : Cloudant as spark-sql external datastore application , similar to test class in Scala
-* CloudantDF.py : Cloudant as spark-sql external datastore DataFrame application
+* CloudantDF.py : Cloudant as spark-sql external datastore DataFrame application using DataFrame
+* CloudantDFOption.py : Cloudant as spark-sql external datastore DataFrame application using DataFrame with option
 * RiakApp.py: Riak as spark-sql external datastore application. 
 
 		
