@@ -80,11 +80,7 @@ class DefaultSource extends RelationProvider with CreatableRelationProvider with
       
     private def create(sqlContext: SQLContext, parameters: Map[String, String], inSchema: StructType) = {
     
-      val dbName = parameters.getOrElse("database", parameters.getOrElse("path",null))
-      val indexName = parameters.getOrElse("index",null)
-      logger.info(s"Use dbName=$dbName, indexName=$indexName")
-      
-      val config: CloudantConfig = JsonStoreConfigManager.getConfig(sqlContext, dbName, indexName).asInstanceOf[CloudantConfig]
+      val config: CloudantConfig = JsonStoreConfigManager.getConfig(sqlContext, parameters).asInstanceOf[CloudantConfig]
     
       val schema: StructType = {
         if (inSchema!=null) inSchema

@@ -35,17 +35,13 @@ Spark Version | Release # | Binary Location
 1.3.0 | v0.1 | [Location] (https://github.com/cloudant/spark-cloudant/releases/download/v0.1/cloudant-spark.jar)
 1.3.1 | v1.3.1.2 | [Location] (https://github.com/cloudant/spark-cloudant/releases/download/v1.3.1.2/cloudant-spark.jar)
 1.4.0 | v1.4.0.0 | [Location] (https://github.com/cloudant/spark-cloudant/releases/download/1.4.0.0/cloudant-spark.jar)
-1.4.1 | v1.4.1.0 | [Location] (https://github.com/cloudant/spark-cloudant/releases/download/v1.4.1.0/cloudant-spark.jar)
+1.4.1 | v1.4.1.1 | [Location] (https://github.com/cloudant/spark-cloudant/releases/download/v1.4.1.1/cloudant-spark.jar)
 
 
 ### Build from source:
 
 [Instructions](README_build.md)
 	
-
-### More document
-
-[Location](document)
 
 
 ## Sample application 
@@ -110,7 +106,7 @@ Spark Version | Release # | Binary Location
 
 ### Using DataFrame In Python 
 
-[python code](python/CloudantDF.py)
+[python code](python/CloudantDF.py). 
 	    
 	conf = SparkConf().setAppName("Cloudant Spark SQL External Datasource in Python")
 	# define coudant related configuration
@@ -126,6 +122,7 @@ Spark Version | Release # | Binary Location
 	
 	df.filter(df.airportCode >= 'CAA').select("airportCode",'airportName').save("airportcodemapping_df", "com.cloudant.spark")	    
 	
+[Sample code on using DataFrame option to define cloudant configuration](python/CloudantDFOption.py)
 	
 ### Using DataFrame In Scala 
 
@@ -148,6 +145,9 @@ Spark Version | Release # | Binary Location
 
      df.filter(df("airportCode") >= "CAA").select("airportCode","airportName").show()
      df.filter(df("airportCode") >= "CAA").select("airportCode","airportName").write.format("com.cloudant.spark").save("airportcodemapping_df")
+     
+
+[Sample code on using DataFrame option to define cloudant configuration](spark-test/src/main/scala/mytest/spark/CloudantDFOption.scala)
 
 ### Note: 
 	
@@ -175,6 +175,8 @@ In the above table creation, you can replace "USING com.cloudant.spark.CloudantR
 
 ### Configuration on SparkConf
 
+Configuration can also be passed on DataFrame using option, which overrides what is defined in SparkConf
+
 Name | Default | Meaning
 --- |:---:| ---
 cloudant.host||cloudant host url
@@ -190,6 +192,8 @@ jsonstore.rdd.minInPartition|10|the min rows in a partition.
 Default values are defined in [here](cloudant-spark-sql/src/main/resources/application.conf)
 
 ### Configuration on Spark SQL temp table
+
+Configuration can also be passed on DataFrame using option.
 
 Name | Default | Meaning
 --- |:---:| ---

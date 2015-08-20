@@ -72,5 +72,41 @@ import com.cloudant.spark.CloudantConfig
       null
   }
   
+  /**
+   * The configuration sequence: DataFrame option override SparkConf override defaults
+   */
+  
+  def getConfig(context: SQLContext,  parameters: Map[String, String]): JsonStoreConfig = {
+    
+      val sparkConf = context.sparkContext.getConf
+      
+      val totalS = parameters.getOrElse(PARTITION_CONFIG,null)
+      implicit val total = if (totalS ==null) sparkConf.getInt(PARTITION_CONFIG,defaultPartitions) else totalS.toInt
+      val maxS = parameters.getOrElse(MAX_IN_PARTITION_CONFIG,null)
+      implicit val max = if (maxS ==null) sparkConf.getInt(MAX_IN_PARTITION_CONFIG,defaultMaxInPartition) else maxS.toInt
+      val minS = parameters.getOrElse(MIN_IN_PARTITION_CONFIG,null)
+      implicit val min = if (minS ==null) sparkConf.getInt(MIN_IN_PARTITION_CONFIG,defaultMinInPartition) else minS.toInt
+      
+      val dbName = parameters.getOrElse("database", parameters.getOrElse("path",null))
+      val indexName = parameters.getOrElse("index",null)
+      
+      println(s"Use dbName=$dbName, indexName=$indexName, $PARTITION_CONFIG=$total, $MAX_IN_PARTITION_CONFIG=$max, $MIN_IN_PARTITION_CONFIG=$min")
+      
+
+      if (sparkConf.contains(CLOUDANT_HOST_CONFIG) || parameters.contains(CLOUDANT_HOST_CONFIG) ) 
+      {
+        val host = parameters.getOrElse(CLOUDANT_HOST_CONFIG,sparkConf.get(CLOUDANT_HOST_CONFIG))
+        val user = parameters.getOrElse(CLOUDANT_USERNAME_CONFIG,sparkConf.get(CLOUDANT_USERNAME_CONFIG))
+        val passwd = parameters.getOrElse(CLOUDANT_PASSWORD_CONFIG,sparkConf.get(CLOUDANT_PASSWORD_CONFIG))
+        return CloudantConfig(host,  dbName, indexName)(user, passwd, total, max, min)
+      }
+      if (sparkConf.contains(RIAK_HOST_CONFIG)  || parameters.contains(RIAK_HOST_CONFIG))
+      {
+        val host = parameters.getOrElse(RIAK_HOST_CONFIG,sparkConf.get(RIAK_HOST_CONFIG))
+        val port = parameters.getOrElse(RIAK_PORT_CONFIG,sparkConf.get(RIAK_PORT_CONFIG))
+        return RiakConfig(host, port, dbName)(partitions=total, maxInPartition=max, minInPartition=min)
+      }
+      null
+  }
 
 }
