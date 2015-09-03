@@ -39,35 +39,40 @@ import com.cloudant.spark.CloudantConfig
   val PARTITION_CONFIG = "jsonstore.rdd.partitions"
   val MAX_IN_PARTITION_CONFIG = "jsonstore.rdd.maxInPartition"
   val MIN_IN_PARTITION_CONFIG = "jsonstore.rdd.minInPartition"
+  val REQUEST_TIMEOUT_CONFIG = "jsonstore.rdd.requestTimeout"
+  val CONCURRENT_SAVE_CONFIG = "jsonstore.rdd.concurrentSave"
   
   val configFactory = ConfigFactory.load()
   import java.util.concurrent.TimeUnit._
 
-  val timeoutInMillis = Duration(configFactory.getDuration("spray.can.server.request-timeout", SECONDS),SECONDS).toMillis
-  
   val ROOT_CONFIG_NAME = "spark-sql"
   val rootConfig = configFactory.getConfig(ROOT_CONFIG_NAME) 
   val defaultPartitions = rootConfig.getInt(PARTITION_CONFIG)
   val defaultMaxInPartition = rootConfig.getInt(MAX_IN_PARTITION_CONFIG)
   val defaultMinInPartition = rootConfig.getInt(MIN_IN_PARTITION_CONFIG)
+  val defaultRequestTimeout = rootConfig.getLong(REQUEST_TIMEOUT_CONFIG)
+  val defaultConcurrentSave = rootConfig.getInt(CONCURRENT_SAVE_CONFIG)
   
   def getConfig(context: SQLContext, dbName: String, indexName:String = null): JsonStoreConfig = {
       val sparkConf = context.sparkContext.getConf
       implicit val total = sparkConf.getInt(PARTITION_CONFIG,defaultPartitions)
       implicit val max = sparkConf.getInt(MAX_IN_PARTITION_CONFIG,defaultMaxInPartition)
       implicit val min =sparkConf.getInt(MIN_IN_PARTITION_CONFIG,defaultMinInPartition)
+      implicit val requestTimeout =sparkConf.getLong(REQUEST_TIMEOUT_CONFIG,defaultRequestTimeout)
+      implicit val concurrentSave =sparkConf.getInt(CONCURRENT_SAVE_CONFIG,defaultConcurrentSave)
+  
       if (sparkConf.contains(CLOUDANT_HOST_CONFIG))
       {
         val host = sparkConf.get(CLOUDANT_HOST_CONFIG)
         val user = sparkConf.get(CLOUDANT_USERNAME_CONFIG)
         val passwd = sparkConf.get(CLOUDANT_PASSWORD_CONFIG)
-        return CloudantConfig(host,  dbName, indexName)(user, passwd, total, max, min)
+        return CloudantConfig(host,  dbName, indexName)(user, passwd, total, max, min,requestTimeout,concurrentSave)
       }
       if (sparkConf.contains(RIAK_HOST_CONFIG))
       {
         val host = sparkConf.get(RIAK_HOST_CONFIG)
         val port = sparkConf.get(RIAK_PORT_CONFIG)
-        return RiakConfig(host, port, dbName)(partitions=total, maxInPartition=max, minInPartition=min)
+        return RiakConfig(host, port, dbName)(partitions=total, maxInPartition=max, minInPartition=min,requestTimeout=requestTimeout,concurrentSave=concurrentSave)
       }
       null
   }
@@ -87,6 +92,9 @@ import com.cloudant.spark.CloudantConfig
       val minS = parameters.getOrElse(MIN_IN_PARTITION_CONFIG,null)
       implicit val min = if (minS ==null) sparkConf.getInt(MIN_IN_PARTITION_CONFIG,defaultMinInPartition) else minS.toInt
       
+      implicit val requestTimeout =sparkConf.getLong(REQUEST_TIMEOUT_CONFIG,defaultRequestTimeout)
+      implicit val concurrentSave =sparkConf.getInt(CONCURRENT_SAVE_CONFIG,defaultConcurrentSave)
+
       val dbName = parameters.getOrElse("database", parameters.getOrElse("path",null))
       val indexName = parameters.getOrElse("index",null)
       
@@ -98,13 +106,13 @@ import com.cloudant.spark.CloudantConfig
         val host = parameters.getOrElse(CLOUDANT_HOST_CONFIG,sparkConf.get(CLOUDANT_HOST_CONFIG))
         val user = parameters.getOrElse(CLOUDANT_USERNAME_CONFIG,sparkConf.get(CLOUDANT_USERNAME_CONFIG))
         val passwd = parameters.getOrElse(CLOUDANT_PASSWORD_CONFIG,sparkConf.get(CLOUDANT_PASSWORD_CONFIG))
-        return CloudantConfig(host,  dbName, indexName)(user, passwd, total, max, min)
+        return CloudantConfig(host,  dbName, indexName)(user, passwd, total, max, min,requestTimeout,concurrentSave)
       }
       if (sparkConf.contains(RIAK_HOST_CONFIG)  || parameters.contains(RIAK_HOST_CONFIG))
       {
         val host = parameters.getOrElse(RIAK_HOST_CONFIG,sparkConf.get(RIAK_HOST_CONFIG))
         val port = parameters.getOrElse(RIAK_PORT_CONFIG,sparkConf.get(RIAK_PORT_CONFIG))
-        return RiakConfig(host, port, dbName)(partitions=total, maxInPartition=max, minInPartition=min)
+        return RiakConfig(host, port, dbName)(partitions=total, maxInPartition=max, minInPartition=min,requestTimeout=requestTimeout,concurrentSave=concurrentSave)
       }
       null
   }

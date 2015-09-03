@@ -37,6 +37,8 @@ trait JsonStoreConfig {
   implicit val partitions: Int
   implicit val maxInPartition: Int
   implicit val minInPartition: Int
+  implicit val requestTimeout: Long
+  implicit val concurrentSave: Int
   def allowPartition(): Boolean = {true}
   def getOneUrl(): String
   def getRangeUrl(field: String, start: Any, startInclusive:Boolean=false, end:Any, endInclusive:Boolean=false, includeDoc: Boolean = true): (String, Boolean) 
