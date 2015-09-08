@@ -29,7 +29,7 @@ import play.api.libs.json.JsNumber
 /**
  * @author yanglei
  */
-@serializable case class CloudantConfig(val host: String, val dbName: String, val indexName: String = null)(implicit val username: String, val password: String, val partitions:Int, val maxInPartition: Int, val minInPartition:Int, val requestTimeout:Long,val concurrentSave:Int) extends JsonStoreConfig{
+@serializable case class CloudantConfig(val host: String, val dbName: String, val indexName: String = null)(implicit val username: String, val password: String, val partitions:Int, val maxInPartition: Int, val minInPartition:Int, val requestTimeout:Long,val concurrentSave:Int, val bulkSize: Int) extends JsonStoreConfig{
   
     private lazy val dbUrl = {"http://"+ host+"/"+dbName}
 
@@ -110,4 +110,14 @@ import play.api.libs.json.JsNumber
     def getRows(result: JsValue): Seq[JsValue] = {
         result \\ "doc"
     }
+    
+    override def getBulkPostUrl(): String = {
+      dbUrl + "/_bulk_docs"
+    }
+    
+    override def getBulkRows(rows: Array[String]): String = {
+      val docs = rows.map { x => Json.parse(x) }
+      Json.stringify(Json.obj("docs" -> Json.toJson(docs.toSeq)))
+    }
+
 }

@@ -39,6 +39,7 @@ trait JsonStoreConfig {
   implicit val minInPartition: Int
   implicit val requestTimeout: Long
   implicit val concurrentSave: Int
+  implicit val bulkSize: Int 
   def allowPartition(): Boolean = {true}
   def getOneUrl(): String
   def getRangeUrl(field: String, start: Any, startInclusive:Boolean=false, end:Any, endInclusive:Boolean=false, includeDoc: Boolean = true): (String, Boolean) 
@@ -48,7 +49,9 @@ trait JsonStoreConfig {
   def getPostUrl(): String = {null}
   def getLastUrl(skip: Int): String = {null}
   def getLastNum(result: JsValue): JsValue = {null}
-  def getTotalUrl(url: String) = {url}
+  def getTotalUrl(url: String): String = {url}
+  def getBulkPostUrl(): String = {null}
+  def getBulkRows(rows: Array[String]): String = {null}
   
   val default_filter: String = "*:*"
   

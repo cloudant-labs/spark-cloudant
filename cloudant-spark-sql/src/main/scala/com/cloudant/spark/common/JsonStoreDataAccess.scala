@@ -46,7 +46,6 @@ import scala.util.Random
 class JsonStoreDataAccess (config: JsonStoreConfig)  {
 
       implicit lazy val timeout = {Timeout(config.requestTimeout)}
-      lazy val concurrentSave = config.concurrentSave
       lazy val envSystem = {SparkEnv.get.actorSystem}
 
       lazy val logger = {Logging(envSystem, getClass)}
@@ -159,27 +158,34 @@ class JsonStoreDataAccess (config: JsonStoreConfig)  {
           data
       }
       
-      def saveAll(data: Array[String]) {
+      def saveAll(rows: Array[String]) {
           implicit val (system, existing) = getSystem()
           import system.dispatcher 
-          val url =config.getPostUrl()
+          
+          val useBulk = (config.getBulkPostUrl() != null && config.bulkSize>1)
+          val bulkSize = if (useBulk) config.bulkSize else 1
+          val bulks = rows.grouped(bulkSize).toList
+          
+          val url = if (bulkSize>1) config.getBulkPostUrl() else config.getPostUrl()
           logger.info(s"Post:$url")
+          
           if (url == null) return
           import ContentTypes._
           implicit val stringMarshaller = Marshaller.of[String](`application/json`) {
             (value, ct, ctx) => ctx.marshalTo(HttpEntity(ct, value))
           }
-          val parallelSize = if (concurrentSave>0) concurrentSave else data.size
-          val blocks = data.size/parallelSize + (if ( data.size % parallelSize != 0) 1 else 0)
+          val parallelSize = if (config.concurrentSave>0) config.concurrentSave else bulks.size
+          val blocks = bulks.size/parallelSize + (if ( bulks.size % parallelSize != 0) 1 else 0)
           
           for (i <- 0 until blocks){
             val start = parallelSize*i
-            val end = if (parallelSize+start<data.size) parallelSize+start else data.size
-            logger.info(s"Save from $start to $end for block size $blocks at $i/$blocks")
+            val end = if (parallelSize+start<bulks.size) parallelSize+start else bulks.size
+            logger.info(s"Save from $start to ${end-1} for bulkSize=$bulkSize and paralellSize=$parallelSize at ${i+1}/$blocks")
             val allFutures =  { 
               for ( j <- start until end) yield
               {
-                val  x = data(j)
+                val  x: String = if (bulkSize >1) config.getBulkRows(bulks(j)) else bulks(j)(0)
+                logger.debug(s"content:$x")
                 var pipeline: HttpRequest => Future[HttpResponse] = null
                 if (validCredentials!=null)
                 {
@@ -198,12 +204,15 @@ class JsonStoreDataAccess (config: JsonStoreConfig)  {
             }
             val f= Future.sequence(allFutures.toList)
             val result = Await.result(f, timeout.duration)
+            val isSuccessful= result.forall { x => x.status.isSuccess } 
             if(!existing)
             {
               logger.info("shutdown newly created ActorSystem")
               system.shutdown()
             }
-            logger.info("Save result "+result.length +" rows is full:"+((end-start)==result.length))
+            logger.info(s"Save total ${end-start}=${result.length} successful=$isSuccessful")
+            if (!isSuccessful)
+               result.foreach { x => logger.info(x.message.toString()) }
           }
       }
 }

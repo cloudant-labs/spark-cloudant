@@ -41,6 +41,7 @@ import com.cloudant.spark.CloudantConfig
   val MIN_IN_PARTITION_CONFIG = "jsonstore.rdd.minInPartition"
   val REQUEST_TIMEOUT_CONFIG = "jsonstore.rdd.requestTimeout"
   val CONCURRENT_SAVE_CONFIG = "jsonstore.rdd.concurrentSave"
+  val BULK_SIZE_CONFIG = "jsonstore.rdd.bulkSize"
   
   val configFactory = ConfigFactory.load()
   import java.util.concurrent.TimeUnit._
@@ -52,6 +53,7 @@ import com.cloudant.spark.CloudantConfig
   val defaultMinInPartition = rootConfig.getInt(MIN_IN_PARTITION_CONFIG)
   val defaultRequestTimeout = rootConfig.getLong(REQUEST_TIMEOUT_CONFIG)
   val defaultConcurrentSave = rootConfig.getInt(CONCURRENT_SAVE_CONFIG)
+  val defaultBulkSize = rootConfig.getInt(BULK_SIZE_CONFIG)
   
   def getConfig(context: SQLContext, dbName: String, indexName:String = null): JsonStoreConfig = {
       val sparkConf = context.sparkContext.getConf
@@ -60,19 +62,20 @@ import com.cloudant.spark.CloudantConfig
       implicit val min =sparkConf.getInt(MIN_IN_PARTITION_CONFIG,defaultMinInPartition)
       implicit val requestTimeout =sparkConf.getLong(REQUEST_TIMEOUT_CONFIG,defaultRequestTimeout)
       implicit val concurrentSave =sparkConf.getInt(CONCURRENT_SAVE_CONFIG,defaultConcurrentSave)
+      implicit val bulkSize =sparkConf.getInt(BULK_SIZE_CONFIG,defaultBulkSize)
   
       if (sparkConf.contains(CLOUDANT_HOST_CONFIG))
       {
         val host = sparkConf.get(CLOUDANT_HOST_CONFIG)
         val user = sparkConf.get(CLOUDANT_USERNAME_CONFIG)
         val passwd = sparkConf.get(CLOUDANT_PASSWORD_CONFIG)
-        return CloudantConfig(host,  dbName, indexName)(user, passwd, total, max, min,requestTimeout,concurrentSave)
+        return CloudantConfig(host,  dbName, indexName)(user, passwd, total, max, min,requestTimeout,concurrentSave, bulkSize)
       }
       if (sparkConf.contains(RIAK_HOST_CONFIG))
       {
         val host = sparkConf.get(RIAK_HOST_CONFIG)
         val port = sparkConf.get(RIAK_PORT_CONFIG)
-        return RiakConfig(host, port, dbName)(partitions=total, maxInPartition=max, minInPartition=min,requestTimeout=requestTimeout,concurrentSave=concurrentSave)
+        return RiakConfig(host, port, dbName)(partitions=total, maxInPartition=max, minInPartition=min,requestTimeout=requestTimeout,concurrentSave=concurrentSave, bulkSize = bulkSize)
       }
       null
   }
@@ -94,11 +97,12 @@ import com.cloudant.spark.CloudantConfig
       
       implicit val requestTimeout =sparkConf.getLong(REQUEST_TIMEOUT_CONFIG,defaultRequestTimeout)
       implicit val concurrentSave =sparkConf.getInt(CONCURRENT_SAVE_CONFIG,defaultConcurrentSave)
+      implicit val bulkSize =sparkConf.getInt(BULK_SIZE_CONFIG,defaultBulkSize)
 
       val dbName = parameters.getOrElse("database", parameters.getOrElse("path",null))
       val indexName = parameters.getOrElse("index",null)
       
-      println(s"Use dbName=$dbName, indexName=$indexName, $PARTITION_CONFIG=$total, $MAX_IN_PARTITION_CONFIG=$max, $MIN_IN_PARTITION_CONFIG=$min")
+      println(s"Use dbName=$dbName, indexName=$indexName, $PARTITION_CONFIG=$total, $MAX_IN_PARTITION_CONFIG=$max, $MIN_IN_PARTITION_CONFIG=$min, $REQUEST_TIMEOUT_CONFIG=$requestTimeout,$CONCURRENT_SAVE_CONFIG=$concurrentSave,$BULK_SIZE_CONFIG=$bulkSize")
       
 
       if (sparkConf.contains(CLOUDANT_HOST_CONFIG) || parameters.contains(CLOUDANT_HOST_CONFIG) ) 
@@ -106,13 +110,13 @@ import com.cloudant.spark.CloudantConfig
         val host = parameters.getOrElse(CLOUDANT_HOST_CONFIG,sparkConf.get(CLOUDANT_HOST_CONFIG))
         val user = parameters.getOrElse(CLOUDANT_USERNAME_CONFIG,sparkConf.get(CLOUDANT_USERNAME_CONFIG))
         val passwd = parameters.getOrElse(CLOUDANT_PASSWORD_CONFIG,sparkConf.get(CLOUDANT_PASSWORD_CONFIG))
-        return CloudantConfig(host,  dbName, indexName)(user, passwd, total, max, min,requestTimeout,concurrentSave)
+        return CloudantConfig(host,  dbName, indexName)(user, passwd, total, max, min,requestTimeout,concurrentSave,bulkSize)
       }
       if (sparkConf.contains(RIAK_HOST_CONFIG)  || parameters.contains(RIAK_HOST_CONFIG))
       {
         val host = parameters.getOrElse(RIAK_HOST_CONFIG,sparkConf.get(RIAK_HOST_CONFIG))
         val port = parameters.getOrElse(RIAK_PORT_CONFIG,sparkConf.get(RIAK_PORT_CONFIG))
-        return RiakConfig(host, port, dbName)(partitions=total, maxInPartition=max, minInPartition=min,requestTimeout=requestTimeout,concurrentSave=concurrentSave)
+        return RiakConfig(host, port, dbName)(partitions=total, maxInPartition=max, minInPartition=min,requestTimeout=requestTimeout,concurrentSave=concurrentSave,bulkSize = bulkSize)
       }
       null
   }

@@ -34,7 +34,7 @@ import play.api.libs.json.JsNumber
  */
 
 
-@serializable  case class RiakConfig(val host: String, val port: String, val dbName: String)(implicit val username: String=null, val password: String=null,val partitions:Int, val maxInPartition: Int, val minInPartition:Int,val requestTimeout:Long,val concurrentSave:Int) extends JsonStoreConfig{
+@serializable  case class RiakConfig(val host: String, val port: String, val dbName: String)(implicit val username: String=null, val password: String=null,val partitions:Int, val maxInPartition: Int, val minInPartition:Int,val requestTimeout:Long,val concurrentSave:Int, val bulkSize: Int) extends JsonStoreConfig{
   
     private lazy val dbUrl = {"http://"+ host+":"+port+"/search/query/"+dbName+"?wt=json&q="}
     

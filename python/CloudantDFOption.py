@@ -20,6 +20,8 @@ from pyspark import SparkContext, SparkConf
 conf = SparkConf().setAppName("Cloudant Spark SQL External Datasource in Python")
 # define coudant related configuration
 conf.set("jsonstore.rdd.maxInPartition",1000)
+conf.set("jsonstore.rdd.concurrentSave",2)
+conf.set("jsonstore.rdd.bulkSize",10)
 
 sc = SparkContext(conf=conf)
 sqlContext = SQLContext(sc)

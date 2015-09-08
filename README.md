@@ -35,7 +35,7 @@ Spark Version | Release # | Binary Location
 1.3.0 | v0.1 | [Location] (https://github.com/cloudant/spark-cloudant/releases/download/v0.1/cloudant-spark.jar)
 1.3.1 | v1.3.1.2 | [Location] (https://github.com/cloudant/spark-cloudant/releases/download/v1.3.1.2/cloudant-spark.jar)
 1.4.0 | v1.4.0.0 | [Location] (https://github.com/cloudant/spark-cloudant/releases/download/1.4.0.0/cloudant-spark.jar)
-1.4.1 | v1.4.1.2 | [Location] (https://github.com/cloudant/spark-cloudant/releases/download/v1.4.1.2/cloudant-spark.jar)
+1.4.1 | v1.4.1.3 | [Location] (https://github.com/cloudant/spark-cloudant/releases/download/v1.4.1.3/cloudant-spark.jar)
 
 
 ### Build from source:
@@ -189,7 +189,7 @@ jsonstore.rdd.maxInPartition|-1|the max rows in a partition. -1 means unlimited
 jsonstore.rdd.minInPartition|10|the min rows in a partition.
 jsonstore.rdd.requestTimeout|100000| the request timeout in milli-second
 jsonstore.rdd.concurrentSave|-1| the parallel saving size. -1 means unlimited
-
+jsonstore.rdd.bulkSize|1| the bulk save size. 
 
 Default values are defined in [here](cloudant-spark-sql/src/main/resources/application.conf)
 
