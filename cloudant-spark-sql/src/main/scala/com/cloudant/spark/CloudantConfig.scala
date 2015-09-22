@@ -31,7 +31,7 @@ import play.api.libs.json.JsNumber
  */
 @serializable case class CloudantConfig(val host: String, val dbName: String, val indexName: String = null)(implicit val username: String, val password: String, val partitions:Int, val maxInPartition: Int, val minInPartition:Int, val requestTimeout:Long,val concurrentSave:Int, val bulkSize: Int) extends JsonStoreConfig{
   
-    private lazy val dbUrl = {"http://"+ host+"/"+dbName}
+    private lazy val dbUrl = {"https://"+ host+"/"+dbName}
 
     val pkField = "_id"
     val defaultIndex = "_all_docs" // "_changes" does not work for partition
