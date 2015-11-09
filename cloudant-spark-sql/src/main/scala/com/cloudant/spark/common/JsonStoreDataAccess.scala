@@ -84,12 +84,6 @@ class JsonStoreDataAccess (config: JsonStoreConfig)  {
           logger.debug(s"processAll columns:$columns, attrToFilters:$attrToFilters")
           val jsonResult = Json.parse(result)
           var rows = config.getRows(jsonResult )
-          if (attrToFilters != null)
-          {
-            val util = new FilterUtil(attrToFilters)
-            rows = rows.filter(r => util.apply(r))
-            logger.debug(s"filtered: $rows")
-          }
           rows.map(r =>  convert(r))
       }
       
