@@ -135,6 +135,7 @@ class FilterUtil(filters: Map[String, Array[Filter]]){
         }else
         {
           if (field.isInstanceOf[JsNumber])  satisfiesAll(field.as[JsNumber].value.longValue(), filters)
+          else if (field.isInstanceOf[JsNumber])  satisfiesAll(field.as[JsNumber].value.intValue(), filters)
           else if (field.isInstanceOf[JsBoolean])  satisfiesAll(field.as[JsBoolean].value, filters)
           else if (field.isInstanceOf[JsBoolean])  satisfiesAll(field.as[JsBoolean].value, filters)
           else if (field.isInstanceOf[JsString]) satisfiesAll(field.as[JsString].value, filters)
@@ -145,6 +146,21 @@ class FilterUtil(filters: Map[String, Array[Filter]]){
     satisfied
   }
   
+  private def satisfiesAll(value: Integer, filters: Array[Filter]): Boolean = {
+    val satisfied = filters.forall({
+      case EqualTo(attr, v) => value.equals(v.asInstanceOf[Integer])
+      case GreaterThan(attr, v) => value > v.asInstanceOf[Integer]
+      case LessThan(attr, v) =>  value < v.asInstanceOf[Integer]
+      case GreaterThanOrEqual(attr, v) => value >= v.asInstanceOf[Integer]
+      case LessThanOrEqual(attr, v) => value <= v.asInstanceOf[Integer]
+      case In(attr, vs) => vs.exists(v => value.equals(asInstanceOf[Integer]))
+      case IsNotNull(attr) => value!=null
+      case IsNull(attr) => value == null
+      case _ => true
+    })
+    satisfied
+  }
+          
   private def satisfiesAll(value: Long, filters: Array[Filter]): Boolean = {
     val satisfied = filters.forall({
       case EqualTo(attr, v) => value.equals(v.asInstanceOf[Long])
