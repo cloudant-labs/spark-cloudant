@@ -30,7 +30,8 @@ import akka.event.Logging
 /**
  * Only handles the following filter condition
  * 1. EqualTo,GreaterThan,LessThan,GreaterThanOrEqual,LessThanOrEqual,In
- * 2. recursive AND of (filters in 1 and AND). Issue: Spark 1.3.0 does not return AND filter instead returned 2 filters
+ * 2. recursive AND of (filters in 1 and AND). Issue: Spark 1.3.0 does not return
+ *    AND filter instead returned 2 filters
  * @author yanglei
  */
 class FilterInterpreter( origFilters: Array[Filter]){
@@ -135,16 +136,26 @@ class FilterUtil(filters: Map[String, Array[Filter]]){
 										}else
 										{
 											if (field.isInstanceOf[JsNumber]) {
-												if (field.as[JsNumber].value.getClass.equals(Double)) satisfiesAll(field.as[JsNumber].value.doubleValue(), filters)
-												else if (field.as[JsNumber].value.getClass.equals(scala.Float)) satisfiesAll(field.as[JsNumber].value.floatValue(), filters)
-												else if (field.as[JsNumber].value.getClass.equals(Long)) satisfiesAll(field.as[JsNumber].value.longValue(), filters)
-												else if (field.as[JsNumber].value.getClass.equals(Int)) satisfiesAll(field.as[JsNumber].value.intValue(), filters)
-												else if (field.as[JsNumber].value.getClass.equals(Short)) satisfiesAll(field.as[JsNumber].value.shortValue(), filters)
-												else if (field.as[JsNumber].value.getClass.equals(Byte)) satisfiesAll(field.as[JsNumber].value.byteValue(), filters)
+											  val numType = field.as[JsNumber].value.getClass
+												if (numType.equals(Double))
+												  satisfiesAll(field.as[JsNumber].value.doubleValue(), 
+												      filters)
+												else if (numType.equals(scala.Float)) 
+												  satisfiesAll(field.as[JsNumber].value.floatValue(), filters)
+												else if (numType.equals(Long)) 
+												  satisfiesAll(field.as[JsNumber].value.longValue(), filters)
+												else if (numType.equals(Int)) 
+												  satisfiesAll(field.as[JsNumber].value.intValue(), filters)
+												else if (numType.equals(Short)) 
+												  satisfiesAll(field.as[JsNumber].value.shortValue(), filters)
+												else if (numType.equals(Byte)) 
+												  satisfiesAll(field.as[JsNumber].value.byteValue(), filters)
 												else true
 											}
-											else if (field.isInstanceOf[JsBoolean])  satisfiesAll(field.as[JsBoolean].value, filters)
-											else if (field.isInstanceOf[JsString]) satisfiesAll(field.as[JsString].value, filters)
+											else if (field.isInstanceOf[JsBoolean])  
+											  satisfiesAll(field.as[JsBoolean].value, filters)
+											else if (field.isInstanceOf[JsString]) 
+											  satisfiesAll(field.as[JsString].value, filters)
 											else true
 										}
 							}
