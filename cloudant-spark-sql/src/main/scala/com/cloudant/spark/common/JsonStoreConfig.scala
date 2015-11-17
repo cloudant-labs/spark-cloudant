@@ -15,21 +15,16 @@
 *******************************************************************************/
 package com.cloudant.spark.common
 
-import org.apache.spark.sql.SQLContext
 import play.api.libs.json.JsValue
-import play.api.libs.json.JsSuccess
-import play.api.libs.json.JsError
-import play.api.libs.json.Json
 import scala.util.control.Breaks._
 import play.api.libs.json.JsUndefined
 import java.net.URLEncoder
-import com.typesafe.config.ConfigFactory
-import scala.concurrent.duration.Duration
 
 /**
  * 
  * @author yanglei
- * Only allow one field pushdown now as the filter today does not tell how to link the filters out And v.s. Or
+ * Only allow one field pushdown now
+  * as the filter today does not tell how to link the filters out And v.s. Or
  */
 trait JsonStoreConfig {
   implicit val username: String
@@ -42,8 +37,11 @@ trait JsonStoreConfig {
   implicit val bulkSize: Int 
   def allowPartition(): Boolean = {true}
   def getOneUrl(): String
-  def getRangeUrl(field: String, start: Any, startInclusive:Boolean=false, end:Any, endInclusive:Boolean=false, includeDoc: Boolean = true): (String, Boolean) 
-  def getSubSetUrl (url: String, skip: Int, limit: Int)(implicit convertSkip:(Int) => String ) : String
+  def getRangeUrl(field: String, start: Any, startInclusive:Boolean=false,
+      end:Any, endInclusive:Boolean=false, 
+      includeDoc: Boolean = true): (String, Boolean)
+  def getSubSetUrl (url: String, skip: Int, limit: Int)
+      (implicit convertSkip:(Int) => String ) : String
   def getTotalRows(result: JsValue): Int
   def getRows(result: JsValue): Seq[JsValue]
   def getPostUrl(): String = {null}
@@ -52,52 +50,52 @@ trait JsonStoreConfig {
   def getTotalUrl(url: String): String = {url}
   def getBulkPostUrl(): String = {null}
   def getBulkRows(rows: Array[String]): String = {null}
+  def getDbname():String = {null}
   
   val default_filter: String = "*:*"
   
-  def calculateCondition(field: String, min:Any, minInclusive: Boolean=false, max: Any, maxInclusive: Boolean = false) : String = {
-      if (field!=null && ( min !=null || max!= null))
-      {
-        var condition = field+":"
-        if (min!=null && max!=null && min.equals(max)){
-           condition += min
-        }
-        else{
-          if (minInclusive) condition+="["
-          else condition +="{"
-          if (min!=null) condition += min
-          else condition+="*"
-          condition+=" TO "
-          if (max !=null) condition += max
-          else condition += "*"
-          if (maxInclusive) condition+="]"
-          else condition +="}"
-        }
-        URLEncoder.encode(condition,"UTF-8")
-      }else default_filter
+  def calculateCondition(field: String, min:Any, minInclusive: Boolean=false, 
+      max: Any, maxInclusive: Boolean = false) : String = {
+    if (field!=null && ( min !=null || max!= null)){
+      var condition = field+":"
+      if (min!=null && max!=null && min.equals(max)){
+         condition += min
+      }
+      else{
+        if (minInclusive) condition+="["
+        else condition +="{"
+        if (min!=null) condition += min
+        else condition+="*"
+        condition+=" TO "
+        if (max !=null) condition += max
+        else condition += "*"
+        if (maxInclusive) condition+="]"
+        else condition +="}"
+      }
+      URLEncoder.encode(condition,"UTF-8")
+    }else 
+      default_filter
+    }
   }
-}
 
 
-private object JsonUtil
-{
-     def getField(row: JsValue, field: String) : Option[JsValue] = {
-      var path = field.split('.')
-      var currentValue = row
-      var finalValue: Option[JsValue] = None
-      breakable { 
-        for (i <- path.indices)
-        {
-          val f = currentValue \ path(i)
-          f match {
-            case s : JsUndefined => break
-            case _ =>  currentValue = f
-          }
-          if (i == path.length -1) //The leaf node
-            finalValue = Some(currentValue)
+private object JsonUtil{
+  def getField(row: JsValue, field: String) : Option[JsValue] = {
+    var path = field.split('.')
+    var currentValue = row
+    var finalValue: Option[JsValue] = None
+    breakable { 
+      for (i <- path.indices){
+        val f = currentValue \ path(i)
+        f match {
+          case s : JsUndefined => break
+          case _ =>  currentValue = f
+        }
+        if (i == path.length -1) //The leaf node
+          finalValue = Some(currentValue)
       }
     }
     finalValue
-    }
+  }
 }
 
