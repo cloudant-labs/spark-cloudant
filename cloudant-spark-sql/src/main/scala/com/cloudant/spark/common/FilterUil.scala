@@ -1,4 +1,5 @@
-/*******************************************************************************
+/**
+ * *****************************************************************************
  * Copyright (c) 2015 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,7 +13,8 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *******************************************************************************/
+ * *****************************************************************************
+ */
 package com.cloudant.spark.common
 
 import org.apache.spark.sql.sources._
@@ -34,112 +36,111 @@ import akka.event.Logging
  *    AND filter instead returned 2 filters
  * @author yanglei
  */
-class FilterInterpreter( origFilters: Array[Filter]){
+class FilterInterpreter(origFilters: Array[Filter]) {
 
-    implicit val system = SparkEnv.get.actorSystem
-            private val logger = Logging(system, getClass)
+  implicit val system = SparkEnv.get.actorSystem
+  private val logger = Logging(system, getClass)
 
-            lazy val firstField = {
-                    if (origFilters.length>0) getFilterAttribute(origFilters(0))
-                    else null
+  lazy val firstField = {
+    if (origFilters.length > 0) getFilterAttribute(origFilters(0))
+    else null
+  }
+
+  private lazy val filtersByAttr = {
+    origFilters
+      .filter(f => getFilterAttribute(f) != null)
+      .map(f => (getFilterAttribute(f), f))
+      .groupBy(attrFilter => attrFilter._1)
+      .mapValues(a => a.map(p => p._2))
+  }
+
+  private def getFilterAttribute(f: Filter): String = {
+    val result = f match {
+      case EqualTo(attr, v) => attr
+      case GreaterThan(attr, v) => attr
+      case LessThan(attr, v) => attr
+      case GreaterThanOrEqual(attr, v) => attr
+      case LessThanOrEqual(attr, v) => attr
+      case In(attr, v) => attr
+      case IsNotNull(attr) => attr
+      case IsNull(attr) => attr
+      case _ => null
+    }
+    result
+  }
+
+  def containsFiltersFor(key: String): Boolean = {
+    filtersByAttr.contains(key)
+  }
+
+  private lazy val analyzedFilters = {
+    filtersByAttr.map(m => m._1 -> analyze(m._2))
+  }
+
+  private def analyze(filters: Array[Filter]): (Any, Boolean, Any, Boolean, Array[Filter]) = {
+
+    var min: Any = null
+    var minInclusive: Boolean = false
+    var max: Any = null
+    var maxInclusive: Boolean = false
+    var others: Array[Filter] = Array[Filter]()
+
+    def evaluate(filter: Filter) {
+      filter match {
+        case GreaterThanOrEqual(attr, v) => { min = v; minInclusive = true }
+        case LessThanOrEqual(attr, v) => { max = v; maxInclusive = true }
+        case EqualTo(attr, v) => { min = v; max = v }
+        case GreaterThan(attr, v) => { min = v }
+        case LessThan(attr, v) => { max = v }
+        case _ => { others = others :+ filter }
+      }
     }
 
-    private lazy val filtersByAttr = {
-            origFilters
-            .filter(f => getFilterAttribute(f)!=null)
-            .map(f => (getFilterAttribute(f), f))
-            .groupBy(attrFilter => attrFilter._1)
-            .mapValues(a => a.map(p => p._2))
-    }
-
-    private def getFilterAttribute(f: Filter): String = {
-            val result = f match {
-            case EqualTo(attr, v) => attr
-            case GreaterThan(attr, v) => attr
-            case LessThan(attr, v) => attr
-            case GreaterThanOrEqual(attr, v) => attr
-            case LessThanOrEqual(attr, v) => attr
-            case In(attr, v) => attr
-            case IsNotNull(attr) =>attr
-            case IsNull(attr) => attr
-            case _  => null
-            }
-            result
-    }
-
-    def containsFiltersFor(key: String): Boolean = {
-            filtersByAttr.contains(key)
-    }
-
-    private lazy val analyzedFilters ={
-            filtersByAttr.map(m => m._1 -> analyze(m._2))
-    }
-
-    private def analyze(filters: Array[Filter]):(Any, Boolean, Any,Boolean, Array[Filter]) =  {
-
-            var min:Any = null
-                    var minInclusive: Boolean = false
-                    var max: Any = null
-                    var maxInclusive:Boolean = false
-                    var others: Array[Filter] = Array[Filter]()
-
-                    def evaluate(filter: Filter) {
-        filter match{
-        case GreaterThanOrEqual(attr, v) => {min = v; minInclusive=true}
-        case LessThanOrEqual(attr, v) => {max = v;maxInclusive=true}
-        case EqualTo(attr,v) => {min = v;  max = v}
-        case GreaterThan(attr, v) => {min = v}
-        case LessThan(attr, v) =>  {max = v}
-        case _ => {others  = others :+  filter}
-        }
-    }
-
-    filters.map(f=>evaluate(f))
+    filters.map(f => evaluate(f))
 
     logger.info(s"Calculated range info: min=$min, minInclusive=$minInclusive,max=$max,maxInclusive=$maxInclusive, others=$others")
-    (min, minInclusive,max,maxInclusive, others)
-    }
+    (min, minInclusive, max, maxInclusive, others)
+  }
 
-    def getInfo(field: String):(Any, Boolean, Any,Boolean) ={
-            if (field==null) ( null, false, null,false)
-            else {
-                val data  =analyzedFilters.getOrElse(field, ( null, false, null,false, null))
-                        (data._1,data._2,data._3, data._4)
-            }
+  def getInfo(field: String): (Any, Boolean, Any, Boolean) = {
+    if (field == null) (null, false, null, false)
+    else {
+      val data = analyzedFilters.getOrElse(field, (null, false, null, false, null))
+      (data._1, data._2, data._3, data._4)
     }
+  }
 
-    def getFiltersForPostProcess(pushdownField: String) ={
-            filtersByAttr.map(f=>{
-                if (f._1.equals(pushdownField)) f._1-> analyzedFilters.get(pushdownField).get._5
-                else f._1 -> f._2
-            })
-    }
+  def getFiltersForPostProcess(pushdownField: String) = {
+    filtersByAttr.map(f => {
+      if (f._1.equals(pushdownField)) f._1 -> analyzedFilters.get(pushdownField).get._5
+      else f._1 -> f._2
+    })
+  }
 }
 
 /**
  * @author yanglei
  */
-class FilterUtil(filters: Map[String, Array[Filter]]){
+class FilterUtil(filters: Map[String, Array[Filter]]) {
 
-	implicit val system = SparkEnv.get.actorSystem
-			private val logger = Logging(system, getClass)
-			def  apply (implicit r: JsValue =null): Boolean = {
+  implicit val system = SparkEnv.get.actorSystem
+  private val logger = Logging(system, getClass)
+  def apply(implicit r: JsValue = null): Boolean = {
 
-					if (r == null) return true
-							val satisfied = filters.forall({
-							case (attr, filters) =>{
-								val field = JsonUtil.getField(r, attr).getOrElse(null)
-										if (field == null)
-										{
-											logger.debug(s"field $attr not exisit:$r")
-											false
-										}else {
-											true
-										}
-							}
-							})
+    if (r == null) return true
+    val satisfied = filters.forall({
+      case (attr, filters) => {
+        val field = JsonUtil.getField(r, attr).getOrElse(null)
+        if (field == null) {
+          logger.debug(s"field $attr not exisit:$r")
+          false
+        } else {
+          true
+        }
+      }
+    })
 
-							satisfied
-	}
+    satisfied
+  }
 }
 
