@@ -37,11 +37,11 @@ object CloudantDF{
         import sqlContext._
         
 
-        val df = sqlContext.read.format("com.cloudant.spark").load("airportcodemapping")
+        val df = sqlContext.read.format("com.cloudant.spark").load("n_airportcodemapping")
         df.printSchema()
-
-        df.filter(df("airportCode") >= "CAA").select("airportCode","airportName").show()
-        df.filter(df("airportCode") >= "CAA").select("airportCode","airportName").write.format("com.cloudant.spark").save("airportcodemapping_df")
+        df.filter(df("airportName") >= "Moscow").select("_id","airportName").show()
+        df.filter(df("_id") >= "CAA").select("_id","airportName").show()
+        df.filter(df("_id") >= "CAA").select("_id","airportName").write.format("com.cloudant.spark").save("airportcodemapping_df")
 
         val df2 = sqlContext.read.format("com.cloudant.spark").load("n_flight")
         val total = df2.filter(df2("flightSegmentId") >"AA9").select("flightSegmentId", "scheduledDepartureTime").orderBy(df2("flightSegmentId")).count()
