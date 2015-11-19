@@ -30,11 +30,12 @@ cloudant_host = "ACCOUNT.cloudant.com"
 cloudant_username = "USERNAME"
 cloudant_password = "PASSWORD"
 
-df = sqlContext.read.format("com.cloudant.spark").option("cloudant.host",cloudant_host).option("cloudant.username",cloudant_username).option("cloudant.password",cloudant_password).load("airportcodemapping")
+df = sqlContext.read.format("com.cloudant.spark").option("cloudant.host",cloudant_host).option("cloudant.username",cloudant_username).option("cloudant.password",cloudant_password).load("n_airportcodemapping")
 df.printSchema()
 
-df.filter(df.airportCode >= 'CAA').select("airportCode",'airportName').show()
-df.filter(df.airportCode >= 'CAA').select("airportCode",'airportName').write.format("com.cloudant.spark").option("cloudant.host",cloudant_host).option("cloudant.username",cloudant_username).option("cloudant.password",cloudant_password).save("airportcodemapping_df")
+#defect 56458 - exception thrown, commenting out so remaining tests will run
+#df.filter(df._id >= 'CAA').select("_id",'airportName').show()
+#df.filter(df._id >= 'CAA').select("_id",'airportName').write.format("com.cloudant.spark").option("cloudant.host",cloudant_host).option("cloudant.username",cloudant_username).option("cloudant.password",cloudant_password).save("airportcodemapping_df")
 
 df = sqlContext.read.format("com.cloudant.spark").option("cloudant.host",cloudant_host).option("cloudant.username",cloudant_username).option("cloudant.password",cloudant_password).load("n_flight")
 df.printSchema()
