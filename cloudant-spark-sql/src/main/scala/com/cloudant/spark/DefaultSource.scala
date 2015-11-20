@@ -85,19 +85,12 @@ class DefaultSource extends RelationProvider with CreatableRelationProvider with
       val schema: StructType = {
         if (inSchema!=null) inSchema
         else{
-          try{
             val dataAccess = new JsonStoreDataAccess(config)
             val aRDD = sqlContext.sparkContext.parallelize(dataAccess.getOne())
             sqlContext.read.json(aRDD).schema
-          }catch
-          {
-            // We may not be able to derive a schema if it is an empty database
-            case e: Throwable => logger.info(s"Cannot load schema:$e")
-            null
-          }
         }
       }
-  
+
       CloudantReadWriteRelation(config, schema)(sqlContext)
     }
   
