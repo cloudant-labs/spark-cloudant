@@ -27,8 +27,6 @@ Contains various test cases for exploring spark api:
 * CloudantApp.py : Cloudant as spark-sql external datastore application , similar to test class in Scala
 * CloudantDF.py : Cloudant as spark-sql external datastore DataFrame application using DataFrame
 * CloudantDFOption.py : Cloudant as spark-sql external datastore DataFrame application using DataFrame with option
-* RiakApp.py: Riak as spark-sql external datastore application. 
-
 		
 
 ### To work with Scala projects

@@ -17,6 +17,7 @@
  */
 package com.cloudant.spark.common
 
+import com.cloudant.spark.JsonUtil
 import org.apache.spark.sql.sources._
 import play.api.libs.json.JsValue
 import play.api.libs.json.Json
@@ -28,6 +29,7 @@ import play.api.libs.json.JsBoolean
 import play.api.libs.json.JsString
 import org.apache.spark.SparkEnv
 import akka.event.Logging
+
 
 /**
  * Only handles the following filter condition

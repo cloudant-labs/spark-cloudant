@@ -11,7 +11,6 @@ submission with flavors
 ##### with local slave
 		
 	spark-submit  --master local[4]  --jars cloudant-spark.jar python/CloudantApp.py
-	spark-submit  --master local[4]  --jars cloudant-spark.jar python/RiakApp.py
 	spark-submit  --master local[4]  --jars cloudant-spark.jar python/CloudantDF.py
 	spark-submit  --master local[4]  --jars cloudant-spark.jar python/CloudantDFOption.py
 

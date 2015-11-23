@@ -15,6 +15,7 @@
 *******************************************************************************/
 package com.cloudant.spark.common
 
+import com.cloudant.spark.{JsonUtil, CloudantConfig}
 import spray.http._
 import spray.client.pipelining._
 import scala.concurrent._
@@ -36,7 +37,7 @@ import scala.util.Random
 /**
  * @author yanglei
  */
-class JsonStoreDataAccess (config: JsonStoreConfig)  {
+class JsonStoreDataAccess (config: CloudantConfig)  {
   implicit lazy val timeout = {Timeout(config.requestTimeout)}
   lazy val envSystem = {SparkEnv.get.actorSystem}
   lazy val logger = {Logging(envSystem, getClass)}
