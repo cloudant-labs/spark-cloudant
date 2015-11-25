@@ -15,12 +15,8 @@
 *******************************************************************************/
 package com.cloudant.spark
 
-import org.apache.spark.sql.SQLContext
 import play.api.libs.json.JsValue
-import play.api.libs.json.JsSuccess
-import play.api.libs.json.JsError
 import play.api.libs.json.Json
-import scala.util.control.Breaks._
 import play.api.libs.json.JsUndefined
 import java.net.URLEncoder
 import com.cloudant.spark.common._
@@ -73,7 +69,7 @@ import play.api.libs.json.JsNumber
       if (url.indexOf('?')>0) (url+"&include_docs=true",pusheddown)
       else (url+"?include_docs=true",pusheddown)
     }else
-       ( url, pusheddown)
+       (url, pusheddown)
   }
     
   private def calculate(field: String, start: Any, startInclusive: Boolean, 
@@ -81,25 +77,29 @@ import play.api.libs.json.JsNumber
     if (field!=null && field.equals(pkField)){
       var condition = ""
       if (start!=null && end!=null && start.equals(end)){
-        condition += "?key=" + start 
+        condition += "?key=%22" + URLEncoder.encode(
+          start.toString(),"UTF-8") + "%22"
       }else{
-        if (start != null)
-            condition += "?startkey=" + start 
+        if (start != null) {
+          condition += "?startkey=%22" + URLEncoder.encode(
+              start.toString(),"UTF-8") + "%22"
+        }
         if (end !=null){
           if (start !=null)
             condition += "&"
           else
             condition += "?"
-            condition += "endkey=" + end
+          condition += "endkey=%22" + URLEncoder.encode(
+              end.toString(),"UTF-8") + "%22"
           }
       }
-      (dbUrl + "/_all_docs"+URLEncoder.encode(condition,"UTF-8"), true)
+      (dbUrl + "/_all_docs" + condition, true)
     }else if (indexName!=null){ //  push down to indexName
-        val condition = calculateCondition(field, start, startInclusive, 
-            end, endInclusive)
-        (dbUrl+"/"+indexName+"?q="+condition, true)
-      }else
-        (s"$dbUrl/$defaultIndex" ,false)
+      val condition = calculateCondition(field, start, startInclusive,
+          end, endInclusive)
+      (dbUrl+"/"+indexName+"?q="+condition, true)
+    }else
+      (s"$dbUrl/$defaultIndex" ,false)
   }
 
   def getSubSetUrl (url: String, skip: Int, limit: Int)
