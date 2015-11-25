@@ -62,7 +62,6 @@ object CloudantApp {
 //
 //      bookingData.map(t => "customer: " + t(0) + ", dateOfBooking: " + t(1)).collect().foreach(println) 
 
-      // defect 56458 - 0 row in DF
       println("About to test com.cloudant.spark.CloudantPrunedFilteredRP for n_airportcodemapping")
         sqlContext.sql(
       s"""
@@ -103,18 +102,17 @@ object CloudantApp {
       flightData.map(t => "flightSegmentId: " + t(0) + ", scheduledDepartureTime: " + t(1)).collect().foreach(println) 
 
 
-      // defect 56458 - exception thrown, commenting out so remaining tests will run
-//       println("About to test com.cloudant.spark.CloudantPartitionedPrunedFilteredRP for n_airportcodemapping")  
-//        sqlContext.sql(
-//      s"""
-//        |CREATE TEMPORARY TABLE airportTable3
-//        |USING com.cloudant.spark.CloudantPartitionedPrunedFilteredRP
-//        |OPTIONS ( database 'n_airportcodemapping')
-//      """.stripMargin)
-//      
-//      val airportData3 = sqlContext.sql("SELECT _id, airportName FROM airportTable3 WHERE _id >= 'CAA' AND _id <= 'GAA' ORDER BY _id")
-//      airportData3.printSchema()
-//      airportData3.map(t => "code: " + t(0) + ",name:" + t(1)).collect().foreach(println) 
+      println("About to test com.cloudant.spark.CloudantPartitionedPrunedFilteredRP for n_airportcodemapping")  
+        sqlContext.sql(
+      s"""
+        |CREATE TEMPORARY TABLE airportTable3
+        |USING com.cloudant.spark.CloudantPartitionedPrunedFilteredRP
+        |OPTIONS ( database 'n_airportcodemapping')
+      """.stripMargin)
+      
+      val airportData3 = sqlContext.sql("SELECT _id, airportName FROM airportTable3 WHERE _id >= 'CAA' AND _id <= 'GAA' ORDER BY _id")
+      airportData3.printSchema()
+      airportData3.map(t => "code: " + t(0) + ",name:" + t(1)).collect().foreach(println) 
 
        println("About to test com.cloudant.spark.CloudantPartitionedPrunedFilteredRP for n_booking")
         sqlContext.sql(
