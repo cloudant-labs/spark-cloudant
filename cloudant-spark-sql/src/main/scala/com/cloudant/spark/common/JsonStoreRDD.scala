@@ -15,6 +15,7 @@
 *******************************************************************************/
 package com.cloudant.spark.common
 
+import com.cloudant.spark.CloudantConfig
 import org.apache.spark.SparkContext
 import org.apache.spark.Partition
 import org.apache.spark.TaskContext
@@ -30,7 +31,7 @@ import akka.event.Logging
  * JsonStoreRDDPartition defines each partition as a subset of a query result: the limit rows returns and the skipped rows.
  */
 
-private[spark] class JsonStoreRDDPartition(val skip: Int, val limit: Int, val idx: Int, val config: JsonStoreConfig, val attrToFilters: Map[String, Array[Filter]]) extends Partition with Serializable{
+private[spark] class JsonStoreRDDPartition(val skip: Int, val limit: Int, val idx: Int, val config: CloudantConfig, val attrToFilters: Map[String, Array[Filter]]) extends Partition with Serializable{
   val index = idx
 }
 
@@ -40,7 +41,7 @@ private[spark] class JsonStoreRDDPartition(val skip: Int, val limit: Int, val id
  *  defaultPartitions : how many partition intent, will be re-calculate based on the value based on total rows and minInPartition / maxInPartition )
  *  maxRowsInPartition: -1 means unlimited
  */
-class JsonStoreRDD(@transient sc: SparkContext, config: JsonStoreConfig, url: String)(implicit requiredcolumns: Array[String] =null, attrToFilters: Map[String, Array[Filter]]=null)
+class JsonStoreRDD(@transient sc: SparkContext, config: CloudantConfig, url: String)(implicit requiredcolumns: Array[String] =null, attrToFilters: Map[String, Array[Filter]]=null)
   extends RDD[String](sc, Nil) {
   
   lazy val totalRows = {

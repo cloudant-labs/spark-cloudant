@@ -22,40 +22,42 @@ import java.net.URLEncoder
 import com.cloudant.spark.common._
 import play.api.libs.json.JsNumber
 
-/**
- * @author yanglei
- */
-@serializable case class CloudantConfig(val host: String, val dbName: String,
+/*
+@author yanglei
+Only allow one field pushdown now
+as the filter today does not tell how to link the filters out And v.s. Or
+*/
+@serializable class CloudantConfig(val host: String, val dbName: String,
     val indexName: String = null)
     (implicit val username: String, val password: String,
      val partitions:Int, val maxInPartition: Int, val minInPartition:Int,
-     val requestTimeout:Long,val concurrentSave:Int, val bulkSize: Int)
-    extends JsonStoreConfig{
+     val requestTimeout:Long,val concurrentSave:Int, val bulkSize: Int) {
   
   private lazy val dbUrl = {"https://"+ host+"/"+dbName}
 
   val pkField = "_id"
   val defaultIndex = "_all_docs" // "_changes" does not work for partition
+  val default_filter: String = "*:*"
 
-  override def getPostUrl(): String ={dbUrl}
+  def getPostUrl(): String ={dbUrl}
   
-  override def getLastUrl(skip: Int): String = {
+  def getLastUrl(skip: Int): String = {
     if (skip ==0 ) null
     else s"$dbUrl/$defaultIndex?limit=$skip"
   }
   
-  override def getLastNum(result: JsValue): JsValue = {result \ "last_seq"}
+  def getLastNum(result: JsValue): JsValue = {result \ "last_seq"}
   
-  override def getTotalUrl(url: String) = {
+  def getTotalUrl(url: String) = {
     if (url.contains('?')) url+"&limit=1"
     else  url+"?limit=1"
   }
 
-  override def getDbname(): String ={
+  def getDbname(): String ={
     dbName
   }
 
-  override def allowPartition(): Boolean = {indexName==null}
+  def allowPartition(): Boolean = {indexName==null}
     
   def getOneUrl(): String = { dbUrl+ "/_all_docs?limit=1&include_docs=true"}
     
@@ -102,6 +104,29 @@ import play.api.libs.json.JsNumber
       (s"$dbUrl/$defaultIndex" ,false)
   }
 
+  def calculateCondition(field: String, min:Any, minInclusive: Boolean=false,
+        max: Any, maxInclusive: Boolean = false) : String = {
+    if (field!=null && ( min !=null || max!= null)){
+      var condition = field+":"
+      if (min!=null && max!=null && min.equals(max)){
+        condition += min
+      }
+      else{
+        if (minInclusive) condition+="["
+        else condition +="{"
+        if (min!=null) condition += min
+        else condition+="*"
+        condition+=" TO "
+        if (max !=null) condition += max
+        else condition += "*"
+        if (maxInclusive) condition+="]"
+        else condition +="}"
+      }
+      URLEncoder.encode(condition,"UTF-8")
+    }else
+      default_filter
+  }
+
   def getSubSetUrl (url: String, skip: Int, limit: Int)
       (implicit convertSkip:(Int) => String): String ={
     val suffix = {
@@ -128,11 +153,11 @@ import play.api.libs.json.JsNumber
     result \\ "doc"
   }
     
-  override def getBulkPostUrl(): String = {
+  def getBulkPostUrl(): String = {
     dbUrl + "/_bulk_docs"
   }
     
-  override def getBulkRows(rows: Array[String]): String = {
+  def getBulkRows(rows: Array[String]): String = {
     val docs = rows.map { x => Json.parse(x) }
     Json.stringify(Json.obj("docs" -> Json.toJson(docs.toSeq)))
   }
