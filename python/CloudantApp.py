@@ -72,14 +72,13 @@ for code in flightData.collect():
 	print 'Flight {0} on {1}'.format(code.flightSegmentId, code.scheduledDepartureTime)
 		
 
-# defect 56458 - exception thrown, commenting out so remaining tests will run
-#print 'About to test com.cloudant.spark.CloudantPartitionedPrunedFilteredRP for n_airportcodemapping'
-#sqlContext.sql(" CREATE TEMPORARY TABLE airportTable2 USING com.cloudant.spark.CloudantPartitionedPrunedFilteredRP OPTIONS ( database 'n_airportcodemapping')")
-#      
-#airportData = sqlContext.sql("SELECT _id, airportName FROM airportTable2 WHERE _id >= 'CAA' AND _id <= 'GAA' ORDER BY _id")
-#airportData.printSchema()
-#for code in airportData.collect():
-#	print code._id
+print 'About to test com.cloudant.spark.CloudantPartitionedPrunedFilteredRP for n_airportcodemapping'
+sqlContext.sql(" CREATE TEMPORARY TABLE airportTable2 USING com.cloudant.spark.CloudantPartitionedPrunedFilteredRP OPTIONS ( database 'n_airportcodemapping')")
+      
+airportData = sqlContext.sql("SELECT _id, airportName FROM airportTable2 WHERE _id >= 'CAA' AND _id <= 'GAA' ORDER BY _id")
+airportData.printSchema()
+for code in airportData.collect():
+	print code._id
 
 print 'About to test com.cloudant.spark.CloudantPartitionedPrunedFilteredRP for n_booking'
 sqlContext.sql(" CREATE TEMPORARY TABLE bookingTable2 USING com.cloudant.spark.CloudantPartitionedPrunedFilteredRP OPTIONS ( database 'n_booking')")
