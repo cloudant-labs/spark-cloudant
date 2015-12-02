@@ -187,6 +187,27 @@ database||cloudant database name
 index||cloudant search index w/o the database name.only used for load.
 path||cloudant: as database name if database is not present
 
+## Troubleshooting
+
+### Unicode support
+
+Having non-ascii characters in your Cloudant documents requires the Python interpreter to be set to support UTF-8. Failure to set the right encoding results in errors like the one shown for a `df.show()` action:
+
+````
+   df.show()
+  File "/Users/holger/dev/spark-1.5.2/python/lib/pyspark.zip/pyspark/sql/dataframe.py", line 256, in show
+UnicodeEncodeError: 'ascii' codec can't encode character u'\xdf' in position 1198: ordinal not in range(128)
+````
+
+There are a number of ways to force the Python interpreter to use UTF-8 encoding. A simple method is to add these lines to your script:
+
+````
+import sys
+reload(sys)
+sys.setdefaultencoding('utf-8')
+````
+
+See [https://issues.apache.org/jira/browse/SPARK-11772](https://issues.apache.org/jira/browse/SPARK-11772) for details.
 
 ## Known limitations and improvement areas
 
