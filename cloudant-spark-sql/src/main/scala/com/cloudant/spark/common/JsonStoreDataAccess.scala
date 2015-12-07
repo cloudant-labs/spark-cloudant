@@ -49,7 +49,16 @@ class JsonStoreDataAccess (config: CloudantConfig)  {
   }
 
   def getOne()( implicit columns: Array[String] = null) = {
-    this.getQueryResult[Seq[String]](config.getOneUrl, processAll)
+    var r = this.getQueryResult[Seq[String]](config.getOneUrlExcludeDDoc1(), processAll)
+    if (r.size == 0 ){
+      r = this.getQueryResult[Seq[String]](config.getOneUrlExcludeDDoc2(), processAll)
+    }
+    if (r.size == 0) {
+      throw new RuntimeException("Database " + config.getDbname() +
+        " doesn't have any non-design documents!")
+    }else {
+      r
+    }
   }
 
   def getAll[T](url: String)
@@ -84,8 +93,10 @@ class JsonStoreDataAccess (config: CloudantConfig)  {
       attrToFilters: Map[String, Array[Filter]] = null)= {
     logger.debug(s"processAll columns:$columns, attrToFilters:$attrToFilters")
     val jsonResult = Json.parse(result)
-    var rows = config.getRows(jsonResult )
-    rows.map(r =>  convert(r))
+    var rows = config.getRows(jsonResult)
+    //filter design docs
+    rows = rows.filter(r => FilterDDocs.filter(r))
+    rows.map(r => convert(r))
   }
       
   private def processIterator (result: String)

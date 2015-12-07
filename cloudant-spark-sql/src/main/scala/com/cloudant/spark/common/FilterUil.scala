@@ -128,7 +128,6 @@ class FilterUtil(filters: Map[String, Array[Filter]]) {
   implicit val system = SparkEnv.get.actorSystem
   private val logger = Logging(system, getClass)
   def apply(implicit r: JsValue = null): Boolean = {
-
     if (r == null) return true
     val satisfied = filters.forall({
       case (attr, filters) => {
@@ -141,8 +140,21 @@ class FilterUtil(filters: Map[String, Array[Filter]]) {
         }
       }
     })
-
     satisfied
   }
 }
+
+
+object FilterDDocs {
+  def filter(row: JsValue): Boolean = {
+    if (row == null) return true
+    val id : String = JsonUtil.getField(row, "_id").
+        getOrElse(null).as[JsString].value
+    if (id.startsWith("_design"))
+      false
+    else
+      true
+  }
+}
+
 
