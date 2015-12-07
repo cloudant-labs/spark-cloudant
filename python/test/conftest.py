@@ -23,14 +23,9 @@ sys.path.append(os.path.join(os.path.dirname(__file__), "helpers"))
 @pytest.fixture(scope="session", autouse=True)
 def test_properties():
 	properties = {
-	'cloudanthost':'281053d5-a6e9-4c13-943e-05f70f25bf70-bluemix.cloudant.com', 
-	'cloudantusername':'stromentemonstallostitya', 
-	'cloudantpassword':'6a9c346d6aea58ddd4f9ee92bb9758491c44d54f'}
-	
-# 	properties = {
-# 	'cloudanthost':'ACCOUNT.cloudant.com', 
-# 	'cloudantusername':'USERNAME', 
-# 	'cloudantpassword':'PASSWORD'}
+	'cloudanthost':'ACCOUNT.cloudant.com', 
+	'cloudantusername':'USERNAME', 
+	'cloudantpassword':'PASSWORD'}
 	
 	return properties
 	

@@ -5,6 +5,7 @@
 - python [Requests module] (http://docs.python-requests.org/en/latest/user/install/)
 - [pytest](http://pytest.org/latest/)
 - spark 1.4 or 1.5 (http://spark.apache.org/docs/latest/spark-standalone.html) up and running 
+- cloudant databases with test data populated by the [acmeair-nodejs app](https://github.com/acmeair/acmeair-nodejs)
 
 ### Test Setup:
 - Start a python 3 virtualenv
@@ -18,6 +19,7 @@
     export CONNECTOR_JAR=/mypath/spark-cloudant/cloudant-spark-sql/target/scala-2.10/cloudant-spark.jar
     export SPARK_HOME=/Applications/spark-1.4.1-bin-hadoop2.6/
     ```
+- Edit spark-cloudant/python/test/conftest.py, update the test_properties fixture (eg. cloudant credentials) 
     
 ### Run Tests:
 - Go to the spark-cloudant/python/test
