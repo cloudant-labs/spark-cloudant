@@ -19,10 +19,10 @@
     export CONNECTOR_JAR=/mypath/spark-cloudant/cloudant-spark-sql/target/scala-2.10/cloudant-spark.jar
     export SPARK_HOME=/Applications/spark-1.4.1-bin-hadoop2.6/
     ```
-- Edit spark-cloudant/python/test/conftest.py, update the test_properties fixture (eg. cloudant credentials) 
+- Edit spark-cloudant/test/conftest.py, update the test_properties fixture (eg. cloudant credentials) 
     
 ### Run Tests:
-- Go to the spark-cloudant/python/test
+- Go to the spark-cloudant/test
 - Run `py.test`   (or `py.test -s` to disable output capturing for debug purposes)
 
 ### Add More Tests:

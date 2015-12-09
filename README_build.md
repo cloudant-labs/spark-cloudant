@@ -9,13 +9,13 @@
 contains the integration of clouding as spark-sql external datasource
    				
 
-	./spark-test folder
+	./examples/scala folder
 		
 contains various test cases for exploring spark api:
 
-* mytest.spark.CloudantApp: cloudant as spark-sql external datastore application
-* mytest.spark.CloudantDF: cloudant as spark-sql external datastore application using DataFrame
-* mytest.spark.CloudantDFOption: cloudant as spark-sql external datastore application using DataFrame with option
+* examples.scala.CloudantApp: cloudant as spark-sql external datastore application
+* examples.scala.CloudantDF: cloudant as spark-sql external datastore application using DataFrame
+* examples.spark.CloudantDFOption: cloudant as spark-sql external datastore application using DataFrame with option
 
 
 #### Python project:
@@ -57,9 +57,9 @@ assume at cloudant-spark-sql folder
 create all-inclusive cloudant-spark.jar (except spark and hadoop) under target/scala-2.10 and be used for job submission
 	
 	
-#### Project spark-test
+#### Project /examples/scala
 	
-assume at spark-test folder
+assume at /examples/scala folder
 		
 	sbt package
 			
