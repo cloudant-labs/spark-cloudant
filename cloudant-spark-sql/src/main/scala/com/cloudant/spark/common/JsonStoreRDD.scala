@@ -28,20 +28,29 @@ import akka.event.Logging
 
 /**
  * @author yanglei
- * JsonStoreRDDPartition defines each partition as a subset of a query result: the limit rows returns and the skipped rows.
+ * JsonStoreRDDPartition defines each partition as a subset of a query result:
+  * the limit rows returns and the skipped rows.
  */
 
-private[spark] class JsonStoreRDDPartition(val skip: Int, val limit: Int, val idx: Int, val config: CloudantConfig, val attrToFilters: Map[String, Array[Filter]]) extends Partition with Serializable{
+private[spark] class JsonStoreRDDPartition(val skip: Int, val limit: Int,
+    val idx: Int, val config: CloudantConfig,
+    val attrToFilters: Map[String, Array[Filter]])
+    extends Partition with Serializable{
   val index = idx
 }
 
 /**
  * @author yanglei
- *  The main purpose of JsonStoreRDD is to be able to create parallel read by partition for dataaccess getAll (by condition) scenarios
- *  defaultPartitions : how many partition intent, will be re-calculate based on the value based on total rows and minInPartition / maxInPartition )
+ *  The main purpose of JsonStoreRDD is to be able to create parallel read
+ *  by partition for dataaccess getAll (by condition) scenarios
+ *  defaultPartitions : how many partition intent,
+ *  will be re-calculate based on the value based on total rows
+ *  and minInPartition / maxInPartition )
  *  maxRowsInPartition: -1 means unlimited
  */
-class JsonStoreRDD(@transient sc: SparkContext, config: CloudantConfig, url: String)(implicit requiredcolumns: Array[String] =null, attrToFilters: Map[String, Array[Filter]]=null)
+class JsonStoreRDD(@transient sc: SparkContext, config: CloudantConfig,
+    url: String)(implicit requiredcolumns: Array[String] = null,
+    attrToFilters: Map[String, Array[Filter]]=null)
   extends RDD[String](sc, Nil) {
   
   lazy val totalRows = {
@@ -66,24 +75,26 @@ class JsonStoreRDD(@transient sc: SparkContext, config: CloudantConfig, url: Str
     val limit = totalRows/totalPartition
     if (totalRows % totalPartition != 0) limit +1
     else limit
-    
   }
   
   override def getPartitions: Array[Partition] = {
-    
-      implicit val system = SparkEnv.get.actorSystem
-      val logger = Logging(system, getClass)
+    implicit val system = SparkEnv.get.actorSystem
+    val logger = Logging(system, getClass)
 
-    logger.info(s"Partition config - total=$totalPartition, limit=$limitPerPartition for totalRows of $totalRows")
+    logger.info(s"Partition config - total=$totalPartition, " +
+        s"limit=$limitPerPartition for totalRows of $totalRows")
     
     (0 until totalPartition).map(i => {
       val skip = i * limitPerPartition
-      new JsonStoreRDDPartition(skip,limitPerPartition,i, config, attrToFilters).asInstanceOf[Partition]
+      new JsonStoreRDDPartition(skip,limitPerPartition, i, config,
+          attrToFilters).asInstanceOf[Partition]
     }).toArray
   }
   
-  override def compute(splitIn: Partition, context: TaskContext): Iterator[String] = {
+  override def compute(splitIn: Partition, context: TaskContext):
+      Iterator[String] = {
     val myPartition = splitIn.asInstanceOf[JsonStoreRDDPartition]
-    new JsonStoreDataAccess(myPartition.config).getIterator(myPartition.skip, myPartition.limit,url)
+    new JsonStoreDataAccess(myPartition.config).getIterator(myPartition.skip,
+        myPartition.limit,url)
   }
 }
