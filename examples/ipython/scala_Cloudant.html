@@ -225,7 +225,7 @@ div#notebook {
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[3]:</div>
+<div class="prompt input_prompt">In&nbsp;[2]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-scala"><pre><span class="k">val</span> <span class="n">sqlCtx</span> <span class="k">=</span> <span class="k">new</span> <span class="n">org</span><span class="o">.</span><span class="n">apache</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">sql</span><span class="o">.</span><span class="nc">SQLContext</span><span class="o">(</span><span class="n">sc</span><span class="o">)</span>
@@ -252,10 +252,10 @@ div#notebook {
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[4]:</div>
+<div class="prompt input_prompt">In&nbsp;[3]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-scala"><pre><span class="k">val</span> <span class="n">df</span> <span class="k">=</span> <span class="n">sqlCtx</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="o">(</span><span class="s">&quot;com.cloudant.spark&quot;</span><span class="o">).</span><span class="n">option</span><span class="o">(</span><span class="s">&quot;cloudant.host&quot;</span><span class="o">,</span><span class="s">&quot;examples.cloudant.com&quot;</span><span class="o">).</span><span class="n">option</span><span class="o">(</span><span class="s">&quot;cloudant.username&quot;</span><span class="o">,</span> <span class="s">&quot;examples&quot;</span><span class="o">).</span><span class="n">option</span><span class="o">(</span><span class="s">&quot;cloudant.password&quot;</span><span class="o">,</span><span class="s">&quot;xxxx&quot;</span><span class="o">).</span><span class="n">load</span><span class="o">(</span><span class="s">&quot;customer&quot;</span><span class="o">)</span>
+<div class=" highlight hl-scala"><pre><span class="k">val</span> <span class="n">df</span> <span class="k">=</span> <span class="n">sqlCtx</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="o">(</span><span class="s">&quot;com.cloudant.spark&quot;</span><span class="o">).</span><span class="n">option</span><span class="o">(</span><span class="s">&quot;cloudant.host&quot;</span><span class="o">,</span><span class="s">&quot;examples.cloudant.com&quot;</span><span class="o">).</span><span class="n">option</span><span class="o">(</span><span class="s">&quot;cloudant.username&quot;</span><span class="o">,</span> <span class="s">&quot;examples&quot;</span><span class="o">).</span><span class="n">option</span><span class="o">(</span><span class="s">&quot;cloudant.password&quot;</span><span class="o">,</span><span class="s">&quot;xxxx&quot;</span><span class="o">).</span><span class="n">load</span><span class="o">(</span><span class="s">&quot;crimes&quot;</span><span class="o">)</span>
 </pre></div>
 
 </div>
@@ -268,7 +268,7 @@ div#notebook {
 
 <div class="output_area"><div class="prompt"></div>
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>Use dbName=customer, indexName=null, jsonstore.rdd.partitions=5, jsonstore.rdd.maxInPartition=-1, jsonstore.rdd.minInPartition=10, jsonstore.rdd.requestTimeout=100000,jsonstore.rdd.concurrentSave=-1,jsonstore.rdd.bulkSize=1
+<pre>Use dbName=crimes, indexName=null, jsonstore.rdd.partitions=5, jsonstore.rdd.maxInPartition=-1, jsonstore.rdd.minInPartition=10, jsonstore.rdd.requestTimeout=100000,jsonstore.rdd.concurrentSave=-1,jsonstore.rdd.bulkSize=1
 </pre>
 </div>
 </div>
@@ -291,7 +291,7 @@ div#notebook {
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[5]:</div>
+<div class="prompt input_prompt">In&nbsp;[4]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-scala"><pre><span class="n">df</span><span class="o">.</span><span class="n">printSchema</span><span class="o">()</span>
@@ -308,19 +308,22 @@ div#notebook {
 <div class="output_area"><div class="prompt"></div>
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>root
- |-- ADDRESS1: struct (nullable = true)
- |    |-- street: string (nullable = true)
- |    |-- street number: string (nullable = true)
- |-- ADDRESS1_MB: string (nullable = true)
- |-- BRANCH_CODE: long (nullable = true)
- |-- CITY: string (nullable = true)
- |-- CITY_MB: string (nullable = true)
- |-- COUNTRY_CODE: long (nullable = true)
- |-- ORGANIZATION_CODE: string (nullable = true)
- |-- POSTAL_ZONE: string (nullable = true)
- |-- WAREHOUSE_BRANCH_CODE: long (nullable = true)
  |-- _id: string (nullable = true)
  |-- _rev: string (nullable = true)
+ |-- geometry: struct (nullable = true)
+ |    |-- coordinates: array (nullable = true)
+ |    |    |-- element: double (containsNull = true)
+ |    |-- type: string (nullable = true)
+ |-- properties: struct (nullable = true)
+ |    |-- compnos: string (nullable = true)
+ |    |-- domestic: boolean (nullable = true)
+ |    |-- fromdate: long (nullable = true)
+ |    |-- main_crimecode: string (nullable = true)
+ |    |-- naturecode: string (nullable = true)
+ |    |-- reptdistrict: string (nullable = true)
+ |    |-- shooting: boolean (nullable = true)
+ |    |-- source: string (nullable = true)
+ |-- type: string (nullable = true)
 
 </pre>
 </div>
@@ -332,7 +335,7 @@ div#notebook {
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[6]:</div>
+<div class="prompt input_prompt">In&nbsp;[5]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-scala"><pre><span class="n">df</span><span class="o">.</span><span class="n">count</span><span class="o">()</span>
@@ -346,11 +349,11 @@ div#notebook {
 <div class="output">
 
 
-<div class="output_area"><div class="prompt output_prompt">Out[6]:</div>
+<div class="output_area"><div class="prompt output_prompt">Out[5]:</div>
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>3561</pre>
+<pre>271</pre>
 </div>
 
 </div>
@@ -361,10 +364,10 @@ div#notebook {
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[7]:</div>
+<div class="prompt input_prompt">In&nbsp;[6]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-scala"><pre><span class="n">df</span><span class="o">.</span><span class="n">select</span><span class="o">(</span><span class="s">&quot;CITY&quot;</span><span class="o">).</span><span class="n">show</span><span class="o">()</span>
+<div class=" highlight hl-scala"><pre><span class="n">df</span><span class="o">.</span><span class="n">select</span><span class="o">(</span><span class="s">&quot;properties.naturecode&quot;</span><span class="o">).</span><span class="n">show</span><span class="o">()</span>
 </pre></div>
 
 </div>
@@ -377,30 +380,30 @@ div#notebook {
 
 <div class="output_area"><div class="prompt"></div>
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>+----------------+
-|            CITY|
-+----------------+
-|           Paris|
-|          Milano|
-|       Amsterdam|
-|         Hamburg|
-|         M?nchen|
-|           Kista|
-|         Calgary|
-|         Toronto|
-|          Boston|
-|         Seattle|
-|     Los Angeles|
-|           Miami|
-|            Lyon|
-|Distrito Federal|
-|           Tokyo|
-|      Osaka City|
-|       Melbourne|
-|          Bilbao|
-|       S?o Paulo|
-|          Kuopio|
-+----------------+
+<pre>+----------+
+|naturecode|
++----------+
+|    DISTRB|
+|       EDP|
+|    ARREST|
+|        AB|
+|      CD14|
+|    UNKEMS|
+|      REQP|
+|       EDP|
+|       MVA|
+|     IVPER|
+|      NIDV|
+|        AB|
+|    IVPREM|
+|     IVPER|
+|     IVPER|
+|       MVA|
+|      CD11|
+|    LARCEN|
+|       MVA|
+|    ARREST|
++----------+
 
 </pre>
 </div>
@@ -412,10 +415,10 @@ div#notebook {
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[9]:</div>
+<div class="prompt input_prompt">In&nbsp;[8]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-scala"><pre><span class="n">df</span><span class="o">.</span><span class="n">select</span><span class="o">(</span><span class="s">&quot;ADDRESS1_MB&quot;</span><span class="o">).</span><span class="n">show</span><span class="o">()</span>
+<div class=" highlight hl-scala"><pre><span class="n">df</span><span class="o">.</span><span class="n">filter</span><span class="o">(</span><span class="n">df</span><span class="o">.</span><span class="n">col</span><span class="o">(</span><span class="s">&quot;properties.naturecode&quot;</span><span class="o">).</span><span class="n">startsWith</span><span class="o">(</span><span class="s">&quot;DISTRB&quot;</span><span class="o">)).</span><span class="n">show</span><span class="o">()</span>
 </pre></div>
 
 </div>
@@ -428,87 +431,17 @@ div#notebook {
 
 <div class="output_area"><div class="prompt"></div>
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>+--------------------+
-|         ADDRESS1_MB|
-+--------------------+
-|75, rue du Faubou...|
-|     Piazza Duomo, 1|
-| Singelgravenplein 4|
-|      Schwabentor 35|
-|    Leopoldstra?e 36|
-| Isafjordsgatan 30 C|
-|7800, 756 - 6th A...|
-|    789 Yonge Street|
-|1288 Dorchester A...|
-|     299 Yale Avenue|
-|1288 South Barrin...|
-|      10032 NW 186th|
-| 6c, rue de l&apos;?glise|
-|Prol. Paseo de la...|
-|         202-2-3 ???|
-|           543-225 ?|
-|    2315 Queen&apos;s Ave|
-|Plaza de la Const...|
-|Avenida Paulista,...|
-|       Kauppakatu 33|
-+--------------------+
-
-</pre>
-</div>
-</div>
-
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[10]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-scala"><pre><span class="k">val</span> <span class="n">add</span> <span class="k">=</span> <span class="n">df</span><span class="o">.</span><span class="n">select</span><span class="o">(</span><span class="s">&quot;ADDRESS1_MB&quot;</span><span class="o">);</span>
-        <span class="n">add</span><span class="o">.</span><span class="n">registerTempTable</span><span class="o">(</span><span class="s">&quot;add&quot;</span><span class="o">);</span>
-        <span class="n">add</span><span class="o">.</span><span class="n">printSchema</span><span class="o">();</span>
-        <span class="n">add</span><span class="o">.</span><span class="n">show</span><span class="o">();</span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area"><div class="prompt"></div>
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>root
- |-- ADDRESS1_MB: string (nullable = true)
-
-+--------------------+
-|         ADDRESS1_MB|
-+--------------------+
-|75, rue du Faubou...|
-|     Piazza Duomo, 1|
-| Singelgravenplein 4|
-|      Schwabentor 35|
-|    Leopoldstra?e 36|
-| Isafjordsgatan 30 C|
-|7800, 756 - 6th A...|
-|    789 Yonge Street|
-|1288 Dorchester A...|
-|     299 Yale Avenue|
-|1288 South Barrin...|
-|      10032 NW 186th|
-| 6c, rue de l&apos;?glise|
-|Prol. Paseo de la...|
-|         202-2-3 ???|
-|           543-225 ?|
-|    2315 Queen&apos;s Ave|
-|Plaza de la Const...|
-|Avenida Paulista,...|
-|       Kauppakatu 33|
-+--------------------+
+<pre>+--------------------+--------------------+--------------------+--------------------+-------+
+|                 _id|                _rev|            geometry|          properties|   type|
++--------------------+--------------------+--------------------+--------------------+-------+
+|79f14b64c57461584...|1-d9518df5c255e4b...|[List(-71.0598744...|[142035012,true,1...|Feature|
+|79f14b64c57461584...|1-798ef404b141dfb...|[List(-71.0554045...|[142035053,false,...|Feature|
+|79f14b64c57461584...|1-08cd46894f9c579...|[List(-71.1317963...|[142035113,false,...|Feature|
+|79f14b64c57461584...|1-be4512491803441...|[List(-71.1331290...|[142035116,false,...|Feature|
+|79f14b64c57461584...|1-2e3e1fe35278b5d...|[List(-71.0784045...|[142035162,false,...|Feature|
+|79f14b64c57461584...|1-e03133da93c2644...|[List(-71.0824845...|[142035211,false,...|Feature|
+|79f14b64c57461584...|1-4c21d07bfb9f45a...|[List(-71.1013666...|[142035316,false,...|Feature|
++--------------------+--------------------+--------------------+--------------------+-------+
 
 </pre>
 </div>
