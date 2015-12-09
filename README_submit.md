@@ -10,9 +10,9 @@ submission with flavors
 
 ##### with local slave
 		
-	spark-submit  --master local[4]  --jars cloudant-spark.jar python/CloudantApp.py
-	spark-submit  --master local[4]  --jars cloudant-spark.jar python/CloudantDF.py
-	spark-submit  --master local[4]  --jars cloudant-spark.jar python/CloudantDFOption.py
+	spark-submit  --master local[4]  --jars cloudant-spark.jar examples/python/CloudantApp.py
+	spark-submit  --master local[4]  --jars cloudant-spark.jar examples/python/CloudantDF.py
+	spark-submit  --master local[4]  --jars cloudant-spark.jar examples/python/CloudantDFOption.py
 
 ##### with mesos master
 		
@@ -31,9 +31,9 @@ submission with flavors
 
 ##### with local slave
 		
-	spark-submit --class "mytest.spark.CloudantApp" --master local[4] --jars cloudant-spark.jar spark-test/target/scala-2.10/spark_test_2.10-0.1-SNAPSHOT.jar
-	spark-submit --class "mytest.spark.CloudantDF" --master local[4] --jars cloudant-spark.jar spark-test/target/scala-2.10/spark_test_2.10-0.1-SNAPSHOT.jar
-	spark-submit --class "mytest.spark.CloudantDFOption" --master local[4] --jars cloudant-spark.jar spark-test/target/scala-2.10/spark_test_2.10-0.1-SNAPSHOT.jar
+	spark-submit --class "mytest.spark.CloudantApp" --master local[4] --jars cloudant-spark.jar examples/scala/target/scala-2.10/spark_test_2.10-0.1-SNAPSHOT.jar
+	spark-submit --class "mytest.spark.CloudantDF" --master local[4] --jars cloudant-spark.jar examples/scala/target/scala-2.10/spark_test_2.10-0.1-SNAPSHOT.jar
+	spark-submit --class "mytest.spark.CloudantDFOption" --master local[4] --jars cloudant-spark.jar examples/scala/target/scala-2.10/spark_test_2.10-0.1-SNAPSHOT.jar
 	
 	
 ##### with mesos master
