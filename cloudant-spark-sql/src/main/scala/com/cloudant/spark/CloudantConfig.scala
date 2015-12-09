@@ -38,6 +38,7 @@ as the filter today does not tell how to link the filters out And v.s. Or
   val pkField = "_id"
   val defaultIndex = "_all_docs" // "_changes" does not work for partition
   val default_filter: String = "*:*"
+  val partitionSize: Long = 1000000 //1 Mb
 
   def getPostUrl(): String ={dbUrl}
   
@@ -55,6 +56,10 @@ as the filter today does not tell how to link the filters out And v.s. Or
 
   def getDbname(): String ={
     dbName
+  }
+
+  def getDbUrl(): String = {
+    dbUrl
   }
 
   def allowPartition(): Boolean = {indexName==null}
@@ -150,7 +155,21 @@ as the filter today does not tell how to link the filters out And v.s. Or
       case _ =>  value.as[JsNumber].value.intValue()
     }
   }
-    
+
+  def getDataSize(result: JsValue): (Int, Long) = {
+    val docCount = result \ "doc_count"
+    val docCountInt = docCount match {
+      case s : JsUndefined => 0
+      case _ =>  docCount.as[JsNumber].value.intValue()
+    }
+    val dataSize = result \"sizes" \ "external"
+    val dataSizeLong = dataSize match {
+      case s : JsUndefined => 0
+      case _ =>  dataSize.as[JsNumber].value.longValue()
+    }
+    (docCountInt, dataSizeLong)
+  }
+
   def getRows(result: JsValue): Seq[JsValue] = {
     result \\ "doc"
   }
