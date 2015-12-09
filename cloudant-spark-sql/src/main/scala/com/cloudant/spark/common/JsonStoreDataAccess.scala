@@ -15,13 +15,11 @@
 *******************************************************************************/
 package com.cloudant.spark.common
 
+
 import com.cloudant.spark.{JsonUtil, CloudantConfig}
-import spray.http._
 import spray.client.pipelining._
 import scala.concurrent._
-import akka.actor.ActorSystem
 import akka.event.Logging
-import akka.util.Timeout
 import play.api.libs.json.Json
 import play.api.libs.json.JsValue
 import scala.collection.mutable.HashMap
@@ -32,7 +30,16 @@ import spray.httpx.marshalling.Marshaller
 import play.api.libs.json.JsString
 import com.typesafe.config.ConfigFactory
 import scala.util.Random
+import scala.concurrent.Future
 
+import akka.actor.ActorSystem
+import akka.util.Timeout
+import akka.pattern.ask
+import akka.io.IO
+
+import spray.can.Http
+import spray.http._
+import HttpMethods._
 
 /**
  * @author yanglei
@@ -141,22 +148,19 @@ class JsonStoreDataAccess (config: CloudantConfig)  {
       attrToFilters: Map[String, Array[Filter]] =null) : T={
     logger.debug("Cloudant query: "+ url)
     implicit val ( system, existing) = getSystem()
-    import system.dispatcher 
 
-    var pipeline: HttpRequest => Future[HttpResponse] = null
-    if (validCredentials!=null){
-      pipeline = ( 
-        addCredentials(validCredentials) 
-        ~> sendReceive
-      )
-    }else{
-      pipeline = sendReceive
+    val request: HttpRequest = if (validCredentials != null) {
+      Get(url) ~> addCredentials(validCredentials)
+    } else {
+      HttpRequest(GET, Uri(url))
     }
-    val response: Future[HttpResponse] = pipeline(Get(url))
+
+    val response: Future[HttpResponse] =
+      (IO(Http) ? request).mapTo[HttpResponse]
     val result = Await.result(response, timeout.duration)
     if (result.status.isFailure){
-      throw new RuntimeException("Database " + config.getDbname() + 
-          " request error: " + result.entity.asString)
+      throw new RuntimeException("Database " + config.getDbname() +
+        " request error: " + result.entity.asString)
     }
     val data = postProcessor(result.entity.asString)
     logger.debug(s"got result:$data")
@@ -210,21 +214,20 @@ class JsonStoreDataAccess (config: CloudantConfig)  {
           val response: Future[HttpResponse] = pipeline(request)
             response
           } 
-        }
-        val f = Future.sequence(allFutures.toList)
-        val result = Await.result(f, timeout.duration)
-        val isSuccessful= result.forall { x => x.status.isSuccess } 
-        if(!existing)
-        {
-          logger.info("shutdown newly created ActorSystem")
-          system.shutdown()
-        }
-        logger.info(s"Save total ${end-start}=${result.length} successful=$isSuccessful")
-        if (!isSuccessful)
-           throw new RuntimeException("Database " + config.getDbname() +
-              " request error: " + result(0).entity.asString +
-              " Failed to save data!")
       }
+      val f = Future.sequence(allFutures.toList)
+      val result = Await.result(f, timeout.duration)
+      val isSuccessful= result.forall { x => x.status.isSuccess }
+      if(!existing)
+      {
+        logger.info("shutdown newly created ActorSystem")
+        system.shutdown()
+      }
+      logger.info(s"Save total ${end-start}=${result.length} successful=$isSuccessful")
+      if (!isSuccessful)
+         throw new RuntimeException("Database " + config.getDbname() +
+          " does not exist or is not accessible. Failed to save data!")
+    }
   }
 }
 
