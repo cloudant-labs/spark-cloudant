@@ -1,4 +1,21 @@
-Apache License
+Skip to content
+This repository  
+Search
+Pull requests
+Issues
+Gist
+ @mayya-sharipova
+ Unwatch 80
+  Star 0
+ Fork 0 cloudant/clouseau PRIVATE
+ Code  Issues 0  Pull requests 5  Wiki  Pulse  Graphs
+Branch: master Find file Copy pathclouseau/LICENSE.txt
+dbfb784  on Jul 13
+@robertkowalski robertkowalski add license file
+1 contributor
+RawBlameHistory     203 lines (169 sloc)  11.1 KB
+
+                                 Apache License
                            Version 2.0, January 2004
                         http://www.apache.org/licenses/
 
@@ -178,7 +195,7 @@ Apache License
    APPENDIX: How to apply the Apache License to your work.
 
       To apply the Apache License to your work, attach the following
-      boilerplate notice, with the fields enclosed by brackets "{}"
+      boilerplate notice, with the fields enclosed by brackets "[]"
       replaced with your own identifying information. (Don't include
       the brackets!)  The text should be enclosed in the appropriate
       comment syntax for the file format. We also recommend that a
@@ -186,7 +203,7 @@ Apache License
       same "printed page" as the copyright notice for easier
       identification within third-party archives.
 
-   Copyright {yyyy} {name of copyright owner}
+   Copyright 2015 IBM Corporation
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -199,4 +216,5 @@ Apache License
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
-
+Status API Training Shop Blog About Pricing
+© 2015 GitHub, Inc. Terms Privacy Security Contact Help
