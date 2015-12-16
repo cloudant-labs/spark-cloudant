@@ -154,6 +154,10 @@ class JsonStoreDataAccess (config: CloudantConfig)  {
     }
     val response: Future[HttpResponse] = pipeline(Get(url))
     val result = Await.result(response, timeout.duration)
+    if (result.status.isFailure){
+      throw new RuntimeException("Database " + config.getDbname() + 
+          " request error: " + result.entity.asString)
+    }
     val data = postProcessor(result.entity.asString)
     logger.debug(s"got result:$data")
     if(!existing){
@@ -218,7 +222,8 @@ class JsonStoreDataAccess (config: CloudantConfig)  {
         logger.info(s"Save total ${end-start}=${result.length} successful=$isSuccessful")
         if (!isSuccessful)
            throw new RuntimeException("Database " + config.getDbname() +
-            " does not exist or is not accessible. Failed to save data!")
+              " request error: " + result(0).entity.asString +
+              " Failed to save data!")
       }
   }
 }
