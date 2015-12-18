@@ -88,24 +88,6 @@ class JsonStoreDataAccess (config: CloudantConfig)  {
         {result => config.getTotalRows(Json.parse(result))})
   }
 
-  def getPartitions(url: String): (Int, Int, Int) ={
-    val dbUrl = config.getDbUrl()
-    val (totalRows, totalSize) = this.getQueryResult(dbUrl,
-        {result => config.getDataSize(Json.parse(result))})
-    if (totalSize == 0)
-      (0, totalRows, totalRows) //Partitions are not defined
-    else {
-      val partitionSize= config.partitionSize - 50000 //leave 50Kb for headers etc
-      var numOfPartitions = Math.ceil(totalSize*1.0 /partitionSize).toInt
-      var rowsInPartition = totalRows
-      if (numOfPartitions < 2)
-        numOfPartitions = 1
-      else
-        rowsInPartition = totalRows/numOfPartitions
-      (numOfPartitions, rowsInPartition, totalRows)
-    }
-  }
-
   private def processAll (result: String)
       (implicit columns: Array[String], 
       attrToFilters: Map[String, Array[Filter]] = null)= {
