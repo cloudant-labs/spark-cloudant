@@ -54,6 +54,18 @@ class DataLoader:
 		finally:
 			acmeair.stop_acmeair()
 			
+			
+	def remove_AcmeDb(self, num_of_cust):
+		"""
+		Drop all AcmeAir databases
+		"""
+		acmeair = AcmeAirUtils()
+		if acmeair.is_acmeair_running() != 0:
+			acmeair.stop_acmeair()
+			
+		cloudantUtils = CloudantDbUtils(test_properties)
+		cloudantUtils.drop_all_databases()		
+	
 	
 	def load_SpecCharValuePredicateData(self):
 		"""
@@ -88,17 +100,21 @@ if  __name__ =='__main__':
 	import argparse
 	parser = argparse.ArgumentParser(description="Utility to load AcmeAir data required for python spark-cloudant tests")
 	group = parser.add_mutually_exclusive_group(required=True)
-	group.add_argument('-reset', action='store_true', help='Reset databases and create search indexes only')
-	group.add_argument('-load', help='Reset and Load databases with the given # of users', type=int)
+	group.add_argument('-cleanup', action='store_true', help='Drop all test databases')
+	group.add_argument('-load', help='Reset and Load databases with the given # of users. -load 0 to just recreate databases and indexes.', type=int)
 	args = parser.parse_args()
 
 	dataloader = DataLoader()
 	
 	if args.load is not None:
-		dataloader.load_AcmeData(args.load)
-		dataloader.load_SpecCharValuePredicateData()
+		if args.load == 0:
+			cloudantUtils = CloudantDbUtils(test_properties)
+			cloudantUtils.reset_databases()
+		else:			
+			dataloader.load_AcmeData(args.load)
+			dataloader.load_SpecCharValuePredicateData()
 		
-	elif args.reset:
+	elif args.cleanup:
 		cloudantUtils = CloudantDbUtils(test_properties)
-		cloudantUtils.reset_databases()
+		cloudantUtils.drop_all_databases()
 

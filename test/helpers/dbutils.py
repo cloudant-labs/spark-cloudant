@@ -92,8 +92,14 @@ class CloudantDbUtils:
 		
 			self.create_database(db)
 			self.create_index(db)
+	
 		
-		
+	def drop_all_databases(self):
+		for db in self.test_dbs:
+			if self.db_exists(db):
+				self.drop_database(db)		
+			
+			
 	def check_databases(self):
 		for db in self.test_dbs:
 			assert self.db_exists(db)

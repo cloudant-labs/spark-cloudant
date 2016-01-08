@@ -32,8 +32,8 @@ A utility is included to create test data to the cloudant database.
 - Edit spark-cloudant/test/conftest.py, update the test_properties fixture.  Note the cloudant credentials need to have rights to **create** and **delete** databases.
 - Go to spark-cloudant/test
 - Run `python -m helpers.dataload [options]` with one of the following arguments:
-  - `-reset`  (Reset databases and create search indexes.  Note that it does not populate test data.)
-  - `-load num_of_customers`  (Reset and Load databases with the given # of users)
+  - `-cleanup`  (Drop all test databases)
+  - `-load num_of_customers`  (Reset and Load databases with the given # of users. -load 0 to just recreate databases and indexes.)
   ```
      python -m helpers.dataload -load 200
   ```
