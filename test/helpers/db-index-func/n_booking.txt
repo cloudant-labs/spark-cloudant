@@ -1,0 +1,1 @@
+{"_id":"_design/view","views":{},"language":"javascript","indexes":{"n_bookings":{"analyzer":"standard","index":"function(doc){\n    index(\"default\", doc._id);\n  \t    if(doc.customerId){\n         \tindex(\"customerId\", doc.customerId, {\"store\": \"yes\"});\n  \t    }\n}"}}}
