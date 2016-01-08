@@ -15,47 +15,32 @@
 #******************************************************************************/
 import pytest
 import subprocess
+import os
+import conftest
+	
+def createSparkConf():
+	from pyspark import SparkConf
+	test_properties = conftest.test_properties()
 
-def create_test_py(in_script, out_script, test_properties):
-	"""
-	Given a master test script file, insert the necessary test configurations (eg. Cloudant credentials),
-	write it to a temp file then submit a spark job
-	"""
+	conf = SparkConf()
+	conf.set("cloudant.host", test_properties["cloudanthost"])
+	conf.set("cloudant.username", test_properties["cloudantusername"])
+	conf.set("cloudant.password", test_properties["cloudantpassword"])
+	
+	return conf
 
-	replacements = {
-	"<cloudanthost>":test_properties["cloudanthost"],
-	"<cloudantusername>":test_properties["cloudantusername"],
-	"<cloudantpassword>":test_properties["cloudantpassword"]}
-	
-	lines = []
-	with open(in_script) as infile:
-		for line in infile:
-			for src, target in replacements.items():
-				line = line.replace(src, target)
-			lines.append(line)
-	infile.close()
-	
-	with open(str(out_script), "w") as outfile:
-		for line in lines:
-			outfile.write(line)
-	outfile.close()
 
-	print ("Master Script File = ", in_script)
-	print ("Temp Script File = ", out_script)
+def get_test_properties():
+	return conftest.test_properties()
+
 	
-	
-def run_test(in_script, out_script_name, out_script_dir, sparksubmit, test_properties):
+def run_test(in_script, sparksubmit):
 	__tracebackhide__ = True
-	
-	# write the test script to a temp file with proper configuration
-	# note: pytest keeps 5 temp dirs created for tests and will clean up itself
-	out_script = out_script_dir.join(out_script_name)
-	create_test_py(in_script, out_script, test_properties)
 	
 	# spark-submit the script
 	import os, sys
 	command = [sparksubmit]
-	command.extend(["--master", "local[4]", "--jars", os.environ["CONNECTOR_JAR"], str(out_script)])
+	command.extend(["--master", "local[4]", "--jars", os.environ["CONNECTOR_JAR"], str(in_script)])	
 	proc = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 	err, out = proc.communicate()
 	# print spark log and stdout (when  py.test -s is used)
