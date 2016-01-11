@@ -1,0 +1,1 @@
+{"_id":"_design/view","views":{},"language":"javascript","indexes":{"n_customersessions":{"analyzer":"standard","index":"function(doc){\n\t    index(\"default\", doc._id);\n    \t    if(doc.customerid){\n           \tindex(\"customerid\", doc.customerid, {\"store\": \"yes\"});\n    \t    }\n}"}}}

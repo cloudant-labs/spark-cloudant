@@ -15,12 +15,13 @@
 #******************************************************************************/
 from pyspark.sql import SQLContext
 from pyspark import SparkContext, SparkConf
+import sys
+from os.path import dirname as dirname
+# add /test to pythonpath so utils can be imported when running from spark
+sys.path.append(dirname(dirname(dirname(__file__))))
+import helpers.utils as utils
 
-conf = SparkConf().setAppName("n_airportcodemapping range predicate tests - Python")
-conf.set("cloudant.host", "<cloudanthost>")
-conf.set("cloudant.username", "<cloudantusername>")
-conf.set("cloudant.password", "<cloudantpassword>")
-
+conf = utils.createSparkConf()
 sc = SparkContext(conf=conf)
 sqlContext = SQLContext(sc)
 

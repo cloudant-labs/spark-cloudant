@@ -17,7 +17,6 @@ import pytest
 import requests
 import sys
 import os
-sys.path.append(os.path.join(os.path.dirname(__file__), "helpers"))
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -31,22 +30,11 @@ def test_properties():
 	
 
 @pytest.fixture(scope="session", autouse=True)
-def check_db_availability(test_properties):
-	test_dbs = [
-		"n_airportcodemapping",
-		"n_booking",
-		"n_customer",
-		"n_customersession",
-		"n_flight",
-		"n_flightsegment",
-		"airportcodemapping_df"
-	]
-	for db in test_dbs:
-		print ("Checking connection to cloudant databases: {}".format(db))
-		url = "https://{}/{}".format(
-				test_properties["cloudanthost"], db)
-		response = requests.get(url, auth=(test_properties["cloudantusername"], test_properties["cloudantpassword"]))
-		assert response.status_code == 200
+def setup_test_databases(test_properties):
+	from helpers.dbutils import CloudantDbUtils
+	
+	cloudantUtils = CloudantDbUtils(test_properties)
+	cloudantUtils.check_databases()
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -56,11 +44,10 @@ def check_connector_jar():
 		if os.path.isfile(jarpath):
 			print ("Cloudant-Spark Connector path: ", jarpath)
 		else:
-			print("Invalid Cloudant-Spark Connector path:", jarpath)
-			sys.exit(1)			
+			raise RuntimeError("Invalid Cloudant-Spark Connector path:", jarpath)
+				
 	except KeyError:
-		print("Environment variable CONNECTOR_JAR not set")
-		sys.exit(1)
+		raise RuntimeError("Environment variable CONNECTOR_JAR not set")
 
 
 @pytest.fixture
@@ -68,13 +55,13 @@ def sparksubmit():
 	try:
 		sys.path.append(os.path.join(os.environ["SPARK_HOME"], "python"))
 		sys.path.append(os.path.join(os.environ["SPARK_HOME"], "python", "lib", "py4j-0.8.2.1-src.zip"))
+		
 	except KeyError:
-		print("Environment variable SPARK_HOME not set")
-		sys.exit(1)
+		raise RuntimeError("Environment variable SPARK_HOME not set")
 		
 	return os.path.join(os.environ.get("SPARK_HOME"), "bin", "spark-submit")
 
-	
+
 
 
 	

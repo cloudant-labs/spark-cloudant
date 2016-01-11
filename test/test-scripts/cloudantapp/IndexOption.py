@@ -16,12 +16,13 @@
 from pyspark.sql import SQLContext
 from pyspark import SparkContext, SparkConf
 import requests
+import sys
+from os.path import dirname as dirname
+# add /test to pythonpath so utils can be imported when running from spark
+sys.path.append(dirname(dirname(dirname(__file__))))
+import helpers.utils as utils
 
-conf = SparkConf().setAppName("n_flight basic tests with index in option - Python")
-conf.set("cloudant.host", "<cloudanthost>")
-conf.set("cloudant.username", "<cloudantusername>")
-conf.set("cloudant.password", "<cloudantpassword>")
-
+conf = utils.createSparkConf()
 sc = SparkContext(conf=conf)
 sqlContext = SQLContext(sc)
 
@@ -40,8 +41,9 @@ def verifyIndexOption():
 
 
 # query the index using Cloudant API to get expected count
-url = "https://<cloudanthost>/n_flight/_design/view/_search/n_flights?q=flightSegmentId:{AA9%20TO%20AA95}"
-response = requests.get(url, auth=('<cloudantusername>', '<cloudantpassword>'))
+test_properties = utils.get_test_properties()
+url = "https://"+test_properties["cloudanthost"]+"/n_flight/_design/view/_search/n_flights?q=flightSegmentId:{AA9%20TO%20AA95}"
+response = requests.get(url, auth=(test_properties["cloudantusername"], test_properties["cloudantpassword"]))
 assert response.status_code == 200
 total_rows = response.json().get("total_rows")
 

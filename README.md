@@ -39,7 +39,7 @@ Spark Version | Release # | Binary Location
 
 ### Using SQL In Python 
 	
-[python code](python/CloudantApp.py)
+[python code](examples/python/CloudantApp.py)
 	
 	conf = SparkConf().setAppName("Cloudant Spark SQL External Datasource in Python")
 		
@@ -68,7 +68,7 @@ Spark Version | Release # | Binary Location
 
 ### Using SQL In Scala 
 
-[Scala code](spark-test/src/main/scala/mytest/spark/CloudantApp.scala)
+[Scala code](examples/scala/src/main/scala/mytest/spark/CloudantApp.scala)
 	
 	val conf = new SparkConf().setAppName("Cloudant Spark SQL External Datasource in Scala")
 		
@@ -97,7 +97,7 @@ Spark Version | Release # | Binary Location
 
 ### Using DataFrame In Python 
 
-[python code](python/CloudantDF.py). 
+[python code](examples/python/CloudantDF.py). 
 	    
 	conf = SparkConf().setAppName("Cloudant Spark SQL External Datasource in Python")
 	# define coudant related configuration
@@ -113,11 +113,11 @@ Spark Version | Release # | Binary Location
 	
 	df.filter(df.airportCode >= 'CAA').select("airportCode",'airportName').save("airportcodemapping_df", "com.cloudant.spark")	    
 	
-[Sample code on using DataFrame option to define cloudant configuration](python/CloudantDFOption.py)
+[Sample code on using DataFrame option to define cloudant configuration](examples/python/CloudantDFOption.py)
 	
 ### Using DataFrame In Scala 
 
-[Scala code](spark-test/src/main/scala/mytest/spark/CloudantDF.scala)
+[Scala code](examples/scala/src/main/scala/mytest/spark/CloudantDF.scala)
 	
 	val conf = new SparkConf().setAppName("Cloudant Spark SQL External Datasource in Scala")
 		
@@ -138,7 +138,7 @@ Spark Version | Release # | Binary Location
      df.filter(df("airportCode") >= "CAA").select("airportCode","airportName").write.format("com.cloudant.spark").save("airportcodemapping_df")
      
 
-[Sample code on using DataFrame option to define cloudant configuration](spark-test/src/main/scala/mytest/spark/CloudantDFOption.scala)
+[Sample code on using DataFrame option to define cloudant configuration](examples/scala/src/main/scala/mytest/spark/CloudantDFOption.scala)
 
 	
 ## Job Submission
