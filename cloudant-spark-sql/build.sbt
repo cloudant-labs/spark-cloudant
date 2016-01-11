@@ -21,6 +21,7 @@ libraryDependencies ++= {
     "org.apache.spark"    %%  "spark-core"	  %  sparkV % "provided",
     "org.apache.spark"    %%  "spark-sql"	  %  sparkV % "provided",
     "io.spray"            %%  "spray-client"  %  sprayV,
+    "io.spray"            %%  "spray-can"  %  sprayV,
     "com.typesafe.play"   %%  "play-json"     %  playJsonV
   )
 }
@@ -28,10 +29,11 @@ libraryDependencies ++= {
 assemblyOption in assembly := (assemblyOption in assembly).value.copy(includeScala = false)
 
 assemblyMergeStrategy in assembly := {
-case PathList("scala", xs @ _*) => MergeStrategy.discard
-case x =>
-  val oldStrategy = (assemblyMergeStrategy in assembly).value
-  oldStrategy(x)
+  case "reference.conf"   => MergeStrategy.first
+  case PathList("scala", xs @ _*) => MergeStrategy.discard
+  case x =>
+    val oldStrategy = (assemblyMergeStrategy in assembly).value
+    oldStrategy(x)
 }
 
 assemblyJarName in assembly := "cloudant-spark.jar"
