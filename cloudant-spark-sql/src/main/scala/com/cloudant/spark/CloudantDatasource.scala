@@ -25,19 +25,19 @@ import com.cloudant.spark.common._
 /**
  * @author yanglei
  */
-case class CloudantTableScan (dbName: String)
+case class CloudantTableScan (dbName: String, schemaSampleSize: String = null)
                       (@transient val sqlContext: SQLContext) 
   extends BaseRelation with TableScan 
 {
   lazy val dataAccess = {
-      new JsonStoreDataAccess(JsonStoreConfigManager.getConfig(sqlContext, dbName)) }
+      new JsonStoreDataAccess(config) }
   
   lazy val config: CloudantConfig = {
-    JsonStoreConfigManager.getConfig(sqlContext, dbName).asInstanceOf[CloudantConfig]
+    JsonStoreConfigManager.getConfig(sqlContext, dbName, null, schemaSampleSize).asInstanceOf[CloudantConfig]
   }
 
   val schema: StructType = {
-      val aRDD = sqlContext.sparkContext.parallelize(dataAccess.getOne())
+      val aRDD = sqlContext.sparkContext.parallelize(dataAccess.getMany(config.getSchemaSampleSize()))
       sqlContext.read.json(aRDD).schema
   }
 
@@ -53,7 +53,7 @@ class CloudantRP extends RelationProvider {
 
   def createRelation(sqlContext: SQLContext, parameters: Map[String, String]) = {
     CloudantTableScan(
-      parameters("database"))(sqlContext)
+      parameters("database"), parameters.getOrElse(JsonStoreConfigManager.PARAM_SCHEMA_SAMPLE_SIZE_CONFIG, null))(sqlContext)
   }
   
 }

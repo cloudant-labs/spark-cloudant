@@ -28,7 +28,7 @@ Only allow one field pushdown now
 as the filter today does not tell how to link the filters out And v.s. Or
 */
 @serializable class CloudantConfig(val host: String, val dbName: String,
-    val indexName: String = null)
+    val indexName: String = null, val schemaSampleSize: Int = JsonStoreConfigManager.defaultSchemaSampleSize)
     (implicit val username: String, val password: String,
      val partitions:Int, val maxInPartition: Int, val minInPartition:Int,
      val requestTimeout:Long,val concurrentSave:Int, val bulkSize: Int) {
@@ -44,6 +44,10 @@ as the filter today does not tell how to link the filters out And v.s. Or
   def getLastUrl(skip: Int): String = {
     if (skip ==0 ) null
     else s"$dbUrl/$defaultIndex?limit=$skip"
+  }
+
+  def getSchemaSampleSize(): Int = {
+    schemaSampleSize
   }
   
   def getLastNum(result: JsValue): JsValue = {result \ "last_seq"}
@@ -62,6 +66,14 @@ as the filter today does not tell how to link the filters out And v.s. Or
   def getOneUrl(): String = { dbUrl+ "/_all_docs?limit=1&include_docs=true"}
   def getOneUrlExcludeDDoc1(): String = { dbUrl+ "/_all_docs?endkey=%22_design/%22&limit=1&include_docs=true"}
   def getOneUrlExcludeDDoc2(): String = { dbUrl+ "/_all_docs?startkey=%22_design0/%22&limit=1&include_docs=true"}
+
+  def getAllDocsUrl(limit: Int): String = {
+    if (limit == JsonStoreConfigManager.SCHEMA_FOR_ALL_DOCS_NUM) {
+      dbUrl + "/_all_docs?include_docs=true"
+    } else {
+      dbUrl + "/_all_docs?limit=" + limit + "&include_docs=true"
+    }
+  }
     
   def getRangeUrl(field: String = null, start: Any = null, 
       startInclusive:Boolean = false, end:Any =null, 

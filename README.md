@@ -173,7 +173,8 @@ jsonstore.rdd.maxInPartition|-1|the max rows in a partition. -1 means unlimited
 jsonstore.rdd.minInPartition|10|the min rows in a partition.
 jsonstore.rdd.requestTimeout|100000| the request timeout in milli-second
 jsonstore.rdd.concurrentSave|-1| the parallel saving size. -1 means unlimited
-jsonstore.rdd.bulkSize|1| the bulk save size. 
+jsonstore.rdd.bulkSize|1| the bulk save size
+jsonstore.rdd.schemaSampleSize|1| the sample size for RDD schema discovery. -1 means unlimited
 
 Default values are defined in [here](cloudant-spark-sql/src/main/resources/application.conf)
 
@@ -186,8 +187,63 @@ Name | Default | Meaning
 database||cloudant database name
 index||cloudant search index w/o the database name.only used for load.
 path||cloudant: as database name if database is not present
+schemaSampleSize|1| the sample size used to discover the schema for this temp table. -1 scans all documents
 
 ## Troubleshooting
+
+### Schema variance
+
+If your database contains documents that don't all match exactly one JSON schema, it is possible that Spark functions break with a 
+stack trace similar to this:
+
+````
+   df.show()
+	org.apache.spark.SparkException: Job aborted due to stage failure: Task 0 in stage 8.0 failed 1 times, most recent failure: Lost task 0.0 in stage 8.0 (TID 28, localhost): java.lang.ArrayIndexOutOfBoundsException: 14
+	at org.apache.spark.sql.catalyst.CatalystTypeConverters$.convertRowWithConverters(CatalystTypeConverters.scala:348)
+````
+
+This error indicates that a field has been found in a document but it is not present in the RDD. Given that the RDD is by default constructed based on the data of the first document only, this error is going to happen in situations where:
+ - the first document was missing an attribute
+ - the first document was using an attribute but with a NULL value
+ - the first document was using an attribute but with a value of a different type
+
+
+ To resolve this situation we introduced the **schemaSampleSize** option listed above. That option can be used in one of two places:
+ 
+ 1) as a global setting for the Spark Context (applies to all RDDs created within that context)
+
+ 2) as a local setting for the specific RDD. (A local setting precedes a global setting)
+
+ To add the global settting directly to your Spark Context use:
+
+ ```
+conf = SparkConf().setAppName("Multiple schema test")
+
+conf.set("cloudant.host","<ACCOUNT>.cloudant.com")
+conf.set("cloudant.username", "<USERNAME>")
+conf.set("cloudant.password","<PASSWORD>")
+conf.set("jsonstore.rdd.schemaSampleSize", -1)
+
+sc = SparkContext(conf=conf)
+sqlContext = SQLContext(sc)
+```
+
+For a local setting applied to a single RDD only, use:
+
+```
+sqlContext.sql("CREATE TEMPORARY TABLE schema-test USING com.cloudant.spark.CloudantRP OPTIONS ( schemaSampleSize '10',database 'schema-test')")
+schemaTestTable = sqlContext.sql("SELECT * FROM schema-test")
+```
+
+Acceptable values for either setting are:
+
+-1 - scan all documents in the database (be careful! This can cause the Spark job to become very expensive!)
+
+1 - scan only the first document in the database (the default)
+
+N - scan an arbitrary number of documents in the database (if N is greater than the number of documents in the database, we will apply -1)
+
+0 or any non-integer values are not permitted and will result in an error.
 
 ### Unicode support
 
@@ -215,9 +271,7 @@ See [https://issues.apache.org/jira/browse/SPARK-11772](https://issues.apache.or
 	HttpClientConnection: Aggregated response entity greater than configured limit of 1048576 bytes,closing connection
 	java.lang.RuntimeException: sendReceive doesn't support chunked response
 
-* TableScan in cases hits IndexOutOfRangeException 
-
-* Schema is calculated on the first document w/o any predicate push down. Need a better approach
+* TableScan in cases hits IndexOutOfRangeException
 
 * Cloudant search index query does not support "paging" through skip and limit.
 		
