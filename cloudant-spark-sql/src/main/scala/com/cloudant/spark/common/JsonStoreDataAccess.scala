@@ -68,6 +68,24 @@ class JsonStoreDataAccess (config: CloudantConfig)  {
     }
   }
 
+  def getMany(limit: Int)(implicit columns: Array[String] = null) = {
+    if(limit == 0){
+      throw new RuntimeException("Database " + config.getDbname() +
+        " schema sample size is 0!")
+    }
+    if(limit < -1){
+      throw new RuntimeException("Database " + config.getDbname() +
+        " schema sample size is " + limit + "!")
+    }
+    var r = this.getQueryResult[Seq[String]](config.getAllDocsUrl(limit), processAll)
+    if (r.size == 0) {
+      throw new RuntimeException("Database " + config.getDbname() +
+        " doesn't have any non-design documents!")
+    }else {
+      r
+    }
+  }
+
   def getAll[T](url: String)
       (implicit columns: Array[String] = null,
       attrToFilters: Map[String, Array[Filter]] =null) = {

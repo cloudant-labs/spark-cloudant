@@ -32,12 +32,12 @@ import com.cloudant.spark.common._
 /**
  * @author yanglei
  */
-case class CloudantPartitionedPrunedFilteredScan (dbName: String, indexName: String = null)
+case class CloudantPartitionedPrunedFilteredScan (dbName: String, indexName: String = null, schemaSampleSize: String = null)
                       (@transient val sqlContext: SQLContext) 
   extends BaseRelation with PrunedFilteredScan 
 {
   lazy val config: CloudantConfig = {
-    JsonStoreConfigManager.getConfig(sqlContext, dbName, indexName).asInstanceOf[CloudantConfig]
+    JsonStoreConfigManager.getConfig(sqlContext, dbName, indexName, schemaSampleSize).asInstanceOf[CloudantConfig]
   }
   
   @transient lazy val dataAccess = {
@@ -45,7 +45,7 @@ case class CloudantPartitionedPrunedFilteredScan (dbName: String, indexName: Str
   }
   
   val schema: StructType = {
-      val aRDD = sqlContext.sparkContext.parallelize(dataAccess.getOne())
+      val aRDD = sqlContext.sparkContext.parallelize(dataAccess.getMany(config.getSchemaSampleSize()))
       sqlContext.read.json(aRDD).schema
   }
 
@@ -77,7 +77,7 @@ class CloudantPartitionedPrunedFilteredRP extends RelationProvider {
   def createRelation(sqlContext: SQLContext, parameters: Map[String, String]) = {
     
     CloudantPartitionedPrunedFilteredScan(
-      parameters("database"), parameters.getOrElse("index",null))(sqlContext)
+      parameters("database"), parameters.getOrElse("index",null), parameters.getOrElse(JsonStoreConfigManager.PARAM_SCHEMA_SAMPLE_SIZE_CONFIG, null))(sqlContext)
   }
   
 }

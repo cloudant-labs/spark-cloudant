@@ -86,7 +86,7 @@ class DefaultSource extends RelationProvider with CreatableRelationProvider with
         if (inSchema!=null) inSchema
         else{
             val dataAccess = new JsonStoreDataAccess(config)
-            val aRDD = sqlContext.sparkContext.parallelize(dataAccess.getOne())
+            val aRDD = sqlContext.sparkContext.parallelize(dataAccess.getMany(config.getSchemaSampleSize()))
             sqlContext.read.json(aRDD).schema
         }
       }
