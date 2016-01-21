@@ -28,6 +28,17 @@ sc = SparkContext(conf=conf)
 sqlContext = SQLContext(sc)
 
 df = sqlContext.load("n_airportcodemapping", "com.cloudant.spark")
+
+# In case of doing multiple operations on a dataframe (select, filter etc.)
+# you should persist the dataframe.
+# Othewise, every operation on the dataframe will load the same data from Cloudant again.
+# Persisting will also speed up computation.
+df.cache() # persisting in memory
+# alternatively for large dbs to persist in memory & disk:
+# from pyspark import StorageLevel
+# df.persist(storageLevel = StorageLevel(True, True, False, True, 1)) 
+
+
 df.printSchema()
 
 df.filter(df.airportName >= 'Moscow').select("_id",'airportName').show()

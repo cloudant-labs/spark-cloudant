@@ -19,6 +19,7 @@ import org.apache.spark.SparkContext
 import org.apache.spark.SparkContext._
 import org.apache.spark.SparkConf
 import org.apache.spark.sql.SQLContext
+import org.apache.spark.storage.StorageLevel
 
 /**
  * @author yanglei
@@ -38,6 +39,14 @@ object CloudantDF{
         
 
         val df = sqlContext.read.format("com.cloudant.spark").load("n_airportcodemapping")
+        // In case of doing multiple operations on a dataframe (select, filter etc.)
+        // you should persist the dataframe.
+        // Othewise, every operation on the dataframe will load the same data from Cloudant again.
+        // Persisting will also speed up computation.
+        df.cache() //persisting in memory
+        //  alternatively for large dbs to persist in memory & disk:
+        // df.persist(StorageLevel.MEMORY_AND_DISK)
+        
         df.printSchema()
 
         df.filter(df("airportName") >= "Moscow").select("_id","airportName").show()
