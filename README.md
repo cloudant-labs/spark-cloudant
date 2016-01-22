@@ -41,105 +41,135 @@ Spark Version | Release # | Binary Location
 ### Using SQL In Python 
 	
 [python code](examples/python/CloudantApp.py)
-	
-	conf = SparkConf().setAppName("Cloudant Spark SQL External Datasource in Python")
-		
-	# define cloudant related configuration
-	conf.set("cloudant.host","ACCOUNT.cloudant.com")
-	conf.set("cloudant.username", "USERNAME")
-	conf.set("cloudant.password","PASSWORD")
-	
-	# create Spark context and SQL context
-	sc = SparkContext(conf=conf)
-	sqlContext = SQLContext(sc)
-	
-	# create temp table
-	sqlContext.sql("CREATE TEMPORARY TABLE airportTable USING com.cloudant.spark.CloudantRP OPTIONS ( database 'airportcodemapping')")
-	      
-	# create Schema RDD
-	data = sqlContext.sql("SELECT airportCode, airportName FROM airportTable WHERE airportCode >= 'CAA' ORDER BY airportCode")
-		
-	# print schema
-	data.printSchema()
-	
-	# print data
-	for code in data.collect():
-		print code.airportCode
 
+```python
+conf = SparkConf().setAppName("Cloudant Spark SQL External Datasource in Python")
+	
+# define cloudant related configuration
+conf.set("cloudant.host","ACCOUNT.cloudant.com")
+conf.set("cloudant.username", "USERNAME")
+conf.set("cloudant.password","PASSWORD")
+	
+# create Spark context and SQL context
+sc = SparkContext(conf=conf)
+sqlContext = SQLContext(sc)
+	
+# create temp table
+sqlContext.sql("CREATE TEMPORARY TABLE airportTable USING com.cloudant.spark.CloudantRP OPTIONS ( database 'airportcodemapping')")
+      
+# create Schema RDD
+data = sqlContext.sql("SELECT airportCode, airportName FROM airportTable WHERE airportCode >= 'CAA' ORDER BY airportCode")
+	
+# print schema
+data.printSchema()
+	
+# print data
+for code in data.collect():
+	print code.airportCode
+		
+```	
 
 ### Using SQL In Scala 
 
 [Scala code](examples/scala/src/main/scala/mytest/spark/CloudantApp.scala)
-	
-	val conf = new SparkConf().setAppName("Cloudant Spark SQL External Datasource in Scala")
-		
-	// define cloudant related configuration	
-    conf.set("cloudant.host","ACCOUNT.cloudant.com")
-    conf.set("cloudant.username", "USERNAME")
-    conf.set("cloudant.password","PASSWORD")
-        
-    // create Spark context and SQL context
-    val sc = new SparkContext(conf)
-    val sqlContext = new SQLContext(sc)
-    import sqlContext._
-        
-    // Create a temp table 
-    sqlContext.sql("CREATE TEMPORARY TABLE airportTable USING com.cloudant.spark.CloudantRP OPTIONS ( database 'airportcodemapping'")
-      
-    // create Schema RDD
-	val data = sqlContext.sql("SELECT airportCode, airportName FROM airportTable WHERE airportCode >= 'CAA' ORDER BY airportCode"")
-	    
-	// print schema
-	data.printSchema()
 
-	// print data
-	data.map(t => "airportCode: " + t(0) +"airportName: " + t(1)).collect().foreach(println) 
+```scala
+val conf = new SparkConf().setAppName("Cloudant Spark SQL External Datasource in Scala")
+	
+// define cloudant related configuration	
+conf.set("cloudant.host","ACCOUNT.cloudant.com")
+conf.set("cloudant.username", "USERNAME")
+conf.set("cloudant.password","PASSWORD")
+    
+// create Spark context and SQL context
+val sc = new SparkContext(conf)
+val sqlContext = new SQLContext(sc)
+import sqlContext._
+    
+// Create a temp table 
+sqlContext.sql("CREATE TEMPORARY TABLE airportTable USING com.cloudant.spark.CloudantRP OPTIONS ( database 'airportcodemapping'")
+  
+// create Schema RDD
+val data = sqlContext.sql("SELECT airportCode, airportName FROM airportTable WHERE airportCode >= 'CAA' ORDER BY airportCode"")
+    
+// print schema
+data.printSchema()
+
+// print data
+data.map(t => "airportCode: " + t(0) +"airportName: " + t(1)).collect().foreach(println) 
+	
+```	
 
 
 ### Using DataFrame In Python 
 
 [python code](examples/python/CloudantDF.py). 
+
+```python	    
+conf = SparkConf().setAppName("Cloudant Spark SQL External Datasource in Python")
+# define coudant related configuration
+conf.set("cloudant.host","ACCOUNT.cloudant.com")
+conf.set("cloudant.username", "USERNAME")
+conf.set("cloudant.password","PASSWORD")
+	
+sc = SparkContext(conf=conf)
+sqlContext = SQLContext(sc)
+	
+df = sqlContext.load("airportcodemapping", "com.cloudant.spark")
+
+# cache RDD in memory
+df.cache()
+# to cache RDD on disk:
+# df.persist(storageLevel = StorageLevel(True, True, False, True, 1))
+
+df.printSchema()
+	
+df.filter(df.airportCode >= 'CAA').select("airportCode",'airportName').save("airportcodemapping_df", "com.cloudant.spark")	
 	    
-	conf = SparkConf().setAppName("Cloudant Spark SQL External Datasource in Python")
-	# define coudant related configuration
-	conf.set("cloudant.host","ACCOUNT.cloudant.com")
-	conf.set("cloudant.username", "USERNAME")
-	conf.set("cloudant.password","PASSWORD")
+```
 	
-	sc = SparkContext(conf=conf)
-	sqlContext = SQLContext(sc)
-	
-	df = sqlContext.load("airportcodemapping", "com.cloudant.spark")
-	df.printSchema()
-	
-	df.filter(df.airportCode >= 'CAA').select("airportCode",'airportName').save("airportcodemapping_df", "com.cloudant.spark")	    
+In case of doing multiple operations on a dataframe (select, filter etc.),
+you should persist a dataframe. Othewise, every operation on a dataframe will load the same data from Cloudant again.
+Persisting will also speed up computation. This statement will persist an RDD in memory: `df.cache()`.  Alternatively for large dbs to persist in memory & disk, use: 
+
+```python
+from pyspark import StorageLevel
+df.persist(storageLevel = StorageLevel(True, True, False, True, 1))
+```	
 	
 [Sample code on using DataFrame option to define cloudant configuration](examples/python/CloudantDFOption.py)
 	
 ### Using DataFrame In Scala 
 
 [Scala code](examples/scala/src/main/scala/mytest/spark/CloudantDF.scala)
+
+```	scala
+val conf = new SparkConf().setAppName("Cloudant Spark SQL External Datasource in Scala")
 	
-	val conf = new SparkConf().setAppName("Cloudant Spark SQL External Datasource in Scala")
-		
-	// define cloudant related configuration	
-    conf.set("cloudant.host","ACCOUNT.cloudant.com")
-    conf.set("cloudant.username", "USERNAME")
-    conf.set("cloudant.password","PASSWORD")
-        
-    // create Spark context and SQL context
-    val sc = new SparkContext(conf)
-    val sqlContext = new SQLContext(sc)
-    import sqlContext._
-        
-     val df = sqlContext.read.format("com.cloudant.spark").load("airportcodemapping")
-     df.printSchema()
+// define cloudant related configuration	
+conf.set("cloudant.host","ACCOUNT.cloudant.com")
+conf.set("cloudant.username", "USERNAME")
+conf.set("cloudant.password","PASSWORD")
+    
+// create Spark context and SQL context
+val sc = new SparkContext(conf)
+val sqlContext = new SQLContext(sc)
+import sqlContext._
+    
+val df = sqlContext.read.format("com.cloudant.spark").load("airportcodemapping")
 
-     df.filter(df("airportCode") >= "CAA").select("airportCode","airportName").show()
-     df.filter(df("airportCode") >= "CAA").select("airportCode","airportName").write.format("com.cloudant.spark").save("airportcodemapping_df")
-     
+// cache RDD in memory
+df.cache()
+// to cache RDD on disk:
+// df.persist(StorageLevel.MEMORY_AND_DISK) 
 
-[Sample code on using DataFrame option to define cloudant configuration](examples/scala/src/main/scala/mytest/spark/CloudantDFOption.scala)
+df.printSchema()
+df.filter(df("airportCode") >= "CAA").select("airportCode","airportName").show()
+df.filter(df("airportCode") >= "CAA").select("airportCode","airportName").write.format("com.cloudant.spark").save("airportcodemapping_df")
+
+```	
+    
+ [Sample code on using DataFrame option to define cloudant configuration](examples/scala/src/main/scala/mytest/spark/CloudantDFOption.scala)
 
 	
 ## Job Submission

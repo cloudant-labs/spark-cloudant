@@ -31,6 +31,16 @@ cloudant_username = "USERNAME"
 cloudant_password = "PASSWORD"
 
 df = sqlContext.read.format("com.cloudant.spark").option("cloudant.host",cloudant_host).option("cloudant.username",cloudant_username).option("cloudant.password",cloudant_password).load("n_airportcodemapping")
+
+# In case of doing multiple operations on a dataframe (select, filter etc.)
+# you should persist the dataframe.
+# Othewise, every operation on the dataframe will load the same data from Cloudant again.
+# Persisting will also speed up computation.
+df.cache() # persisting in memory
+# alternatively for large dbs to persist in memory & disk:
+# from pyspark import StorageLevel
+# df.persist(storageLevel = StorageLevel(True, True, False, True, 1)) 
+
 df.printSchema()
 
 df.filter(df._id >= 'CAA').select("_id",'airportName').show()

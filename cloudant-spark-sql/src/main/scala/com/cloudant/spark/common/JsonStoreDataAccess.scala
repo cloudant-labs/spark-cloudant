@@ -164,7 +164,7 @@ class JsonStoreDataAccess (config: CloudantConfig)  {
   private def getQueryResult[T](url: String, postProcessor:(String) => T)
       (implicit columns: Array[String] = null, 
       attrToFilters: Map[String, Array[Filter]] =null) : T={
-    logger.debug("Cloudant query: "+ url)
+    logger.info("Loading data from Cloudant using query: "+ url)
     implicit val ( system, existing) = getSystem()
 
     val request: HttpRequest = if (validCredentials != null) {
