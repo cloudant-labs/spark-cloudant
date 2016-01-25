@@ -1,0 +1,68 @@
+{
+    "docs":[
+        {  
+            "_id": "1_1",
+            "password": "password",
+            "status": "GOLD",
+            "total_miles": {"total_miles":10000},
+            "miles_ytd": {"miles_ytd":1000}
+        },
+        {  
+            "_id": "1_2",
+            "password": "password",
+            "status": "GOLD",
+            "total_miles": {"total_miles":10000},
+            "miles_ytd": {"miles_ytd":1000}
+        },
+        {  
+            "_id": "1_3",
+            "total_miles": {"total_miles":10000},
+            "miles_ytd": {"miles_ytd":1000}
+        },
+        {  
+            "_id": "1_4",
+            "total_miles": {"total_miles":10000},
+            "miles_ytd": {"miles_ytd":1000},
+            "address": {
+                "streetAddress1": "123 Main St.",
+                "city": "Anytown",
+                "stateProvince": "NC",
+                "country": "USA",
+                "postalCode": "27617"
+            }
+        },
+        {  
+            "_id": "1_5",
+            "password": "password",
+            "status": "GOLD",
+            "total_miles": {"total_miles":10000},
+            "miles_ytd": {"miles_ytd":1000},
+            "phoneNumber": "919-123-4567"
+        },
+        {  
+            "_id": "1_6",
+            "total_miles": {"total_miles":10000},
+            "miles_ytd": {"miles_ytd":1000}
+        },
+        { 
+            "_id": "1_7",
+            "password": "password",
+            "status": "GOLD",
+            "total_miles": {"total_miles":10000},
+            "miles_ytd": {"miles_ytd":1000}
+        },
+        {
+            "_id": "1_8",
+            "name":{
+                "firstname":"Jim",
+                "lastname":"Yal"
+            },
+            "age":20,
+            "total_miles":true
+        },
+        {
+            "_id": "zzzzzzzzzzzzzz",
+            "miles_ytd":true
+        }
+    ]
+}
