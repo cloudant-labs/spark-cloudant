@@ -73,14 +73,15 @@ import com.cloudant.spark.CloudantConfig
       val intSchemaSampleSize = calculateSchemaSampleSize(varSchemaSampleSize);
 
       println(s"Use dbName=$dbName, indexName=$indexName, $PARTITION_CONFIG=$total, $MAX_IN_PARTITION_CONFIG=$max, $MIN_IN_PARTITION_CONFIG=$min, $REQUEST_TIMEOUT_CONFIG=$requestTimeout,$CONCURRENT_SAVE_CONFIG=$concurrentSave,$BULK_SIZE_CONFIG=$bulkSize,$SCHEMA_SAMPLE_SIZE_CONFIG=$intSchemaSampleSize")
+
+      val host = if (sparkConf.contains(CLOUDANT_HOST_CONFIG)) sparkConf.get(CLOUDANT_HOST_CONFIG) else null
+      val user = if (sparkConf.contains(CLOUDANT_USERNAME_CONFIG)) sparkConf.get(CLOUDANT_USERNAME_CONFIG) else null
+      val passwd = if (sparkConf.contains(CLOUDANT_PASSWORD_CONFIG)) sparkConf.get(CLOUDANT_PASSWORD_CONFIG) else null
       
-      if (sparkConf.contains(CLOUDANT_HOST_CONFIG))
-      {
-        val host = sparkConf.get(CLOUDANT_HOST_CONFIG)
-        val user = sparkConf.get(CLOUDANT_USERNAME_CONFIG)
-        val passwd = sparkConf.get(CLOUDANT_PASSWORD_CONFIG)
-        
+      if (host != null) {
         return new CloudantConfig(host,  dbName, indexName, intSchemaSampleSize)(user, passwd, total, max, min,requestTimeout,concurrentSave, bulkSize)
+      }else{
+        throw new RuntimeException("Spark configuration is invalid! Please make sure to supply required values for cloudant.host.")
       }
       null
   }
@@ -115,16 +116,18 @@ import com.cloudant.spark.CloudantConfig
       val intSchemaSampleSize = calculateSchemaSampleSize(schemaSampleSize);
       
       println(s"Use dbName=$dbName, indexName=$indexName, $PARTITION_CONFIG=$total, $MAX_IN_PARTITION_CONFIG=$max, $MIN_IN_PARTITION_CONFIG=$min, $REQUEST_TIMEOUT_CONFIG=$requestTimeout,$CONCURRENT_SAVE_CONFIG=$concurrentSave,$BULK_SIZE_CONFIG=$bulkSize,$SCHEMA_SAMPLE_SIZE_CONFIG=$intSchemaSampleSize")
-      
 
-      if (sparkConf.contains(CLOUDANT_HOST_CONFIG) || parameters.contains(CLOUDANT_HOST_CONFIG) ) 
-      {
-        val host = parameters.getOrElse(CLOUDANT_HOST_CONFIG,sparkConf.get(CLOUDANT_HOST_CONFIG))
-        val user = parameters.getOrElse(CLOUDANT_USERNAME_CONFIG,sparkConf.get(CLOUDANT_USERNAME_CONFIG))
-        val passwd = parameters.getOrElse(CLOUDANT_PASSWORD_CONFIG,sparkConf.get(CLOUDANT_PASSWORD_CONFIG))
-        return new CloudantConfig(host,  dbName, indexName, intSchemaSampleSize)(user, passwd, total, max, min,requestTimeout,concurrentSave,bulkSize)
+      val hostParam = parameters.getOrElse(CLOUDANT_HOST_CONFIG, null)
+      val userParam = parameters.getOrElse(CLOUDANT_USERNAME_CONFIG, null)
+      val passwdParam = parameters.getOrElse(CLOUDANT_PASSWORD_CONFIG, null)
+      val host = if (hostParam == null) sparkConf.get(CLOUDANT_HOST_CONFIG, null) else hostParam
+      val user = if (userParam == null) sparkConf.get(CLOUDANT_USERNAME_CONFIG, null) else userParam
+      val passwd = if (passwdParam == null) sparkConf.get(CLOUDANT_PASSWORD_CONFIG, null) else passwdParam
+      if (host != null) {
+        return new CloudantConfig(host, dbName, indexName, intSchemaSampleSize)(user, passwd, total, max, min, requestTimeout, concurrentSave, bulkSize)
+      } else {
+        throw new RuntimeException("Spark configuration is invalid! Please make sure to supply required values for cloudant.host.")
       }
-      null
   }
 
 }
