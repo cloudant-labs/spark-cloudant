@@ -79,6 +79,9 @@ class JsonStoreDataAccess (config: CloudantConfig)  {
     }
     var r = this.getQueryResult[Seq[String]](config.getAllDocsUrl(limit), processAll)
     if (r.size == 0) {
+      r = this.getQueryResult[Seq[String]](config.getAllDocsUrlExcludeDDoc(limit), processAll)
+    }
+    if (r.size == 0) {
       throw new RuntimeException("Database " + config.getDbname() +
         " doesn't have any non-design documents!")
     }else {

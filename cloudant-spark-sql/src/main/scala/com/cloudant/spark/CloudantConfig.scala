@@ -67,6 +67,10 @@ as the filter today does not tell how to link the filters out And v.s. Or
   def getOneUrlExcludeDDoc1(): String = { dbUrl+ "/_all_docs?endkey=%22_design/%22&limit=1&include_docs=true"}
   def getOneUrlExcludeDDoc2(): String = { dbUrl+ "/_all_docs?startkey=%22_design0/%22&limit=1&include_docs=true"}
 
+  def getAllDocsUrlExcludeDDoc(limit: Int): String = {
+    dbUrl + "/_all_docs?startkey=%22_design0/%22&limit=" + limit + "&include_docs=true"
+  }
+  
   def getAllDocsUrl(limit: Int): String = {
     if (limit == JsonStoreConfigManager.SCHEMA_FOR_ALL_DOCS_NUM) {
       dbUrl + "/_all_docs?include_docs=true"
