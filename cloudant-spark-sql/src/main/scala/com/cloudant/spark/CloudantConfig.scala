@@ -16,6 +16,7 @@
 package com.cloudant.spark
 
 import play.api.libs.json.JsValue
+import play.api.libs.json.JsArray
 import play.api.libs.json.Json
 import play.api.libs.json.JsUndefined
 import java.net.URLEncoder
@@ -168,7 +169,7 @@ as the filter today does not tell how to link the filters out And v.s. Or
   }
     
   def getRows(result: JsValue): Seq[JsValue] = {
-    result \\ "doc"
+    ((result \ "rows").asInstanceOf[JsArray]).value.map(row => row \ "doc")
   }
     
   def getBulkPostUrl(): String = {
