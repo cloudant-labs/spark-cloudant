@@ -37,6 +37,28 @@ A utility is included to create test data to the cloudant database.
   ```
      python -m helpers.dataload -load 200
   ```
+- Run `python -m helpers.schema -addDocs` to add docs for schema test
+
+  _Note_: To load custom documents, put them in folder `test/resources/<database>.json` where `<database>` represents the database to load the document into. An invalid database name will be ignored. Documents are supplied in a `docs` array for bulk loading, e.g.:
+
+  `test/resources/n_customer.json`
+  ```
+  {
+      "docs":[
+          {
+              "_id": "1",
+              "name":{
+                  "firstname":"Jim",
+                  "lastname":"Yal"
+              },
+              "age":20,
+              "total_miles":true
+          },
+       ...
+      ]
+  }
+  ```
+
 
 ### Run Tests:
 - Go to spark-cloudant/test

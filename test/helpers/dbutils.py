@@ -134,6 +134,18 @@ class CloudantDbUtils:
 		
 	def _get_index_func_filepath(self, db_name):
 		return os.path.join(os.path.dirname(__file__), "db-index-func", db_name + ".txt")
+
+	def bulk_insert(self, db_name, bulk_docs):
+		url = "https://{}/{}/_bulk_docs".format(
+			self.cloudanthost, db_name)
+		response = self.r.post(url, data = bulk_docs)
+		return True if response.status_code == 201 else False
+
+	def check_if_doc_exists(self, db_name, doc_id):
+		url = "https://{}/{}/{}".format(
+			self.cloudanthost, db_name, doc_id)
+		response = self.r.get(url)
+		return response.status_code == 200
 		
 		
 	
