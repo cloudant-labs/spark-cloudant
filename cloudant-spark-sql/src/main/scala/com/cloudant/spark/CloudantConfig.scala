@@ -28,13 +28,13 @@ import play.api.libs.json.JsNumber
 Only allow one field pushdown now
 as the filter today does not tell how to link the filters out And v.s. Or
 */
-@serializable class CloudantConfig(val host: String, val dbName: String,
+@serializable class CloudantConfig(val protocol:String, val host: String, val dbName: String,
     val indexName: String = null, val schemaSampleSize: Int = JsonStoreConfigManager.defaultSchemaSampleSize)
     (implicit val username: String, val password: String,
      val partitions:Int, val maxInPartition: Int, val minInPartition:Int,
      val requestTimeout:Long,val concurrentSave:Int, val bulkSize: Int) {
   
-  private lazy val dbUrl = {"https://"+ host+"/"+dbName}
+  private lazy val dbUrl = {protocol + "://"+ host+"/"+dbName}
 
   val pkField = "_id"
   val defaultIndex = "_all_docs" // "_changes" does not work for partition

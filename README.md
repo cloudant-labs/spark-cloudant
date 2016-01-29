@@ -45,7 +45,9 @@ Spark Version | Release # | Binary Location
 ```python
 conf = SparkConf().setAppName("Cloudant Spark SQL External Datasource in Python")
 	
-# define cloudant related configuration
+# define cloudant related configuration:
+# set protocol to http if needed, default value=https
+# conf.set("cloudant.protocol","http")
 conf.set("cloudant.host","ACCOUNT.cloudant.com")
 conf.set("cloudant.username", "USERNAME")
 conf.set("cloudant.password","PASSWORD")
@@ -76,7 +78,9 @@ for code in data.collect():
 ```scala
 val conf = new SparkConf().setAppName("Cloudant Spark SQL External Datasource in Scala")
 	
-// define cloudant related configuration	
+// define cloudant related configuration
+// set protocol to http if needed, default value=https
+// conf.set("cloudant.protocol","http")	
 conf.set("cloudant.host","ACCOUNT.cloudant.com")
 conf.set("cloudant.username", "USERNAME")
 conf.set("cloudant.password","PASSWORD")
@@ -196,6 +200,7 @@ Configuration can also be passed on DataFrame using option, which overrides what
 
 Name | Default | Meaning
 --- |:---:| ---
+cloudant.protocol|https|protocol to use to transfer data: http or https
 cloudant.host||cloudant host url
 cloudant.username||cloudant userid
 cloudant.password||cloudant password
