@@ -18,7 +18,9 @@ from pyspark.sql import SQLContext
 from pyspark import SparkContext, SparkConf
 
 conf = SparkConf().setAppName("Cloudant Spark SQL External Datasource in Python")
-# define coudant related configuration
+# define cloudant related configuration:
+# set protocol to http if needed, default value=https
+# conf.set("cloudant.protocol","http")
 conf.set("cloudant.host","ACCOUNT.cloudant.com")
 conf.set("cloudant.username", "USERNAME")
 conf.set("cloudant.password","PASSWORD")

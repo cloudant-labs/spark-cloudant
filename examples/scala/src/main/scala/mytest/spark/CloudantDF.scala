@@ -29,6 +29,8 @@ object CloudantDF{
       def main(args: Array[String]) {
 
         val conf = new SparkConf().setAppName("Cloudant Spark SQL External Datasource with DataFrame")
+        // set protocol to http if needed, default value=https
+        // conf.set("cloudant.protocol","http")
         conf.set("cloudant.host","ACCOUNT.cloudant.com")
         conf.set("cloudant.username", "USERNAME")
         conf.set("cloudant.password","PASSWORD")
