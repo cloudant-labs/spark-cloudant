@@ -27,7 +27,7 @@ import com.cloudant.spark.common._
  * @author yanglei
  */
 
-case class CloudantPrunedFilteredScan (dbName: String, indexName: String, schemaSampleSize: String = null)
+case class CloudantPrunedFilteredScan (dbName: String, indexName: String,  viewName:String, schemaSampleSize: String = null)
                       (@transient val sqlContext: SQLContext) 
   extends BaseRelation with PrunedFilteredScan 
 {
@@ -36,7 +36,7 @@ case class CloudantPrunedFilteredScan (dbName: String, indexName: String, schema
   }
   
   lazy val config: CloudantConfig = {
-    JsonStoreConfigManager.getConfig(sqlContext, dbName, indexName, schemaSampleSize).asInstanceOf[CloudantConfig]
+    JsonStoreConfigManager.getConfig(sqlContext, dbName, indexName, viewName, schemaSampleSize).asInstanceOf[CloudantConfig]
   }
 
   val schema: StructType = {
@@ -68,7 +68,7 @@ class CloudantPrunedFilteredRP extends RelationProvider {
 
   def createRelation(sqlContext: SQLContext, parameters: Map[String, String]) = {
     CloudantPrunedFilteredScan(
-      parameters("database"),parameters.getOrElse("index",null), parameters.getOrElse(JsonStoreConfigManager.PARAM_SCHEMA_SAMPLE_SIZE_CONFIG, null))(sqlContext)
+      parameters("database"),parameters.getOrElse("index",null), parameters.getOrElse("view",null), parameters.getOrElse(JsonStoreConfigManager.PARAM_SCHEMA_SAMPLE_SIZE_CONFIG, null))(sqlContext)
   }
   
 }

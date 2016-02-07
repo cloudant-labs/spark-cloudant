@@ -1,1 +1,9 @@
-{"_id":"_design/view","views":{},"language":"javascript","indexes":{"n_flights":{"analyzer":"standard","index":"function(doc){\n\t    index(\"default\", doc._id);\n    \t    if(doc.flightSegmentId){\n           \tindex(\"flightSegmentId\", doc.flightSegmentId, {\"store\": \"yes\"});\n    \t    }\n    \t    if(doc.scheduledDepartureTime){\n           \tindex(\"scheduledDepartureTime\", doc.scheduledDepartureTime, {\"store\": \"yes\"});\n    \t    }\n}"}}}
+{"_id":"_design/view","views":{     "AA0": {
+              "map": "function (doc) {\n  if ((doc.flightSegmentId !== null)\n  && (doc.flightSegmentId == \"AA0\")) {\n    emit(doc.flightSegmentId,doc.scheduledDepartureTime);\n  }\n}"
+            },
+            "AA1": {
+              "map": "function (doc) {\n  if ((doc.flightSegmentId !== null)\n  && (doc.flightSegmentId == \"AA1\")) {\n    emit(doc.flightSegmentId,doc.scheduledDepartureTime);\n  }\n}"
+            },
+            "AA2": {
+              "map": "function (doc) {\n  if ((doc.flightSegmentId !== null)\n  && (doc.flightSegmentId == \"AA2\")) {\n    emit(doc.flightSegmentId,doc.scheduledDepartureTime);\n  }\n}"
+            }},"language":"javascript","indexes":{"n_flights":{"analyzer":"standard","index":"function(doc){\n\t    index(\"default\", doc._id);\n    \t    if(doc.flightSegmentId){\n           \tindex(\"flightSegmentId\", doc.flightSegmentId, {\"store\": \"yes\"});\n    \t    }\n    \t    if(doc.scheduledDepartureTime){\n           \tindex(\"scheduledDepartureTime\", doc.scheduledDepartureTime, {\"store\": \"yes\"});\n    \t    }\n}"}}}
