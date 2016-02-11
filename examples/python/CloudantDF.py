@@ -58,3 +58,8 @@ df.printSchema()
 
 total = df.filter(df.flightSegmentId >'AA9').select("flightSegmentId", "scheduledDepartureTime").orderBy(df.flightSegmentId).count()
 print "Total", total, "flights from index"
+
+# Loading data from views
+df = sqlContext.load(source="com.cloudant.spark", path="movies-glynn", view="_design/view1/_view/titleyear2")
+df.printSchema()
+df.filter(df.value.year >= 1950).select(df.value.title.alias("title"), df.value.year.alias("year")).show()

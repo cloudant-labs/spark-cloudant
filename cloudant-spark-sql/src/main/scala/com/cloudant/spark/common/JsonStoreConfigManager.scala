@@ -58,7 +58,7 @@ import com.cloudant.spark.CloudantConfig
     }
   }
   
-  def getConfig(context: SQLContext, dbName: String, indexName:String = null, schemaSampleSize: String): CloudantConfig = {
+  def getConfig(context: SQLContext, dbName: String, indexName:String = null, viewName:String = null, schemaSampleSize: String): CloudantConfig = {
       val sparkConf = context.sparkContext.getConf
       implicit val total = sparkConf.getInt(PARTITION_CONFIG,defaultPartitions)
       implicit val max = sparkConf.getInt(MAX_IN_PARTITION_CONFIG,defaultMaxInPartition)
@@ -82,7 +82,7 @@ import com.cloudant.spark.CloudantConfig
       val passwd = if (sparkConf.contains(CLOUDANT_PASSWORD_CONFIG)) sparkConf.get(CLOUDANT_PASSWORD_CONFIG) else null
       
       if (host != null) {
-        return new CloudantConfig(protocol, host,  dbName, indexName, intSchemaSampleSize)(user, passwd, total, max, min,requestTimeout,concurrentSave, bulkSize)
+        return new CloudantConfig(protocol, host,  dbName, indexName, viewName, intSchemaSampleSize)(user, passwd, total, max, min,requestTimeout,concurrentSave, bulkSize)
       }else{
         throw new RuntimeException("Spark configuration is invalid! Please make sure to supply required values for cloudant.host.")
       }
@@ -110,6 +110,7 @@ import com.cloudant.spark.CloudantConfig
 
       val dbName = parameters.getOrElse("database", parameters.getOrElse("path",null))
       val indexName = parameters.getOrElse("index",null)
+      val viewName = parameters.getOrElse("view", null)
 
       var schemaSampleSize = parameters.getOrElse(PARAM_SCHEMA_SAMPLE_SIZE_CONFIG, null)
       if (schemaSampleSize == null && sparkConf.contains(SCHEMA_SAMPLE_SIZE_CONFIG) ) {
@@ -118,7 +119,7 @@ import com.cloudant.spark.CloudantConfig
       
       val intSchemaSampleSize = calculateSchemaSampleSize(schemaSampleSize);
       
-      println(s"Use dbName=$dbName, indexName=$indexName, $PARTITION_CONFIG=$total, $MAX_IN_PARTITION_CONFIG=$max, $MIN_IN_PARTITION_CONFIG=$min, $REQUEST_TIMEOUT_CONFIG=$requestTimeout,$CONCURRENT_SAVE_CONFIG=$concurrentSave,$BULK_SIZE_CONFIG=$bulkSize,$SCHEMA_SAMPLE_SIZE_CONFIG=$intSchemaSampleSize")
+      println(s"Use dbName=$dbName, indexName=$indexName, viewName=$viewName, $PARTITION_CONFIG=$total, $MAX_IN_PARTITION_CONFIG=$max, $MIN_IN_PARTITION_CONFIG=$min, $REQUEST_TIMEOUT_CONFIG=$requestTimeout,$CONCURRENT_SAVE_CONFIG=$concurrentSave,$BULK_SIZE_CONFIG=$bulkSize,$SCHEMA_SAMPLE_SIZE_CONFIG=$intSchemaSampleSize")
 
       val protocolParam = parameters.getOrElse(CLOUDANT_PROTOCOL_CONFIG, null)
       val hostParam = parameters.getOrElse(CLOUDANT_HOST_CONFIG, null)
@@ -129,7 +130,7 @@ import com.cloudant.spark.CloudantConfig
       val user = if (userParam == null) sparkConf.get(CLOUDANT_USERNAME_CONFIG, null) else userParam
       val passwd = if (passwdParam == null) sparkConf.get(CLOUDANT_PASSWORD_CONFIG, null) else passwdParam
       if (host != null) {
-        return new CloudantConfig(protocol, host, dbName, indexName, intSchemaSampleSize)(user, passwd, total, max, min, requestTimeout, concurrentSave, bulkSize)
+        return new CloudantConfig(protocol, host, dbName, indexName, viewName, intSchemaSampleSize)(user, passwd, total, max, min, requestTimeout, concurrentSave, bulkSize)
       } else {
         throw new RuntimeException("Spark configuration is invalid! Please make sure to supply required values for cloudant.host.")
       }

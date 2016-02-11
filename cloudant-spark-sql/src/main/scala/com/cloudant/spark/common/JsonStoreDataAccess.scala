@@ -122,8 +122,10 @@ class JsonStoreDataAccess (config: CloudantConfig)  {
     logger.debug(s"processAll columns:$columns, attrToFilters:$attrToFilters")
     val jsonResult = Json.parse(result)
     var rows = config.getRows(jsonResult)
-    //filter design docs
-    rows = rows.filter(r => FilterDDocs.filter(r))
+    if (config.viewName == null) {
+      //filter design docs
+      rows = rows.filter(r => FilterDDocs.filter(r))
+    }
     rows.map(r => convert(r))
   }
       
@@ -167,7 +169,7 @@ class JsonStoreDataAccess (config: CloudantConfig)  {
   private def getQueryResult[T](url: String, postProcessor:(String) => T)
       (implicit columns: Array[String] = null, 
       attrToFilters: Map[String, Array[Filter]] =null) : T={
-    logger.info("Loading data from Cloudant using query: "+ url)
+    logger.warning("Loading data from Cloudant using query: "+ url)
     implicit val ( system, existing) = getSystem()
 
     val request: HttpRequest = if (validCredentials != null) {

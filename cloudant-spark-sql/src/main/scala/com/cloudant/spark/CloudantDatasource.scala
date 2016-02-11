@@ -33,7 +33,7 @@ case class CloudantTableScan (dbName: String, schemaSampleSize: String = null)
       new JsonStoreDataAccess(config) }
   
   lazy val config: CloudantConfig = {
-    JsonStoreConfigManager.getConfig(sqlContext, dbName, null, schemaSampleSize).asInstanceOf[CloudantConfig]
+    JsonStoreConfigManager.getConfig(sqlContext, dbName, null, null, schemaSampleSize).asInstanceOf[CloudantConfig]
   }
 
   val schema: StructType = {

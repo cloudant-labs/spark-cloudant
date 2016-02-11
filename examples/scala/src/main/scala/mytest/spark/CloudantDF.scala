@@ -21,6 +21,7 @@ import org.apache.spark.SparkConf
 import org.apache.spark.sql.SQLContext
 import org.apache.spark.storage.StorageLevel
 
+
 /**
  * @author yanglei
  */
@@ -62,5 +63,11 @@ object CloudantDF{
         val df3 = sqlContext.read.format("com.cloudant.spark").option("index", "_design/view/_search/n_flights").load("n_flight")
         val total2 = df3.filter(df3("flightSegmentId") >"AA9").select("flightSegmentId", "scheduledDepartureTime").orderBy(df3("flightSegmentId")).count()
         println(s"Total $total2 flights from index")
+
+        // Loading data from views
+        val df4 = sqlContext.read.format("com.cloudant.spark").option("view", "_design/view1/_view/titleyear2").load("movies-glynn")
+        df4.printSchema()
+        import sqlContext.implicits._
+        df4.filter($"value.year" >= 1930).select($"value.title", $"value.year").show()
 }
 }

@@ -29,10 +29,11 @@ Only allow one field pushdown now
 as the filter today does not tell how to link the filters out And v.s. Or
 */
 @serializable class CloudantConfig(val protocol:String, val host: String, val dbName: String,
-    val indexName: String = null, val schemaSampleSize: Int = JsonStoreConfigManager.defaultSchemaSampleSize)
+    val indexName: String = null, val viewName:String = null,
+    val schemaSampleSize: Int = JsonStoreConfigManager.defaultSchemaSampleSize)
     (implicit val username: String, val password: String,
-     val partitions:Int, val maxInPartition: Int, val minInPartition:Int,
-     val requestTimeout:Long,val concurrentSave:Int, val bulkSize: Int) {
+    val partitions:Int, val maxInPartition: Int, val minInPartition:Int,
+    val requestTimeout:Long,val concurrentSave:Int, val bulkSize: Int) {
   
   private lazy val dbUrl = {protocol + "://"+ host+"/"+dbName}
 
@@ -69,14 +70,22 @@ as the filter today does not tell how to link the filters out And v.s. Or
   def getOneUrlExcludeDDoc2(): String = { dbUrl+ "/_all_docs?startkey=%22_design0/%22&limit=1&include_docs=true"}
 
   def getAllDocsUrlExcludeDDoc(limit: Int): String = {
-    dbUrl + "/_all_docs?startkey=%22_design0/%22&limit=" + limit + "&include_docs=true"
+    if (viewName == null) {
+      dbUrl + "/_all_docs?startkey=%22_design0/%22&limit=" + limit + "&include_docs=true"
+    } else {
+      dbUrl + "/" + viewName + "?limit=1"
+    }
   }
   
   def getAllDocsUrl(limit: Int): String = {
-    if (limit == JsonStoreConfigManager.SCHEMA_FOR_ALL_DOCS_NUM) {
-      dbUrl + "/_all_docs?include_docs=true"
+    if (viewName == null) {
+      if (limit == JsonStoreConfigManager.SCHEMA_FOR_ALL_DOCS_NUM) {
+        dbUrl + "/_all_docs?include_docs=true"
+      } else {
+        dbUrl + "/_all_docs?limit=" + limit + "&include_docs=true"
+      }
     } else {
-      dbUrl + "/_all_docs?limit=" + limit + "&include_docs=true"
+      dbUrl + "/" + viewName + "?limit=1"
     }
   }
     
@@ -86,6 +95,7 @@ as the filter today does not tell how to link the filters out And v.s. Or
       includeDoc: Boolean = true): (String, Boolean) = {
     val (url:String, pusheddown:Boolean) = calculate(field, start, 
       startInclusive, end, endInclusive)
+    print("Includedoc:" + includeDoc)
     if (includeDoc){
       if (url.indexOf('?')>0) (url+"&include_docs=true",pusheddown)
       else (url+"?include_docs=true",pusheddown)
@@ -105,22 +115,26 @@ as the filter today does not tell how to link the filters out And v.s. Or
           condition += "?startkey=%22" + URLEncoder.encode(
               start.toString(),"UTF-8") + "%22"
         }
-        if (end !=null){
+        if (end != null){
           if (start !=null)
             condition += "&"
           else
             condition += "?"
           condition += "endkey=%22" + URLEncoder.encode(
               end.toString(),"UTF-8") + "%22"
-          }
+        }
       }
       (dbUrl + "/_all_docs" + condition, true)
-    }else if (indexName!=null){ //  push down to indexName
+    }else if (indexName!=null) {
+      //  push down to indexName
       val condition = calculateCondition(field, start, startInclusive,
-          end, endInclusive)
-      (dbUrl+"/"+indexName+"?q="+condition, true)
-    }else
-      (s"$dbUrl/$defaultIndex" ,false)
+        end, endInclusive)
+      (dbUrl + "/" + indexName + "?q=" + condition, true)
+    }else if (viewName != null){
+      (dbUrl + "/" + viewName, true)
+    } else
+      (s"$dbUrl/$defaultIndex", false)
+
   }
 
   def calculateCondition(field: String, min:Any, minInclusive: Boolean=false,
@@ -153,6 +167,7 @@ as the filter today does not tell how to link the filters out And v.s. Or
         limit + "&skip=" + skip
       else if (url.indexOf("_changes")>0) "include_docs=true&limit=" + 
           limit + "&since=" + convertSkip(skip)
+      else if (viewName != null)"limit=" + limit + "&skip=" + skip
       else "include_docs=true&limit=" + limit // TODO Index query does not support subset query. Should disable Partitioned loading?
     }
     if (url.indexOf('?')>0) url+"&"+suffix
@@ -169,7 +184,11 @@ as the filter today does not tell how to link the filters out And v.s. Or
   }
     
   def getRows(result: JsValue): Seq[JsValue] = {
-    ((result \ "rows").asInstanceOf[JsArray]).value.map(row => row \ "doc")
+    if (viewName == null) {
+      ((result \ "rows").asInstanceOf[JsArray]).value.map(row => row \ "doc")
+    } else {
+      ((result \ "rows").asInstanceOf[JsArray]).value.map(row => row)
+    }
   }
     
   def getBulkPostUrl(): String = {

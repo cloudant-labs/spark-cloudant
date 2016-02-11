@@ -140,7 +140,7 @@ Persisting will also speed up computation. This statement will persist an RDD in
 from pyspark import StorageLevel
 df.persist(storageLevel = StorageLevel(True, True, False, True, 1))
 ```	
-	
+
 [Sample code on using DataFrame option to define cloudant configuration](examples/python/CloudantDFOption.py)
 	
 ### Using DataFrame In Scala 
@@ -221,9 +221,16 @@ Configuration can also be passed on DataFrame using option.
 Name | Default | Meaning
 --- |:---:| ---
 database||cloudant database name
-index||cloudant search index w/o the database name.only used for load.
+view||cloudant view w/o the database name. only used for load.
+index||cloudant search index w/o the database name. only used for load data with less than or equal to 200 results.
 path||cloudant: as database name if database is not present
 schemaSampleSize|1| the sample size used to discover the schema for this temp table. -1 scans all documents
+
+Loading data from views is available only for `DefaultSource` provider. For fast loading, views are loaded without include_docs. Thus, a derived schema will always be: `{id, key, value}`, where `value `can be a compount field. An example of loading data from a view: 
+
+```python
+sqlContext.sql(" CREATE TEMPORARY TABLE flightTable1 USING com.cloudant.spark OPTIONS ( database 'n_flight', view '_design/view/_view/AA0')")
+```
 
 ## Troubleshooting
 
