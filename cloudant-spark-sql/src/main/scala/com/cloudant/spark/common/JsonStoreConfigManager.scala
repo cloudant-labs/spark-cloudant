@@ -27,11 +27,11 @@ import org.apache.spark.SparkConf
 
  object JsonStoreConfigManager
 {
-  private val CLOUDANT_HOST_CONFIG = "cloudant.host"
-  private val CLOUDANT_USERNAME_CONFIG = "cloudant.username"
-  private val CLOUDANT_PASSWORD_CONFIG = "cloudant.password"
-  private val CLOUDANT_PROTOCOL_CONFIG = "cloudant.protocol"
-
+  val CLOUDANT_CONNECTOR_VERSION = "1.6.0"
+  val CLOUDANT_HOST_CONFIG = "cloudant.host"
+  val CLOUDANT_USERNAME_CONFIG = "cloudant.username"
+  val CLOUDANT_PASSWORD_CONFIG = "cloudant.password"
+  val CLOUDANT_PROTOCOL_CONFIG = "cloudant.protocol"
 
   private val PARTITION_CONFIG = "jsonstore.rdd.partitions"
   private val MAX_IN_PARTITION_CONFIG = "jsonstore.rdd.maxInPartition"
@@ -68,7 +68,6 @@ import org.apache.spark.SparkConf
         actorSystem.awaitTermination(Duration(10000, "millis"))
       }
     }
-
   }
 
   
@@ -121,7 +120,12 @@ import org.apache.spark.SparkConf
       val indexName = parameters.getOrElse("index",null)
       val viewName = parameters.getOrElse("view", null)
       
-      println(s"Use dbName=$dbName, indexName=$indexName, viewName=$viewName, $PARTITION_CONFIG=$total, $MAX_IN_PARTITION_CONFIG=$max, $MIN_IN_PARTITION_CONFIG=$min, $REQUEST_TIMEOUT_CONFIG=$requestTimeout,$BULK_SIZE_CONFIG=$bulkSize,$SCHEMA_SAMPLE_SIZE_CONFIG=$schemaSampleSize")
+      println(s"Use connectorVersion=$CLOUDANT_CONNECTOR_VERSION, dbName=$dbName, " +
+          s"indexName=$indexName, viewName=$viewName," +
+          s"$PARTITION_CONFIG=$total, + $MAX_IN_PARTITION_CONFIG=$max," +
+          s"$MIN_IN_PARTITION_CONFIG=$min, $REQUEST_TIMEOUT_CONFIG=$requestTimeout," +
+          s"$CONCURRENT_SAVE_CONFIG=$concurrentSave, $BULK_SIZE_CONFIG=$bulkSize," +
+          s"$SCHEMA_SAMPLE_SIZE_CONFIG=$intSchemaSampleSize")
 
       val protocol = getString(sparkConf, parameters,CLOUDANT_PROTOCOL_CONFIG)
       val host = getString( sparkConf, parameters, CLOUDANT_HOST_CONFIG) 
