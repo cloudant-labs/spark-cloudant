@@ -52,3 +52,4 @@ flightData = sqlContext.sql("SELECT flightSegmentId, scheduledDepartureTime FROM
 flightData.printSchema()
 for code in flightData.collect():
 	print 'Flight {0} on {1}'.format(code.flightSegmentId, code.scheduledDepartureTime)
+sc.stop()
