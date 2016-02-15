@@ -21,6 +21,8 @@ import com.cloudant.spark.CloudantConfig
 
  object JsonStoreConfigManager
 {
+  val CLOUDANT_CONNECTOR_VERSION = "1.6.0"
+
   val SCHEMA_FOR_ALL_DOCS_NUM = -1
   
   val CLOUDANT_HOST_CONFIG = "cloudant.host"
@@ -74,7 +76,12 @@ import com.cloudant.spark.CloudantConfig
       
       val intSchemaSampleSize = calculateSchemaSampleSize(varSchemaSampleSize);
 
-      println(s"Use dbName=$dbName, indexName=$indexName, $PARTITION_CONFIG=$total, $MAX_IN_PARTITION_CONFIG=$max, $MIN_IN_PARTITION_CONFIG=$min, $REQUEST_TIMEOUT_CONFIG=$requestTimeout,$CONCURRENT_SAVE_CONFIG=$concurrentSave,$BULK_SIZE_CONFIG=$bulkSize,$SCHEMA_SAMPLE_SIZE_CONFIG=$intSchemaSampleSize")
+      println(s"Use connectorVersion=$CLOUDANT_CONNECTOR_VERSION, dbName=$dbName, " +
+          s"indexName=$indexName, viewName=$viewName," +
+          s"$PARTITION_CONFIG=$total, + $MAX_IN_PARTITION_CONFIG=$max," +
+          s"$MIN_IN_PARTITION_CONFIG=$min, $REQUEST_TIMEOUT_CONFIG=$requestTimeout," +
+          s"$CONCURRENT_SAVE_CONFIG=$concurrentSave, $BULK_SIZE_CONFIG=$bulkSize," +
+          s"$SCHEMA_SAMPLE_SIZE_CONFIG=$intSchemaSampleSize")
 
       val protocol = if (sparkConf.contains(CLOUDANT_PROTOCOL_CONFIG)) sparkConf.get(CLOUDANT_PROTOCOL_CONFIG) else "https"
       val host = if (sparkConf.contains(CLOUDANT_HOST_CONFIG)) sparkConf.get(CLOUDANT_HOST_CONFIG) else null
@@ -119,7 +126,12 @@ import com.cloudant.spark.CloudantConfig
       
       val intSchemaSampleSize = calculateSchemaSampleSize(schemaSampleSize);
       
-      println(s"Use dbName=$dbName, indexName=$indexName, viewName=$viewName, $PARTITION_CONFIG=$total, $MAX_IN_PARTITION_CONFIG=$max, $MIN_IN_PARTITION_CONFIG=$min, $REQUEST_TIMEOUT_CONFIG=$requestTimeout,$CONCURRENT_SAVE_CONFIG=$concurrentSave,$BULK_SIZE_CONFIG=$bulkSize,$SCHEMA_SAMPLE_SIZE_CONFIG=$intSchemaSampleSize")
+      println(s"Use connectorVersion=$CLOUDANT_CONNECTOR_VERSION, dbName=$dbName, " +
+          s"indexName=$indexName, viewName=$viewName," +
+          s"$PARTITION_CONFIG=$total, + $MAX_IN_PARTITION_CONFIG=$max," +
+          s"$MIN_IN_PARTITION_CONFIG=$min, $REQUEST_TIMEOUT_CONFIG=$requestTimeout," +
+          s"$CONCURRENT_SAVE_CONFIG=$concurrentSave, $BULK_SIZE_CONFIG=$bulkSize," +
+          s"$SCHEMA_SAMPLE_SIZE_CONFIG=$intSchemaSampleSize")
 
       val protocolParam = parameters.getOrElse(CLOUDANT_PROTOCOL_CONFIG, null)
       val hostParam = parameters.getOrElse(CLOUDANT_HOST_CONFIG, null)
