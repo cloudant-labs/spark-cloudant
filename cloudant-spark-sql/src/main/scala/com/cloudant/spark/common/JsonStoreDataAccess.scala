@@ -46,8 +46,12 @@ import HttpMethods._
  */
 class JsonStoreDataAccess (config: CloudantConfig)  {
   implicit lazy val timeout = {Timeout(config.requestTimeout)}
-  lazy val envSystem = {SparkEnv.get.actorSystem}
-  lazy val logger = {Logging(envSystem, getClass)}
+  implicit lazy val system = config.getSystem()
+  
+  //implicit lazy val executionContext = system.dispatchers.lookup("dispatcher")
+  implicit lazy val executionContext = system.dispatcher // default dispatcher gives best performance
+    
+  lazy val logger = {Logging(system, getClass)}
 
   private lazy val validCredentials: BasicHttpCredentials = {
     if (config.username !=null) BasicHttpCredentials(config.username, 
@@ -151,7 +155,6 @@ class JsonStoreDataAccess (config: CloudantConfig)  {
       (implicit columns: Array[String] = null, 
       attrToFilters: Map[String, Array[Filter]] =null) : T={
     logger.warning("Loading data from Cloudant using query: "+ url)
-    implicit val system = config.getSystem()
 
     val request: HttpRequest = if (validCredentials != null) {
       Get(url) ~> addCredentials(validCredentials)
@@ -172,9 +175,6 @@ class JsonStoreDataAccess (config: CloudantConfig)  {
   }
 
   def saveAll(rows: List[String]) {
-    implicit val system = config.getSystem()
-    import system.dispatcher 
-    
     val useBulk = (config.getBulkPostUrl() != null && config.bulkSize>1)
     val bulkSize = if (useBulk) config.bulkSize else 1
     val bulks = rows.grouped(bulkSize).toList
