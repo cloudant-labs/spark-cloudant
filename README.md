@@ -208,7 +208,7 @@ jsonstore.rdd.partitions|5|the number of partitions intent used to drive JsonSto
 jsonstore.rdd.maxInPartition|-1|the max rows in a partition. -1 means unlimited
 jsonstore.rdd.minInPartition|10|the min rows in a partition.
 jsonstore.rdd.requestTimeout|100000| the request timeout in milli-second
-jsonstore.rdd.bulkSize|1| the bulk save size
+jsonstore.rdd.bulkSize|20| the bulk save size
 jsonstore.rdd.schemaSampleSize|1| the sample size for RDD schema discovery. -1 means unlimited
 
 Default values are defined in [here](cloudant-spark-sql/src/main/resources/application.conf)
