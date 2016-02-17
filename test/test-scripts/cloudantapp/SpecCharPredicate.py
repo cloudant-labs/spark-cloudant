@@ -45,20 +45,3 @@ def verifySpecCharPredicate():
 print ('About to test com.cloudant.spark for n_airportcodemapping')
 sqlContext.sql("CREATE TEMPORARY TABLE airportTable USING com.cloudant.spark OPTIONS ( database 'n_airportcodemapping')")
 verifySpecCharPredicate()
-
-print ('About to test com.cloudant.spark.CloudantRP for n_airportcodemapping')
-sqlContext.sql("CREATE TEMPORARY TABLE airportTable USING com.cloudant.spark.CloudantRP OPTIONS ( database 'n_airportcodemapping')")
-verifySpecCharPredicate()
-
-print ('About to test com.cloudant.spark.CloudantPrunedFilteredRP for n_airportcodemapping')
-sqlContext.sql("CREATE TEMPORARY TABLE airportTable USING com.cloudant.spark.CloudantPrunedFilteredRP OPTIONS ( database 'n_airportcodemapping')")
-verifySpecCharPredicate()
-
-print ('About to test com.cloudant.spark.CloudantPartitionedPrunedFilteredRP for n_airportcodemapping')
-sqlContext.sql("CREATE TEMPORARY TABLE airportTable USING com.cloudant.spark.CloudantPartitionedPrunedFilteredRP OPTIONS ( database 'n_airportcodemapping')")
-verifySpecCharPredicate()
-
-
-	
-	
-
