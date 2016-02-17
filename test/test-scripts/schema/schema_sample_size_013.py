@@ -42,25 +42,6 @@ response = requests.get(url, auth=(test_properties["cloudantusername"], test_pro
 assert response.status_code == 200
 doc_count = response.json().get("doc_count")
 
-print ('About to test com.cloudant.spark.CloudantPartitionedPrunedFilteredRP for n_customer with setting schemaSampleSize to -1')
-sqlContext.sql(" CREATE TEMPORARY TABLE customerTable USING com.cloudant.spark.CloudantPartitionedPrunedFilteredRP OPTIONS ( schemaSampleSize '-1',database 'n_customer')")
-verify()
-
-print ('About to test com.cloudant.spark.CloudantPrunedFilteredRP for n_customer with setting schemaSampleSize to -1')
-sqlContext.sql(" CREATE TEMPORARY TABLE customerTable USING com.cloudant.spark.CloudantPrunedFilteredRP OPTIONS ( schemaSampleSize '-1',database 'n_customer')")
-verify()
-
 print ('About to test com.cloudant.spark for n_customer with setting schemaSampleSize to -1')
 sqlContext.sql(" CREATE TEMPORARY TABLE customerTable USING com.cloudant.spark OPTIONS ( schemaSampleSize '-1',database 'n_customer')")
 verify()
-
-print ('About to test com.cloudant.spark.CloudantRP for n_customer with setting schemaSampleSize to -1')
-sqlContext.sql(" CREATE TEMPORARY TABLE customerTable USING com.cloudant.spark.CloudantRP OPTIONS ( schemaSampleSize '-1',database 'n_customer')")
-verify()
-
-	
-
-
-	
-	
-

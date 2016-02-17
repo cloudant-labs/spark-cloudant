@@ -56,23 +56,3 @@ if total_rows == 0:
 print ('About to test com.cloudant.spark for n_booking')
 sqlContext.sql(" CREATE TEMPORARY TABLE bookingTable1 USING com.cloudant.spark OPTIONS ( database 'n_booking')")
 verifySpecCharValuePredicate()
-
-print ('About to test com.cloudant.spark.CloudantRP for n_booking')
-sqlContext.sql(" CREATE TEMPORARY TABLE bookingTable1 USING com.cloudant.spark.CloudantPrunedFilteredRP OPTIONS ( database 'n_booking')")
-verifySpecCharValuePredicate()
-
-print ('About to test com.cloudant.spark.CloudantPrunedFilteredRP for n_booking')
-sqlContext.sql(" CREATE TEMPORARY TABLE bookingTable1 USING com.cloudant.spark.CloudantPrunedFilteredRP OPTIONS ( database 'n_booking')")
-verifySpecCharValuePredicate()
-
-print ('About to test com.cloudant.spark.CloudantPartitionedPrunedFilteredRP for n_booking')
-sqlContext.sql(" CREATE TEMPORARY TABLE bookingTable1 USING com.cloudant.spark.CloudantPartitionedPrunedFilteredRP OPTIONS ( database 'n_booking')")
-verifySpecCharValuePredicate()
-      
-
-	
-
-
-	
-	
-

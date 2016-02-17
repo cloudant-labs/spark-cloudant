@@ -25,8 +25,8 @@ conf = utils.createSparkConf()
 sc = SparkContext(conf=conf)
 sqlContext = SQLContext(sc)
 
-print ('About to test com.cloudant.spark.CloudantPrunedFilteredRP for n_customer with setting schemaSampleSize to 0')
-sqlContext.sql(" CREATE TEMPORARY TABLE customerTable USING com.cloudant.spark.CloudantPrunedFilteredRP OPTIONS ( schemaSampleSize '0',database 'n_customer')")
+print ('About to test com.cloudant.spark for n_customer with setting schemaSampleSize to 0')
+sqlContext.sql(" CREATE TEMPORARY TABLE customerTable USING com.cloudant.spark OPTIONS ( schemaSampleSize '0',database 'n_customer')")
 customerData = sqlContext.sql("SELECT * FROM customerTable")
 customerData.printSchema()
       
