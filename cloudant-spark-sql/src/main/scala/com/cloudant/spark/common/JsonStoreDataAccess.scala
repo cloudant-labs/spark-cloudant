@@ -31,6 +31,8 @@ import play.api.libs.json.JsString
 import com.typesafe.config.ConfigFactory
 import scala.util.Random
 import scala.concurrent.Future
+import java.util.concurrent.TimeUnit
+import scala.concurrent.duration._
 
 import akka.actor.ActorSystem
 import akka.util.Timeout
@@ -48,8 +50,7 @@ class JsonStoreDataAccess (config: CloudantConfig)  {
   implicit lazy val timeout = {Timeout(config.requestTimeout)}
   implicit lazy val system = config.getSystem()
   
-  //implicit lazy val executionContext = system.dispatchers.lookup("dispatcher")
-  implicit lazy val executionContext = system.dispatcher // default dispatcher gives best performance
+  implicit lazy val executionContext = system.dispatchers.lookup("thread-pool-dispatcher")
     
   lazy val logger = {Logging(system, getClass)}
 
@@ -190,10 +191,10 @@ class JsonStoreDataAccess (config: CloudantConfig)  {
     val bulkSize = if (useBulk) config.bulkSize else 1
     val bulks = rows.grouped(bulkSize).toList
     val totalBulks = bulks.size
-    logger.info(s"total records:${rows.size}=bulkSize:$bulkSize * totalBulks:$totalBulks, execute in parallel $totalBulks")
+    logger.debug(s"total records:${rows.size}=bulkSize:$bulkSize * totalBulks:$totalBulks, execute in parallel $totalBulks")
     
     val url = if (bulkSize>1) config.getBulkPostUrl() else config.getPostUrl()
-    logger.info(s"Post:$url")
+    logger.debug(s"Post:$url")
     
     if (url == null) return
     import ContentTypes._
@@ -201,34 +202,33 @@ class JsonStoreDataAccess (config: CloudantConfig)  {
       (value, ct, ctx) => ctx.marshalTo(HttpEntity(ct, value))
     }
     // Better parallelism 
-    val allFutures : List[Future[HttpResponse]] =  { 
-        for (bulk <- bulks) yield {
-          val  x: String = if (bulkSize >1) config.getBulkRows(bulk) else bulk(0)
-          logger.debug(s"content:$x")
-          var pipeline: HttpRequest => Future[HttpResponse] = null
-          if (validCredentials!=null)
-          {
-            pipeline = ( 
-            addCredentials(validCredentials) 
-            ~> sendReceive
-            )
-          }else
-          {
-            pipeline = sendReceive
-          }
-          val request = Post(url,x)
-          val response: Future[HttpResponse] = pipeline(request)
-          response
-        }
+    val start_ts: Long = System.currentTimeMillis / 1000
+    // Share the pipeline . TODO use connector?
+    val pipeline: HttpRequest => Future[HttpResponse] = 
+            if (validCredentials!=null)
+            {
+              ( 
+              addCredentials(validCredentials) 
+              ~> sendReceive
+              )
+            }else
+            {
+              sendReceive
+            }
+    val allFutures =  Future.traverse(bulks){ bulk=>
+            val  x: String = if (bulkSize >1) config.getBulkRows(bulk) else bulk(0)
+            logger.debug(s"content:$x")
+            val request = Post(url,x)
+            val response: Future[HttpResponse] = pipeline(request)
+            response
     }
-    val f = Future.sequence(allFutures.toList)
-    val result = Await.result(f, timeout.duration)
-    var reason : String = null
-    val isSuccessful= result.forall { x => if( !x.status.isSuccess ) reason= x.status.reason;x.status.isSuccess }
-    logger.info(s"Save total ${totalBulks}=${result.length} successful=$isSuccessful")
-    if (!isSuccessful)
+    val failureFuture = allFutures.map { x => x.filter {  y => (! y.status.isSuccess) }.map { z => z.status.reason }}
+    val reason= Await.result(failureFuture, (config.requestTimeout * totalBulks).millis).toSet
+    val end_ts: Long = System.currentTimeMillis / 1000
+    logger.info(s"Save total ${rows.length} with bulkSize $bulkSize in ${end_ts-start_ts}s")
+    if (reason.size>0)
     {
-         throw new RuntimeException(s"Database ${config.getDbname()} faield with $reason")
+         throw new RuntimeException(s"Save to Database ${config.getDbname()} failed with $reason")
     }
   }
 }
