@@ -63,3 +63,5 @@ print "Total", total, "flights from index"
 df = sqlContext.load(source="com.cloudant.spark", path="movies-glynn", view="_design/view1/_view/titleyear2")
 df.printSchema()
 df.filter(df.value.year >= 1950).select(df.value.title.alias("title"), df.value.year.alias("year")).show()
+
+sc.stop()

@@ -22,6 +22,7 @@ import play.api.libs.json.JsUndefined
 import java.net.URLEncoder
 import com.cloudant.spark.common._
 import play.api.libs.json.JsNumber
+import akka.actor.ActorSystem
 
 /*
 @author yanglei
@@ -33,13 +34,21 @@ as the filter today does not tell how to link the filters out And v.s. Or
     val schemaSampleSize: Int = JsonStoreConfigManager.defaultSchemaSampleSize)
     (implicit val username: String, val password: String,
     val partitions:Int, val maxInPartition: Int, val minInPartition:Int,
-    val requestTimeout:Long,val concurrentSave:Int, val bulkSize: Int) {
+    val requestTimeout:Long,val bulkSize: Int) {
   
   private lazy val dbUrl = {protocol + "://"+ host+"/"+dbName}
 
   val pkField = "_id"
   val defaultIndex = "_all_docs" // "_changes" does not work for partition
   val default_filter: String = "*:*"
+
+  def getSystem(): ActorSystem  = {
+    JsonStoreConfigManager.getActorSystem()
+  }
+  
+  def shutdown() = {
+    JsonStoreConfigManager.shutdown()
+  }
 
   def getPostUrl(): String ={dbUrl}
   
@@ -195,8 +204,9 @@ as the filter today does not tell how to link the filters out And v.s. Or
     dbUrl + "/_bulk_docs"
   }
     
-  def getBulkRows(rows: Array[String]): String = {
+  def getBulkRows(rows: List[String]): String = {
     val docs = rows.map { x => Json.parse(x) }
     Json.stringify(Json.obj("docs" -> Json.toJson(docs.toSeq)))
   }
+ 
 }

@@ -61,8 +61,11 @@ case class CloudantReadWriteRelation (config:CloudantConfig, schema: StructType 
     }
 
     def  insert( data:DataFrame, overwrite: Boolean) ={
-        //TODO parallel save
-        dataAccess.saveAll(data.toJSON.collect)
+      // Better parallelism 
+      val result = data.toJSON.foreachPartition { x =>
+            val list = x.toList // Has to pass as List, Iterator results in 0 data
+              dataAccess.saveAll(list)
+      }
     }
 }
 
