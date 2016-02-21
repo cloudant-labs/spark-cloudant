@@ -22,6 +22,7 @@ import org.apache.spark.sql.Row
 import org.apache.spark.sql.types._
 import org.apache.spark.sql.sources._
 import com.cloudant.spark.common._
+import org.apache.spark.sql.DataFrame
 
 /**
  * @author yanglei
@@ -39,13 +40,22 @@ case class CloudantPrunedFilteredScan (dbName: String, indexName: String,  viewN
     JsonStoreConfigManager.getConfig(sqlContext, dbName, indexName, viewName, schemaSampleSize).asInstanceOf[CloudantConfig]
   }
 
+  var allDocsDF: DataFrame = null
+  
   val schema: StructType = {
-      val aRDD = sqlContext.sparkContext.parallelize(dataAccess.getMany(config.getSchemaSampleSize()))
-      sqlContext.read.json(aRDD).schema
+    val aRDD = sqlContext.sparkContext.parallelize(dataAccess.getMany(config.getSchemaSampleSize()))
+    val df = sqlContext.read.json(aRDD)
+    if (config.getSchemaSampleSize() == JsonStoreConfigManager.SCHEMA_FOR_ALL_DOCS_NUM && config.viewName == null && config.indexName == null) {
+      allDocsDF = df
+    }
+    df.schema
   }
 
     def buildScan(requiredColumns: Array[String], 
                 filters: Array[Filter]): RDD[Row] = {
+    if (allDocsDF != null) {
+      allDocsDF.rdd
+    }else{
       val filterInterpreter = new FilterInterpreter(filters)
       var searchField:String = {
         if (filterInterpreter.containsFiltersFor(config.pkField)) config.pkField
@@ -60,6 +70,7 @@ case class CloudantPrunedFilteredScan (dbName: String, indexName: String,  viewN
       val rows = dataAccess.getAll(url) 
       val sRDD = sqlContext.sparkContext.parallelize(rows)
       sqlContext.read.json(sRDD).rdd
+    }
   }
 
 }

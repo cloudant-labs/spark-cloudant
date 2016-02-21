@@ -21,6 +21,7 @@ import org.apache.spark.sql.types._
 import org.apache.spark.sql.Row
 import org.apache.spark.sql.sources.{TableScan, RelationProvider, BaseRelation}
 import com.cloudant.spark.common._
+import org.apache.spark.sql.DataFrame
 
 /**
  * @author yanglei
@@ -36,15 +37,25 @@ case class CloudantTableScan (dbName: String, schemaSampleSize: String = null)
     JsonStoreConfigManager.getConfig(sqlContext, dbName, null, null, schemaSampleSize).asInstanceOf[CloudantConfig]
   }
 
+  var allDocsDF: DataFrame = null
+  
   val schema: StructType = {
-      val aRDD = sqlContext.sparkContext.parallelize(dataAccess.getMany(config.getSchemaSampleSize()))
-      sqlContext.read.json(aRDD).schema
+    val aRDD = sqlContext.sparkContext.parallelize(dataAccess.getMany(config.getSchemaSampleSize()))
+    val df = sqlContext.read.json(aRDD)
+    if (config.getSchemaSampleSize() == JsonStoreConfigManager.SCHEMA_FOR_ALL_DOCS_NUM && config.viewName == null && config.indexName == null) {
+      allDocsDF = df
+    }
+    df.schema
   }
 
   def buildScan: RDD[Row] = {
+    if (allDocsDF != null) {
+      allDocsDF.rdd
+    }else{
       val (url, _) = config.getRangeUrl()
       val aRDD = sqlContext.sparkContext.parallelize(dataAccess.getAll(url))
       sqlContext.read.json(aRDD).rdd
+    }
   }
   
 }

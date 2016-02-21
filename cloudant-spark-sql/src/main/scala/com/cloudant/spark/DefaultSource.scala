@@ -36,7 +36,7 @@ import com.cloudant.spark.common._
 /**
  * @author yanglei
  */
-case class CloudantReadWriteRelation (config:CloudantConfig, schema: StructType )
+case class CloudantReadWriteRelation (config:CloudantConfig, schema: StructType, allDocsDF: DataFrame = null)
                       (@transient val sqlContext: SQLContext) 
   extends BaseRelation with PrunedFilteredScan  with InsertableRelation 
 {
@@ -44,20 +44,24 @@ case class CloudantReadWriteRelation (config:CloudantConfig, schema: StructType 
 
     def buildScan(requiredColumns: Array[String], 
                 filters: Array[Filter]): RDD[Row] = {
-      val filterInterpreter = new FilterInterpreter(filters)
-      var searchField:String = {
-        if (filterInterpreter.containsFiltersFor(config.pkField)) config.pkField
-        else  filterInterpreter.firstField
-      }  
-      
-      val (min, minInclusive, max, maxInclusive) = filterInterpreter.getInfo(searchField)
-      implicit val columns = requiredColumns
-      val (url: String, pusheddown: Boolean) =  config.getRangeUrl(searchField, min,minInclusive, max,maxInclusive, false)
-      if (!pusheddown) searchField = null
-      implicit val attrToFilters = filterInterpreter.getFiltersForPostProcess(searchField)
-      
-      val cloudantRDD  = new JsonStoreRDD(sqlContext.sparkContext,config,url)
-      sqlContext.read.json(cloudantRDD).rdd
+      if (allDocsDF != null) {
+        allDocsDF.rdd
+      } else {
+        val filterInterpreter = new FilterInterpreter(filters)
+        var searchField:String = {
+          if (filterInterpreter.containsFiltersFor(config.pkField)) config.pkField
+          else  filterInterpreter.firstField
+        }  
+        
+        val (min, minInclusive, max, maxInclusive) = filterInterpreter.getInfo(searchField)
+        implicit val columns = requiredColumns
+        val (url: String, pusheddown: Boolean) =  config.getRangeUrl(searchField, min,minInclusive, max,maxInclusive, false)
+        if (!pusheddown) searchField = null
+        implicit val attrToFilters = filterInterpreter.getFiltersForPostProcess(searchField)
+        
+        val cloudantRDD  = new JsonStoreRDD(sqlContext.sparkContext,config,url)
+        sqlContext.read.json(cloudantRDD).rdd
+      }
     }
 
     def  insert( data:DataFrame, overwrite: Boolean) ={
@@ -81,17 +85,25 @@ class DefaultSource extends RelationProvider with CreatableRelationProvider with
     private def create(sqlContext: SQLContext, parameters: Map[String, String], inSchema: StructType) = {
     
       val config: CloudantConfig = JsonStoreConfigManager.getConfig(sqlContext, parameters).asInstanceOf[CloudantConfig]
-    
+
+      var allDocsDF: DataFrame = null
+      
       val schema: StructType = {
         if (inSchema!=null) inSchema
         else{
             val dataAccess = new JsonStoreDataAccess(config)
+
             val aRDD = sqlContext.sparkContext.parallelize(dataAccess.getMany(config.getSchemaSampleSize()))
-            sqlContext.read.json(aRDD).schema
+            val df = sqlContext.read.json(aRDD)
+            if (config.getSchemaSampleSize() == JsonStoreConfigManager.SCHEMA_FOR_ALL_DOCS_NUM && config.viewName == null && config.indexName == null) {
+              allDocsDF = df
+            }
+            
+            df.schema
         }
       }
 
-      CloudantReadWriteRelation(config, schema)(sqlContext)
+      CloudantReadWriteRelation(config, schema, allDocsDF)(sqlContext)
     }
   
     def createRelation(sqlContext:SQLContext,mode:SaveMode, parameters:Map[String,String], data:DataFrame) =
