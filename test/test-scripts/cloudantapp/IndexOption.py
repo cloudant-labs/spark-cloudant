@@ -51,25 +51,3 @@ total_rows = response.json().get("total_rows")
 print ('About to test com.cloudant.spark for n_flight with index')
 sqlContext.sql(" CREATE TEMPORARY TABLE flightTable1 USING com.cloudant.spark OPTIONS ( database 'n_flight', index '_design/view/_search/n_flights')")
 verifyIndexOption()
-
-print ('About to test com.cloudant.spark.CloudantRP for n_flight with index (non-applicable option)')
-sqlContext.sql(" CREATE TEMPORARY TABLE flightTable1 USING com.cloudant.spark.CloudantPrunedFilteredRP OPTIONS ( database 'n_flight', index '_design/view/_search/n_flights')")
-verifyIndexOption()
-
-print ('About to test com.cloudant.spark.CloudantPrunedFilteredRP for n_flight with index (non-applicable option)')
-sqlContext.sql(" CREATE TEMPORARY TABLE flightTable1 USING com.cloudant.spark.CloudantPrunedFilteredRP OPTIONS ( database 'n_flight', index '_design/view/_search/n_flights')")
-verifyIndexOption()
-
-print ('About to test com.cloudant.spark.CloudantPartitionedPrunedFilteredRP for n_flight with index')
-sqlContext.sql(" CREATE TEMPORARY TABLE flightTable1 USING com.cloudant.spark.CloudantPrunedFilteredRP OPTIONS ( database 'n_flight', index '_design/view/_search/n_flights')")
-verifyIndexOption()
-	
-
-
-
-	
-
-
-	
-	
-

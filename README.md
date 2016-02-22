@@ -3,20 +3,32 @@ Spark SQL Cloudant External Datasource
 
 Cloudant integration with Spark as Spark SQL external datasource. 
 
-## Contents:
+##  Contents:
+- [Implementation of RelationProvider](#id-section1)
+- [Binary download](#id-section2)
+- [Build from source](#id-section3)
+- [Sample application ](#id-section4)
+- [Job Submission](#id-section5)
+- [Configuration Overview](#id-section6)
+- [Troubleshooting](#id-section7)
+- [Known limitations and areas for improvement] (#id-section8)
 
-### RelationProvider implementations
+<div id='id-section1'/>
+### Implementation of RelationProvider
 
-All implementions can be found [here] (cloudant-spark-sql/src/main/scala/com/cloudant/spark):
+[DefaultSource.scala](cloudant-spark-sql/src/main/scala/com/cloudant/spark/DefaultSource.scala) is a RelationProvider for loading data from Cloudant to Spark, and saving it back from Cloudant to Spark.  It has the following functionalities:
 
-Relation Provider Name | Table Option | Scan Type | Column Pruning | Predicates Push Down | Parallel Loading | Insertable | 
---- | --- | --- | --- | --- | --- | --- | 
-[DefaultSource.scala](cloudant-spark-sql/src/main/scala/com/cloudant/spark/DefaultSource.scala)|database or path, index|PrunedFilteredScan| Yes |_id or first predicate | Yes, except with index | Yes |
-[CloudantDatasource.scala](cloudant-spark-sql/src/main/scala/com/cloudant/spark/CloudantDatasource.scala)|database|TableScan| No | No | No | No | 
-[CloudantPrunedFilteredDatasource.scala](cloudant-spark-sql/src/main/scala/com/cloudant/spark/)|database|PrunedFilteredScan| Yes |_id or first predicate | No | No | CloudantPrunedFilteredDatasource.scala)
-[CloudantPartitionedPrunedFilteredDatasource.scala](cloudant-spark-sql/src/main/scala/com/cloudant/spark/CloudantPartitionedPrunedFilteredDatasource.scala)|database, index|PrunedFilteredScan| Yes |_id or first predicate |  Yes, except with index  | No |
+Functionality | Value 
+--- | --- | ---
+Table Option | database or path, search index, view 
+Scan Type | PrunedFilteredScan | 
+Column Pruning | yes
+Predicates Push Down | _id or first predicate 
+Parallel Loading | yes, except with search index
+ Insertable | yes
 
 
+<div id='id-section2'/>
 ### Binary download:
 
 Spark Version | Release # | Binary Location
@@ -30,12 +42,13 @@ Spark Version | Release # | Binary Location
 1.6.0 | v1.6.1.0 | [Location] (https://github.com/cloudant-labs/spark-cloudant/releases/download/v1.6.1/cloudant-spark-v1.6.1-43.jar)
 
 
+<div id='id-section3'/>
 ### Build from source:
 
 [Instructions](README_build.md)
 	
 
-
+<div id='id-section4'/>
 ## Sample application 
 
 ### Using SQL In Python 
@@ -57,7 +70,7 @@ sc = SparkContext(conf=conf)
 sqlContext = SQLContext(sc)
 	
 # create temp table
-sqlContext.sql("CREATE TEMPORARY TABLE airportTable USING com.cloudant.spark.CloudantRP OPTIONS ( database 'airportcodemapping')")
+sqlContext.sql("CREATE TEMPORARY TABLE airportTable USING com.cloudant.spark OPTIONS ( database 'airportcodemapping')")
       
 # create Schema RDD
 data = sqlContext.sql("SELECT airportCode, airportName FROM airportTable WHERE airportCode >= 'CAA' ORDER BY airportCode")
@@ -91,7 +104,7 @@ val sqlContext = new SQLContext(sc)
 import sqlContext._
     
 // Create a temp table 
-sqlContext.sql("CREATE TEMPORARY TABLE airportTable USING com.cloudant.spark.CloudantRP OPTIONS ( database 'airportcodemapping'")
+sqlContext.sql("CREATE TEMPORARY TABLE airportTable USING com.cloudant.spark OPTIONS ( database 'airportcodemapping'")
   
 // create Schema RDD
 val data = sqlContext.sql("SELECT airportCode, airportName FROM airportTable WHERE airportCode >= 'CAA' ORDER BY airportCode"")
@@ -175,6 +188,8 @@ df.filter(df("airportCode") >= "CAA").select("airportCode","airportName").write.
     
  [Sample code on using DataFrame option to define cloudant configuration](examples/scala/src/main/scala/mytest/spark/CloudantDFOption.scala)
 
+
+<div id='id-section5'/>
 	
 ## Job Submission
 
@@ -191,12 +206,13 @@ df.filter(df("airportCode") >= "CAA").select("airportCode","airportName").write.
 	spark-submit --class "<your class>" --master local[4] --jars <path to cloudant-spark.jar> <path to your app jar>
 		
 		
+<div id='id-section6'/>
 
 ## Configuration Overview		
 
 ### Configuration on SparkConf
 
-Configuration can also be passed on DataFrame using option, which overrides what is defined in SparkConf
+Configuration can also be passed on DataFrame using option, which overrides what is defined in SparkConf.
 
 Name | Default | Meaning
 --- |:---:| ---
@@ -226,12 +242,13 @@ index||cloudant search index w/o the database name. only used for load data with
 path||cloudant: as database name if database is not present
 schemaSampleSize|1| the sample size used to discover the schema for this temp table. -1 scans all documents
 
-Loading data from views is available only for `DefaultSource` provider. For fast loading, views are loaded without include_docs. Thus, a derived schema will always be: `{id, key, value}`, where `value `can be a compount field. An example of loading data from a view: 
+For fast loading, views are loaded without include_docs. Thus, a derived schema will always be: `{id, key, value}`, where `value `can be a compount field. An example of loading data from a view: 
 
 ```python
 sqlContext.sql(" CREATE TEMPORARY TABLE flightTable1 USING com.cloudant.spark OPTIONS ( database 'n_flight', view '_design/view/_view/AA0')")
 ```
 
+<div id='id-section7'/>
 ## Troubleshooting
 
 ### Schema variance
@@ -240,9 +257,9 @@ If your database contains documents that don't all match exactly one JSON schema
 stack trace similar to this:
 
 ````
-   df.show()
-	org.apache.spark.SparkException: Job aborted due to stage failure: Task 0 in stage 8.0 failed 1 times, most recent failure: Lost task 0.0 in stage 8.0 (TID 28, localhost): java.lang.ArrayIndexOutOfBoundsException: 14
-	at org.apache.spark.sql.catalyst.CatalystTypeConverters$.convertRowWithConverters(CatalystTypeConverters.scala:348)
+df.show()
+org.apache.spark.SparkException: Job aborted due to stage failure: Task 0 in stage 8.0 failed 1 times, most recent failure: Lost task 0.0 in stage 8.0 (TID 28, localhost): java.lang.ArrayIndexOutOfBoundsException: 14
+at org.apache.spark.sql.catalyst.CatalystTypeConverters$.convertRowWithConverters(CatalystTypeConverters.scala:348)
 ````
 
 This error indicates that a field has been found in a document but it is not present in the RDD. Given that the RDD is by default constructed based on the data of the first document only, this error is going to happen in situations where:
@@ -258,8 +275,8 @@ This error indicates that a field has been found in a document but it is not pre
  2) as a local setting for the specific RDD. (A local setting precedes a global setting)
 
  To add the global settting directly to your Spark Context use:
-
- ```
+ 
+```python
 conf = SparkConf().setAppName("Multiple schema test")
 
 conf.set("cloudant.host","<ACCOUNT>.cloudant.com")
@@ -270,10 +287,9 @@ conf.set("jsonstore.rdd.schemaSampleSize", -1)
 sc = SparkContext(conf=conf)
 sqlContext = SQLContext(sc)
 ```
-
 For a local setting applied to a single RDD only, use:
 
-```
+``` python
 sqlContext.sql("CREATE TEMPORARY TABLE schema-test USING com.cloudant.spark.CloudantRP OPTIONS ( schemaSampleSize '10',database 'schema-test')")
 schemaTestTable = sqlContext.sql("SELECT * FROM schema-test")
 ```
@@ -292,31 +308,28 @@ N - scan an arbitrary number of documents in the database (if N is greater than 
 
 Having non-ascii characters in your Cloudant documents requires the Python interpreter to be set to support UTF-8. Failure to set the right encoding results in errors like the one shown for a `df.show()` action:
 
-````
-   df.show()
-  File "/Users/holger/dev/spark-1.5.2/python/lib/pyspark.zip/pyspark/sql/dataframe.py", line 256, in show
+```
+df.show()
+File "/Users/holger/dev/spark-1.5.2/python/lib/pyspark.zip/pyspark/sql/dataframe.py", line 256, in show
 UnicodeEncodeError: 'ascii' codec can't encode character u'\xdf' in position 1198: ordinal not in range(128)
-````
+```
 
 There are a number of ways to force the Python interpreter to use UTF-8 encoding. A simple method is to add these lines to your script:
 
-````
+```python
 import sys
 reload(sys)
 sys.setdefaultencoding('utf-8')
-````
+```
 
 See [https://issues.apache.org/jira/browse/SPARK-11772](https://issues.apache.org/jira/browse/SPARK-11772) for details.
 
-## Known limitations and improvement areas
 
-* Chunked response is not supported. For parallel partitioned loading, issue can be workarouded by setting jsonstore.rdd.maxInPartition.  The following is the exception when query result is over limit.
-	HttpClientConnection: Aggregated response entity greater than configured limit of 1048576 bytes,closing connection
-	java.lang.RuntimeException: sendReceive doesn't support chunked response
+<div id='id-section8'/>
 
-* TableScan in cases hits IndexOutOfRangeException
+## Known limitations and areas for improvement
 
-* Cloudant search index query does not support "paging" through skip and limit.
+* Loading data from Cloudant search index will work only for up to 200 results.
 		
 * Need to improve how number of partitions is determined for parallel loading
 
