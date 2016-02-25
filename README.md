@@ -27,7 +27,7 @@ Column Pruning | yes
 Predicates Push Down | _id or first predicate 
 Parallel Loading | yes, except with search index
  Insertable | yes
-
+ 
 
 <div id='id-section2'/>
 ### Implementation of Receiver
@@ -265,11 +265,22 @@ df.filter(df("airportCode") >= "CAA").select("airportCode","airportName").write.
 		
 <div id='id-section7'/>
 
-## Configuration Overview		
+
+## Configuration Overview	
+The configuration is obtained in the following sequence:
+
+1. default in the Config, which is set in the application.conf
+2. key in the SparkConf, which is set in SparkConf
+3. key in the parameters, which is set in a dataframe or temporaty table options
+4. "spark."+key in the SparkConf (as they are treated as the one passed in through spark-submit using --conf option)
+
+Here each subsequent configuration overrides the previous one. Thus, configuration set using DataFrame option overrides what has beens set in SparkConf. And configuration passed in spark-submit using --conf takes precedence over any setting in the code.
+
+
+### Cofiguration in application.conf
+Default values are defined in [here](cloudant-spark-sql/src/main/resources/application.conf)
 
 ### Configuration on SparkConf
-
-Configuration can also be passed on DataFrame using option, which overrides what is defined in SparkConf.
 
 Name | Default | Meaning
 --- |:---:| ---
@@ -281,14 +292,14 @@ jsonstore.rdd.partitions|5|the number of partitions intent used to drive JsonSto
 jsonstore.rdd.maxInPartition|-1|the max rows in a partition. -1 means unlimited
 jsonstore.rdd.minInPartition|10|the min rows in a partition.
 jsonstore.rdd.requestTimeout|100000| the request timeout in milli-second
-jsonstore.rdd.bulkSize|20| the bulk save size
-jsonstore.rdd.schemaSampleSize|1| the sample size for RDD schema discovery. -1 means unlimited
+bulkSize|20| the bulk save size
+schemaSampleSize|1| the sample size for RDD schema discovery. 1 means first document; -1 means all document; 0 will be treated as 1; N means min(n, total) document 
 
-Default values are defined in [here](cloudant-spark-sql/src/main/resources/application.conf)
 
-### Configuration on Spark SQL temp table
 
-Configuration can also be passed on DataFrame using option.
+###  Configuration on Spark SQL Temporary Table or DataFrame
+
+Besides all the configurations passed to a temporary table or dataframe through SparkConf, it is also possible to set the following configurations in temporary table or dataframe using OPTIONS: 
 
 Name | Default | Meaning
 --- |:---:| ---
@@ -297,15 +308,24 @@ view||cloudant view w/o the database name. only used for load.
 index||cloudant search index w/o the database name. only used for load data with less than or equal to 200 results.
 path||cloudant: as database name if database is not present
 schemaSampleSize|1| the sample size used to discover the schema for this temp table. -1 scans all documents
-bulkSize|1| the bulk save size
+bulkSize|20| the bulk save size
+
 
 For fast loading, views are loaded without include_docs. Thus, a derived schema will always be: `{id, key, value}`, where `value `can be a compount field. An example of loading data from a view: 
 
 ```python
 sqlContext.sql(" CREATE TEMPORARY TABLE flightTable1 USING com.cloudant.spark OPTIONS ( database 'n_flight', view '_design/view/_view/AA0')")
+
 ```
 
+###  Configuration in spark-submit using --conf option
+
+The above stated configuration keys can also be set using `spark-submit --conf` option. When passing configuration in spark-submit, make sure adding "spark." as prefix to the keys.
+
+
 <div id='id-section8'/>
+
+
 ## Troubleshooting
 
 ### Schema variance
@@ -389,4 +409,3 @@ See [https://issues.apache.org/jira/browse/SPARK-11772](https://issues.apache.or
 * Loading data from Cloudant search index will work only for up to 200 results.
 		
 * Need to improve how number of partitions is determined for parallel loading
-

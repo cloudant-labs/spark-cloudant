@@ -28,14 +28,13 @@ conf.set("cloudant.password","PASSWORD")
 sc = SparkContext(conf=conf)
 sqlContext = SQLContext(sc)
 
-
 print 'About to test com.cloudant.spark for n_airportcodemapping'
 sqlContext.sql(" CREATE TEMPORARY TABLE airportTable USING com.cloudant.spark OPTIONS ( database 'n_airportcodemapping')")
 airportData = sqlContext.sql("SELECT _id, airportName FROM airportTable WHERE _id >= 'CAA' AND _id <= 'GAA' ORDER BY _id")
 airportData.printSchema()
 print 'Total # of rows in airportData: ' + str(airportData.count())
 for code in airportData.collect():
-	print code._id
+    print code._id
 
 
 print 'About to test com.cloudant.spark for n_booking'
@@ -43,7 +42,7 @@ sqlContext.sql(" CREATE TEMPORARY TABLE bookingTable USING com.cloudant.spark OP
 bookingData = sqlContext.sql("SELECT customerId, dateOfBooking FROM bookingTable WHERE customerId = 'uid0@email.com'")
 bookingData.printSchema()
 for code in bookingData.collect():
-	print 'Booking for {0} on {1}'.format(code.customerId,code.dateOfBooking)
+    print 'Booking for {0} on {1}'.format(code.customerId,code.dateOfBooking)
 
 
 print 'About to test com.cloudant.spark for flight with index'
@@ -51,5 +50,6 @@ sqlContext.sql(" CREATE TEMPORARY TABLE flightTable1 USING com.cloudant.spark OP
 flightData = sqlContext.sql("SELECT flightSegmentId, scheduledDepartureTime FROM flightTable1 WHERE flightSegmentId >'AA9' AND flightSegmentId<'AA95'")
 flightData.printSchema()
 for code in flightData.collect():
-	print 'Flight {0} on {1}'.format(code.flightSegmentId, code.scheduledDepartureTime)
+    print 'Flight {0} on {1}'.format(code.flightSegmentId, code.scheduledDepartureTime)
+
 sc.stop()
