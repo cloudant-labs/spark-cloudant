@@ -290,7 +290,7 @@ sqlContext = SQLContext(sc)
 For a local setting applied to a single RDD only, use:
 
 ``` python
-sqlContext.sql("CREATE TEMPORARY TABLE schema-test USING com.cloudant.spark.CloudantRP OPTIONS ( schemaSampleSize '10',database 'schema-test')")
+sqlContext.sql("CREATE TEMPORARY TABLE schema-test USING com.cloudant.spark OPTIONS ( schemaSampleSize '10',database 'schema-test')")
 schemaTestTable = sqlContext.sql("SELECT * FROM schema-test")
 ```
 
