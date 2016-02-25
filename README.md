@@ -12,9 +12,6 @@ All implementions can be found [here] (cloudant-spark-sql/src/main/scala/com/clo
 Relation Provider Name | Table Option | Scan Type | Column Pruning | Predicates Push Down | Parallel Loading | Insertable | 
 --- | --- | --- | --- | --- | --- | --- | 
 [DefaultSource.scala](cloudant-spark-sql/src/main/scala/com/cloudant/spark/DefaultSource.scala)|database or path, index|PrunedFilteredScan| Yes |_id or first predicate | Yes, except with index | Yes |
-[CloudantDatasource.scala](cloudant-spark-sql/src/main/scala/com/cloudant/spark/CloudantDatasource.scala)|database|TableScan| No | No | No | No | 
-[CloudantPrunedFilteredDatasource.scala](cloudant-spark-sql/src/main/scala/com/cloudant/spark/)|database|PrunedFilteredScan| Yes |_id or first predicate | No | No | CloudantPrunedFilteredDatasource.scala)
-[CloudantPartitionedPrunedFilteredDatasource.scala](cloudant-spark-sql/src/main/scala/com/cloudant/spark/CloudantPartitionedPrunedFilteredDatasource.scala)|database, index|PrunedFilteredScan| Yes |_id or first predicate |  Yes, except with index  | No |
 
 
 ### Binary download:
@@ -196,7 +193,9 @@ df.filter(df("airportCode") >= "CAA").select("airportCode","airportName").write.
 
 ### Configuration on SparkConf
 
-Configuration can also be passed on DataFrame using option, which overrides what is defined in SparkConf
+Configuration can also be passed on DataFrame using option, which overrides what is defined in SparkConf; and/or passed in spark-submit using --conf, which takes precedents to any setting in the code.
+
+When passing configuration in spark-submit, make sure adding "spark." as prefix to the key.
 
 Name | Default | Meaning
 --- |:---:| ---
@@ -209,13 +208,13 @@ jsonstore.rdd.maxInPartition|-1|the max rows in a partition. -1 means unlimited
 jsonstore.rdd.minInPartition|10|the min rows in a partition.
 jsonstore.rdd.requestTimeout|100000| the request timeout in milli-second
 jsonstore.rdd.bulkSize|20| the bulk save size
-jsonstore.rdd.schemaSampleSize|1| the sample size for RDD schema discovery. -1 means unlimited
+jsonstore.rdd.schemaSampleSize|1| the sample size for RDD schema discovery. 1 means first document; -1 means all document; 0 will be treated as 1; N means min(n, total) document 
 
 Default values are defined in [here](cloudant-spark-sql/src/main/resources/application.conf)
 
-### Configuration on Spark SQL temp table
+###  Configuration on Spark SQL TEMPORARY TABLE
 
-Configuration can also be passed on DataFrame using option.
+Besides all the configuration on SparkConf can be passed into TEMPORARY TABLE creation using OPTIONS, you can also define the following configuration which is also available to DataFrame option.
 
 Name | Default | Meaning
 --- |:---:| ---
@@ -223,9 +222,8 @@ database||cloudant database name
 view||cloudant view w/o the database name. only used for load.
 index||cloudant search index w/o the database name. only used for load data with less than or equal to 200 results.
 path||cloudant: as database name if database is not present
-schemaSampleSize|1| the sample size used to discover the schema for this temp table. -1 scans all documents
 
-Loading data from views is available only for `DefaultSource` provider. For fast loading, views are loaded without include_docs. Thus, a derived schema will always be: `{id, key, value}`, where `value `can be a compount field. An example of loading data from a view: 
+For fast loading, views are loaded without include_docs. Thus, a derived schema will always be: `{id, key, value}`, where `value `can be a compount field. An example of loading data from a view: 
 
 ```python
 sqlContext.sql(" CREATE TEMPORARY TABLE flightTable1 USING com.cloudant.spark OPTIONS ( database 'n_flight', view '_design/view/_view/AA0')")
@@ -250,42 +248,7 @@ This error indicates that a field has been found in a document but it is not pre
  - the first document was using an attribute but with a value of a different type
 
 
- To resolve this situation we introduced the **schemaSampleSize** option listed above. That option can be used in one of two places:
- 
- 1) as a global setting for the Spark Context (applies to all RDDs created within that context)
-
- 2) as a local setting for the specific RDD. (A local setting precedes a global setting)
-
- To add the global settting directly to your Spark Context use:
-
- ```
-conf = SparkConf().setAppName("Multiple schema test")
-
-conf.set("cloudant.host","<ACCOUNT>.cloudant.com")
-conf.set("cloudant.username", "<USERNAME>")
-conf.set("cloudant.password","<PASSWORD>")
-conf.set("jsonstore.rdd.schemaSampleSize", -1)
-
-sc = SparkContext(conf=conf)
-sqlContext = SQLContext(sc)
-```
-
-For a local setting applied to a single RDD only, use:
-
-```
-sqlContext.sql("CREATE TEMPORARY TABLE schema-test USING com.cloudant.spark.CloudantRP OPTIONS ( schemaSampleSize '10',database 'schema-test')")
-schemaTestTable = sqlContext.sql("SELECT * FROM schema-test")
-```
-
-Acceptable values for either setting are:
-
--1 - scan all documents in the database (be careful! This can cause the Spark job to become very expensive!)
-
-1 - scan only the first document in the database (the default)
-
-N - scan an arbitrary number of documents in the database (if N is greater than the number of documents in the database, we will apply -1)
-
-0 or any non-integer values are not permitted and will result in an error.
+ To resolve this situation use *jsonstore.rdd.schemaSampleSize* option listed above. 
 
 ### Unicode support
 
