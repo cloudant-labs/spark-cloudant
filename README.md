@@ -265,6 +265,7 @@ df.filter(df("airportCode") >= "CAA").select("airportCode","airportName").write.
 		
 <div id='id-section7'/>
 
+
 ## Configuration Overview	
 The configuration is obtained in the following sequence:
 
@@ -274,7 +275,6 @@ The configuration is obtained in the following sequence:
 4. "spark."+key in the SparkConf (as they are treated as the one passed in through spark-submit using --conf option)
 
 Here each subsequent configuration overrides the previous one. Thus, configuration set using DataFrame option overrides what has beens set in SparkConf. And configuration passed in spark-submit using --conf takes precedence over any setting in the code.
-
 
 
 ### Cofiguration in application.conf
@@ -324,6 +324,7 @@ The above stated configuration keys can also be set using `spark-submit --conf` 
 
 
 <div id='id-section8'/>
+
 
 ## Troubleshooting
 
