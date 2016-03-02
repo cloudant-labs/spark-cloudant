@@ -148,4 +148,23 @@ import com.cloudant.spark.CloudantConfig
       }
   }
 
+  def getConfig(parameters: Map[String, String]): CloudantConfig = {
+
+    val requestTimeoutS = parameters.getOrElse(REQUEST_TIMEOUT_CONFIG, null)
+    implicit val requestTimeout = if (requestTimeoutS == null) defaultRequestTimeout else requestTimeoutS.toLong
+    val dbName = parameters.getOrElse("database", null)
+
+    println(s"Use connectorVersion=$CLOUDANT_CONNECTOR_VERSION, dbName=$dbName, " +
+      s"$REQUEST_TIMEOUT_CONFIG=$requestTimeout")
+    val protocol = parameters.getOrElse(CLOUDANT_PROTOCOL_CONFIG, "https")
+    val host = parameters.getOrElse(CLOUDANT_HOST_CONFIG, null)
+    val user = parameters.getOrElse(CLOUDANT_USERNAME_CONFIG, null)
+    val passwd = parameters.getOrElse(CLOUDANT_PASSWORD_CONFIG, null)
+    if (host != null) {
+      new CloudantConfig(protocol, host, dbName)(user, passwd, defaultPartitions, defaultMaxInPartition, defaultMinInPartition, requestTimeout, defaultConcurrentSave, defaultBulkSize)
+    } else {
+      throw new RuntimeException("Cloudant parameters are invalid! Please make sure to supply required values for cloudant.host.")
+    }
+  }
+
 }

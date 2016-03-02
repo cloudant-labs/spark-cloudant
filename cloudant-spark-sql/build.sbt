@@ -20,6 +20,7 @@ libraryDependencies ++= {
   Seq(
     "org.apache.spark"    %%  "spark-core"	  %  sparkV % "provided",
     "org.apache.spark"    %%  "spark-sql"	  %  sparkV % "provided",
+    "org.apache.spark"    %%  "spark-streaming"   %  sparkV % "provided",
     "io.spray"            %%  "spray-client"  %  sprayV,
     "io.spray"            %%  "spray-can"  %  sprayV,
     "com.typesafe.play"   %%  "play-json"     %  playJsonV

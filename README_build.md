@@ -16,6 +16,7 @@ contains various test cases for exploring spark api:
 * mytest.spark.CloudantApp: cloudant as spark-sql external datastore application
 * mytest.spark.CloudantDF: cloudant as spark-sql external datastore application using DataFrame
 * mytest.spark.CloudantDFOption: cloudant as spark-sql external datastore application using DataFrame with option
+* mytest.spark.CloudantStreaming: cloudant as spark-sql external datastore application using StreamingContext
 
 
 #### Python project:
@@ -39,7 +40,7 @@ Contains various test cases for exploring spark api:
 
 #### To import into eclipse:
 
-assume at each project folder
+assume at root folder
 
 	sbt eclipse 
 	eclipse -> import "Existing project into workspace" of project directory
@@ -59,10 +60,10 @@ create all-inclusive cloudant-spark.jar (except spark and hadoop) under target/s
 	
 #### Project /examples/scala
 	
-assume at /examples/scala folder
+assume at root folder
 		
 	sbt package
 			
-create application jar: target/scala-2.10/spark_test_2.10-0.1-SNAPSHOT.jar and be used for job submission together with cloudant-spark.jar
+create application jar: /examples/scala/target/scala-2.10/spark_test_2.10-0.1-SNAPSHOT.jar and be used for job submission together with cloudant-spark.jar
 			
 
