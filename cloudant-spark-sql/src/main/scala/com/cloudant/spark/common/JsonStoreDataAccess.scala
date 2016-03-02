@@ -166,6 +166,10 @@ class JsonStoreDataAccess (config: CloudantConfig)  {
     }
   }
   
+  def getChanges(url: String, processResults: (String) => String): String = {
+    getQueryResult(url, processResults)
+  }
+  
   private def getQueryResult[T](url: String, postProcessor:(String) => T)
       (implicit columns: Array[String] = null, 
       attrToFilters: Map[String, Array[Filter]] =null) : T={
