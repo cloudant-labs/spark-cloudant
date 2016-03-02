@@ -33,7 +33,7 @@ as the filter today does not tell how to link the filters out And v.s. Or
     val indexName: String = null, val viewName:String = null)
     (implicit val username: String, val password: String,
     val partitions:Int, val maxInPartition: Int, val minInPartition:Int,
-    val requestTimeout:Long,val bulkSize: Int, val schemaSampleSize: Int) {
+    val requestTimeout:Long, val bulkSize: Int, val schemaSampleSize: Int) {
   
    private val SCHEMA_FOR_ALL_DOCS_NUM = -1
   private lazy val dbUrl = {protocol + "://"+ host+"/"+dbName}
@@ -42,12 +42,17 @@ as the filter today does not tell how to link the filters out And v.s. Or
   val defaultIndex = "_all_docs" // "_changes" does not work for partition
   val default_filter: String = "*:*"
 
+
   def getSystem(): ActorSystem  = {
     JsonStoreConfigManager.getActorSystem()
   }
   
   def shutdown() = {
     JsonStoreConfigManager.shutdown()
+  }
+
+  def getChangesUrl(): String = {
+    dbUrl + "/_changes?include_docs=true&feed=normal"
   }
 
   def getPostUrl(): String ={dbUrl}

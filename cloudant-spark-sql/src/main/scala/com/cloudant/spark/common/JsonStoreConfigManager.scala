@@ -22,7 +22,6 @@ import org.apache.spark.scheduler.SparkListener
 import org.apache.spark.scheduler.SparkListenerApplicationEnd
 import akka.actor.ActorSystem
 import scala.concurrent.duration.Duration
-import com.typesafe.config.Config
 import org.apache.spark.SparkConf
 
  object JsonStoreConfigManager
@@ -84,21 +83,30 @@ import org.apache.spark.SparkConf
    */
   
   private def getInt(sparkConf: SparkConf, parameters: Map[String, String], key: String) : Int = {
-    val valueS = parameters.getOrElse(key,null)
-    val default = if (valueS == null)  sparkConf.getInt(key, rootConfig.getInt(key)) else valueS.toInt
+    val defaultConf =  if (sparkConf != null)
+        sparkConf.getInt(key, rootConfig.getInt(key))
+      else
+        rootConfig.getInt(key)
+    val default = parameters.getOrElse(key, defaultConf).asInstanceOf[Int]
     sparkConf.getInt(s"spark.$key", default)
   }
 
   private def getLong(sparkConf: SparkConf, parameters: Map[String, String], key: String) : Long = {
-    val valueS = parameters.getOrElse(key,null)
-    val default = if (valueS == null)  sparkConf.getLong(key, rootConfig.getInt(key)) else valueS.toLong
+    val defaultConf =  if (sparkConf != null)
+      sparkConf.getLong(key, rootConfig.getLong(key))
+    else
+      rootConfig.getLong(key)
+    val default = parameters.getOrElse(key, defaultConf).asInstanceOf[Long]
     sparkConf.getLong(s"spark.$key", default)
   }
 
   private def getString(sparkConf: SparkConf, parameters: Map[String, String], key: String) : String = {
-    val defaultInConfig = if (rootConfig.hasPath(key)) rootConfig.getString(key) else null
-    val valueS = parameters.getOrElse(key,null)
-    val default = if (valueS == null)  sparkConf.get(key, defaultInConfig) else valueS
+    val defaultRootConfig = if (rootConfig.hasPath(key)) rootConfig.getString(key) else null
+    val defaultConf =  if (sparkConf != null)
+      sparkConf.get(key, defaultRootConfig)
+    else
+      defaultRootConfig
+    val default = parameters.getOrElse(key, defaultConf)
     sparkConf.get(s"spark.$key", default)
   }
 
@@ -113,7 +121,6 @@ import org.apache.spark.SparkConf
       implicit val total =  getInt(sparkConf, parameters, PARTITION_CONFIG)
       implicit val max = getInt(sparkConf, parameters, MAX_IN_PARTITION_CONFIG)
       implicit val min = getInt(sparkConf, parameters, MIN_IN_PARTITION_CONFIG)
-      
       implicit val requestTimeout = getLong(sparkConf, parameters, REQUEST_TIMEOUT_CONFIG)
       implicit val bulkSize = getInt(sparkConf, parameters, BULK_SIZE_CONFIG)
       implicit val schemaSampleSize = getInt(sparkConf, parameters, SCHEMA_SAMPLE_SIZE_CONFIG)
@@ -134,8 +141,8 @@ import org.apache.spark.SparkConf
       val passwd = getString(sparkConf, parameters, CLOUDANT_PASSWORD_CONFIG)
       
       if (host != null) {
-        val config= new CloudantConfig(protocol, host, dbName, indexName, viewName)
-            (user, passwd, total, max, min, requestTimeout, bulkSize, schemaSampleSize)
+        val config= new CloudantConfig(protocol, host, dbName, indexName,
+            viewName) (user, passwd, total, max, min, requestTimeout, bulkSize, schemaSampleSize)
          context.sparkContext.addSparkListener(new SparkListener(){
           override def onApplicationEnd(applicationEnd: SparkListenerApplicationEnd) {
               config.shutdown()
@@ -148,4 +155,32 @@ import org.apache.spark.SparkConf
       }
   }
 
+  def getConfig(parameters: Map[String, String]): CloudantConfig = {
+    val sparkConf = null
+
+    implicit val total =  getInt(sparkConf, parameters, PARTITION_CONFIG)
+    implicit val max = getInt(sparkConf, parameters, MAX_IN_PARTITION_CONFIG)
+    implicit val min = getInt(sparkConf, parameters, MIN_IN_PARTITION_CONFIG)
+    implicit val requestTimeout = getLong(sparkConf, parameters, REQUEST_TIMEOUT_CONFIG)
+    implicit val bulkSize = getInt(sparkConf, parameters, BULK_SIZE_CONFIG)
+    implicit val schemaSampleSize = getInt(sparkConf, parameters, SCHEMA_SAMPLE_SIZE_CONFIG)
+
+    val dbName = parameters.getOrElse("database", null)
+
+    println(s"Use connectorVersion=$CLOUDANT_CONNECTOR_VERSION, dbName=$dbName, " +
+        s"$REQUEST_TIMEOUT_CONFIG=$requestTimeout")
+
+    val protocol = getString(sparkConf, parameters,CLOUDANT_PROTOCOL_CONFIG)
+    val host = getString( sparkConf, parameters, CLOUDANT_HOST_CONFIG)
+    val user = getString(sparkConf, parameters,CLOUDANT_USERNAME_CONFIG)
+    val passwd = getString(sparkConf, parameters, CLOUDANT_PASSWORD_CONFIG)
+
+    if (host != null) {
+      new CloudantConfig(protocol, host, dbName)(user, passwd,
+          total, max, min, requestTimeout, bulkSize, schemaSampleSize)
+    } else {
+      throw new RuntimeException("Cloudant parameters are invalid! Please make sure to supply required values for cloudant.host.")
+    }
+  }
 }
+
