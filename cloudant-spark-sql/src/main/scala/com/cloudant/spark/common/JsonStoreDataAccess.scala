@@ -175,7 +175,12 @@ class JsonStoreDataAccess (config: CloudantConfig)  {
     data
   }
 
+
   def saveAll(rows: List[String]) {
+    if (rows.size == 0) {
+      throw new RuntimeException("Database " + config.getDbname() +
+        ": nothing was saved because the number of records was 0!")
+    }
     val useBulk = (config.getBulkPostUrl() != null && config.bulkSize>1)
     val bulkSize = if (useBulk) config.bulkSize else 1
     val bulks = rows.grouped(bulkSize).toList
