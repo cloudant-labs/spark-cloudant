@@ -2,7 +2,7 @@ organization  := "cloudant-labs"
 
 name := "spark-cloudant"
 
-version       := "1.6.1"
+version       := "1.6.2"
 
 scalaVersion  := "2.10.4"
 
@@ -55,6 +55,8 @@ spDescription := """Spark SQL Cloudant External Datasource.
                    | - Allows to save resulting data from Spark to existing Cloudant databases.
                    | - Supports predicates push down (only based on _id field in databases, but varios fields for indexes).
                    | - Support column pruning for indexes.""".stripMargin
+
+spAppendScalaVersion := true
 
 licenses += "Apache-2.0" -> url("http://opensource.org/licenses/Apache-2.0")
 
