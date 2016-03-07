@@ -195,6 +195,10 @@ class JsonStoreDataAccess (config: CloudantConfig)  {
   }
 
   def saveAll(rows: Array[String]) {
+    if (rows.size == 0) {
+      throw new RuntimeException("Database " + config.getDbname() +
+        ": nothing was saved because the number of records was 0!")
+    }
     implicit val (system, existing) = getSystem()
     import system.dispatcher 
     
