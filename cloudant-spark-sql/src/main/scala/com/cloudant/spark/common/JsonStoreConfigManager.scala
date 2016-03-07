@@ -39,6 +39,7 @@ import com.cloudant.spark.CloudantConfig
   val BULK_SIZE_CONFIG = "jsonstore.rdd.bulkSize"
   val SCHEMA_SAMPLE_SIZE_CONFIG = "jsonstore.rdd.schemaSampleSize"
   val PARAM_SCHEMA_SAMPLE_SIZE_CONFIG = "schemaSampleSize"
+  val PARAM_BULK_SIZE_CONFIG = "bulkSize"
   
   val configFactory = ConfigFactory.load()
 
@@ -113,7 +114,8 @@ import com.cloudant.spark.CloudantConfig
       
       implicit val requestTimeout =sparkConf.getLong(REQUEST_TIMEOUT_CONFIG,defaultRequestTimeout)
       implicit val concurrentSave =sparkConf.getInt(CONCURRENT_SAVE_CONFIG,defaultConcurrentSave)
-      implicit val bulkSize =sparkConf.getInt(BULK_SIZE_CONFIG,defaultBulkSize)
+      val bulkSizeS = parameters.getOrElse(PARAM_BULK_SIZE_CONFIG, null)
+      implicit val bulkSize = if (bulkSizeS == null) sparkConf.getInt(BULK_SIZE_CONFIG, defaultBulkSize) else bulkSizeS.toInt
 
       val dbName = parameters.getOrElse("database", parameters.getOrElse("path",null))
       val indexName = parameters.getOrElse("index",null)

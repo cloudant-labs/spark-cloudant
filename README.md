@@ -241,6 +241,7 @@ view||cloudant view w/o the database name. only used for load.
 index||cloudant search index w/o the database name. only used for load data with less than or equal to 200 results.
 path||cloudant: as database name if database is not present
 schemaSampleSize|1| the sample size used to discover the schema for this temp table. -1 scans all documents
+bulkSize|1| the bulk save size
 
 For fast loading, views are loaded without include_docs. Thus, a derived schema will always be: `{id, key, value}`, where `value `can be a compount field. An example of loading data from a view: 
 

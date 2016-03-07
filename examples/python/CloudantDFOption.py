@@ -44,7 +44,7 @@ df.cache() # persisting in memory
 df.printSchema()
 
 df.filter(df._id >= 'CAA').select("_id",'airportName').show()
-df.filter(df._id >= 'CAA').select("_id",'airportName').write.format("com.cloudant.spark").option("cloudant.host",cloudant_host).option("cloudant.username",cloudant_username).option("cloudant.password",cloudant_password).save("airportcodemapping_df")
+df.filter(df._id >= 'CAA').select("_id",'airportName').write.format("com.cloudant.spark").option("cloudant.host",cloudant_host).option("cloudant.username",cloudant_username).option("cloudant.password",cloudant_password).option("bulkSize","22222222").save("airportcodemapping_df")
 
 df = sqlContext.read.format("com.cloudant.spark").option("cloudant.host",cloudant_host).option("cloudant.username",cloudant_username).option("cloudant.password",cloudant_password).load("n_flight")
 df.printSchema()
