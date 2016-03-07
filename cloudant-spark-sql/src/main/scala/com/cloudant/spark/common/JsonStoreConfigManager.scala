@@ -27,11 +27,12 @@ import org.apache.spark.SparkConf
 
  object JsonStoreConfigManager
 {
-  val CLOUDANT_CONNECTOR_VERSION = "1.6.0"
-  val CLOUDANT_HOST_CONFIG = "cloudant.host"
-  val CLOUDANT_USERNAME_CONFIG = "cloudant.username"
-  val CLOUDANT_PASSWORD_CONFIG = "cloudant.password"
-  val CLOUDANT_PROTOCOL_CONFIG = "cloudant.protocol"
+  private val CLOUDANT_CONNECTOR_VERSION = "1.6.0"
+
+  private val CLOUDANT_HOST_CONFIG = "cloudant.host"
+  private val CLOUDANT_USERNAME_CONFIG = "cloudant.username"
+  private val CLOUDANT_PASSWORD_CONFIG = "cloudant.password"
+  private val CLOUDANT_PROTOCOL_CONFIG = "cloudant.protocol"
 
   private val PARTITION_CONFIG = "jsonstore.rdd.partitions"
   private val MAX_IN_PARTITION_CONFIG = "jsonstore.rdd.maxInPartition"
@@ -39,6 +40,10 @@ import org.apache.spark.SparkConf
   private val REQUEST_TIMEOUT_CONFIG = "jsonstore.rdd.requestTimeout"
   private val BULK_SIZE_CONFIG = "jsonstore.rdd.bulkSize"
   private val SCHEMA_SAMPLE_SIZE_CONFIG = "jsonstore.rdd.schemaSampleSize"
+
+
+  val PARAM_SCHEMA_SAMPLE_SIZE_CONFIG = "schemaSampleSize"
+  val PARAM_BULK_SIZE_CONFIG = "bulkSize"
   
   private val configFactory = ConfigFactory.load()
 
@@ -82,20 +87,20 @@ import org.apache.spark.SparkConf
   private def getInt(sparkConf: SparkConf, parameters: Map[String, String], key: String) : Int = {
     val valueS = parameters.getOrElse(key,null)
     val default = if (valueS == null)  sparkConf.getInt(key, rootConfig.getInt(key)) else valueS.toInt
-    sparkConf.getInt(s"spark.$key",default)
+    sparkConf.getInt(s"spark.$key", default)
   }
 
   private def getLong(sparkConf: SparkConf, parameters: Map[String, String], key: String) : Long = {
     val valueS = parameters.getOrElse(key,null)
     val default = if (valueS == null)  sparkConf.getLong(key, rootConfig.getInt(key)) else valueS.toLong
-    sparkConf.getLong(s"spark.$key",default)
+    sparkConf.getLong(s"spark.$key", default)
   }
 
   private def getString(sparkConf: SparkConf, parameters: Map[String, String], key: String) : String = {
     val defaultInConfig = if (rootConfig.hasPath(key)) rootConfig.getString(key) else null
     val valueS = parameters.getOrElse(key,null)
     val default = if (valueS == null)  sparkConf.get(key, defaultInConfig) else valueS
-    sparkConf.get(s"spark.$key",default)
+    sparkConf.get(s"spark.$key", default)
   }
 
   /**
@@ -106,26 +111,23 @@ import org.apache.spark.SparkConf
     
       val sparkConf = context.sparkContext.getConf
       
-      implicit val total =  getInt(sparkConf,parameters, PARTITION_CONFIG)
-      implicit val max = getInt(sparkConf,parameters, MAX_IN_PARTITION_CONFIG)
-      implicit val min = getInt(sparkConf,parameters, MIN_IN_PARTITION_CONFIG)
+      implicit val total =  getInt(sparkConf, parameters, PARTITION_CONFIG)
+      implicit val max = getInt(sparkConf, parameters, MAX_IN_PARTITION_CONFIG)
+      implicit val min = getInt(sparkConf, parameters, MIN_IN_PARTITION_CONFIG)
       
-      implicit val requestTimeout =getLong(sparkConf,parameters, REQUEST_TIMEOUT_CONFIG)
-      implicit val bulkSize =getInt(sparkConf,parameters,BULK_SIZE_CONFIG)
-
-      val tschemaSampleSize = getInt(sparkConf,parameters,SCHEMA_SAMPLE_SIZE_CONFIG) 
-      implicit val schemaSampleSize = if (tschemaSampleSize==0) 1 else tschemaSampleSize
+      implicit val requestTimeout = getLong(sparkConf, parameters, REQUEST_TIMEOUT_CONFIG)
+      implicit val bulkSize = getInt(sparkConf, parameters, BULK_SIZE_CONFIG)
+      implicit val schemaSampleSize = getInt(sparkConf, parameters, SCHEMA_SAMPLE_SIZE_CONFIG)
 
       val dbName = parameters.getOrElse("database", parameters.getOrElse("path",null))
       val indexName = parameters.getOrElse("index",null)
       val viewName = parameters.getOrElse("view", null)
       
-      println(s"Use connectorVersion=$CLOUDANT_CONNECTOR_VERSION, dbName=$dbName, " +
+      println(s"Using connectorVersion=$CLOUDANT_CONNECTOR_VERSION, dbName=$dbName, " +
           s"indexName=$indexName, viewName=$viewName," +
           s"$PARTITION_CONFIG=$total, + $MAX_IN_PARTITION_CONFIG=$max," +
           s"$MIN_IN_PARTITION_CONFIG=$min, $REQUEST_TIMEOUT_CONFIG=$requestTimeout," +
-          s"$CONCURRENT_SAVE_CONFIG=$concurrentSave, $BULK_SIZE_CONFIG=$bulkSize," +
-          s"$SCHEMA_SAMPLE_SIZE_CONFIG=$intSchemaSampleSize")
+          s"$BULK_SIZE_CONFIG=$bulkSize," + s"$SCHEMA_SAMPLE_SIZE_CONFIG=$schemaSampleSize")
 
       val protocol = getString(sparkConf, parameters,CLOUDANT_PROTOCOL_CONFIG)
       val host = getString( sparkConf, parameters, CLOUDANT_HOST_CONFIG) 
@@ -133,7 +135,8 @@ import org.apache.spark.SparkConf
       val passwd = getString(sparkConf, parameters, CLOUDANT_PASSWORD_CONFIG)
       
       if (host != null) {
-        val config= new CloudantConfig(protocol, host, dbName, indexName, viewName)(user, passwd, total, max, min, requestTimeout, bulkSize, schemaSampleSize)
+        val config= new CloudantConfig(protocol, host, dbName, indexName, viewName)
+            (user, passwd, total, max, min, requestTimeout, bulkSize, schemaSampleSize)
          context.sparkContext.addSparkListener(new SparkListener(){
           override def onApplicationEnd(applicationEnd: SparkListenerApplicationEnd) {
               config.shutdown()
