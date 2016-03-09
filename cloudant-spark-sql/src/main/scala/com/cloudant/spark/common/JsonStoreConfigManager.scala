@@ -21,7 +21,7 @@ import com.cloudant.spark.CloudantConfig
 
  object JsonStoreConfigManager
 {
-  val CLOUDANT_CONNECTOR_VERSION = "1.6.0"
+  val CLOUDANT_CONNECTOR_VERSION = "1.6.2"
 
   val SCHEMA_FOR_ALL_DOCS_NUM = -1
   
