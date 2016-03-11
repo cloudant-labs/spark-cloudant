@@ -41,6 +41,10 @@ as the filter today does not tell how to link the filters out And v.s. Or
   val defaultIndex = "_all_docs" // "_changes" does not work for partition
   val default_filter: String = "*:*"
 
+  def getChangesUrl(): String = {
+    dbUrl + "/_changes?include_docs=true&feed=normal"
+  }
+  
   def getPostUrl(): String ={dbUrl}
   
   def getLastUrl(skip: Int): String = {
