@@ -131,7 +131,7 @@ data.map(t => "airportCode: " + t(0) +"airportName: " + t(1)).collect().foreach(
 
 ```scala
 val sparkConf = new SparkConf().setAppName("Cloudant Spark SQL External Datasource in Scala")
-	
+
 // Create the context with a 10 seconds batch size
 
 val duration = new Duration(10000)
