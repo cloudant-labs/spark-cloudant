@@ -22,3 +22,4 @@ libraryDependencies ++= {
   )
 }
 
+sparkVersion  := "1.5.1"
