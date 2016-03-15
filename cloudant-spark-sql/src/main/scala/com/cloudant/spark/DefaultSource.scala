@@ -44,8 +44,17 @@ case class CloudantReadWriteRelation (config:CloudantConfig, schema: StructType,
 
     def buildScan(requiredColumns: Array[String], 
                 filters: Array[Filter]): RDD[Row] = {
+      val colsLength = requiredColumns.length
+
       if (allDocsDF != null) {
-        allDocsDF.rdd
+        if (colsLength == 0) {
+          allDocsDF.select().rdd
+        } else if (colsLength == 1) {
+          allDocsDF.select(requiredColumns(0)).rdd
+        } else {
+          val colsExceptCol0 = for (i <- 1 until colsLength) yield requiredColumns(i)
+          allDocsDF.select(requiredColumns(0), colsExceptCol0: _*).rdd
+        }
       } else {
         val filterInterpreter = new FilterInterpreter(filters)
         var searchField:String = {
@@ -60,7 +69,13 @@ case class CloudantReadWriteRelation (config:CloudantConfig, schema: StructType,
         implicit val attrToFilters = filterInterpreter.getFiltersForPostProcess(searchField)
         
         val cloudantRDD  = new JsonStoreRDD(sqlContext.sparkContext,config,url)
-        sqlContext.read.json(cloudantRDD).rdd
+        val df = sqlContext.read.json(cloudantRDD)
+        if (colsLength > 1) {
+          val colsExceptCol0 = for (i <- 1 until colsLength) yield requiredColumns(i)
+          df.select(requiredColumns(0), colsExceptCol0: _*).rdd
+        } else {
+          df.rdd
+        }
       }
     }
 
