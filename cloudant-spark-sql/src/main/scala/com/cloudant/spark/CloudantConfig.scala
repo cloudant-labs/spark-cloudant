@@ -35,7 +35,6 @@ as the filter today does not tell how to link the filters out And v.s. Or
     val partitions:Int, val maxInPartition: Int, val minInPartition:Int,
     val requestTimeout:Long, val bulkSize: Int, val schemaSampleSize: Int) {
   
-   private val SCHEMA_FOR_ALL_DOCS_NUM = -1
   private lazy val dbUrl = {protocol + "://"+ host+"/"+dbName}
 
   val pkField = "_id"
@@ -92,7 +91,7 @@ as the filter today does not tell how to link the filters out And v.s. Or
   
   def getAllDocsUrl(limit: Int): String = {
     if (viewName == null) {
-      if (limit == SCHEMA_FOR_ALL_DOCS_NUM) {
+      if (limit == JsonStoreConfigManager.SCHEMA_FOR_ALL_DOCS_NUM) {
         dbUrl + "/_all_docs?include_docs=true"
       } else {
         dbUrl + "/_all_docs?limit=" + limit + "&include_docs=true"
