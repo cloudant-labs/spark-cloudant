@@ -267,6 +267,26 @@ df.filter(df("airportCode") >= "CAA").select("airportCode","airportName").write.
 
 ## Configuration Overview		
 
+### Configuration on spark-submit (--conf)
+
+Configuration here will override the one which is defined in SparkConf or is passed on DataFrame using option.
+
+Name | Default | Meaning
+--- |:---:| ---
+spark.cloudant.protocol|https|protocol to use to transfer data: http or https
+spark.cloudant.host||cloudant host url
+spark.cloudant.username||cloudant userid
+spark.cloudant.password||cloudant password
+spark.jsonstore.rdd.partitions|5|the number of partitions intent used to drive JsonStoreRDD loading query result in parallel. The actual number is calculated based on total rows returned and satisfying maxInPartition and minInPartition
+spark.jsonstore.rdd.maxInPartition|-1|the max rows in a partition. -1 means unlimited
+spark.jsonstore.rdd.minInPartition|10|the min rows in a partition.
+spark.jsonstore.rdd.requestTimeout|100000| the request timeout in milli-second
+spark.jsonstore.rdd.concurrentSave|-1| the parallel saving size. -1 means unlimited
+spark.jsonstore.rdd.bulkSize|1| the bulk save size
+spark.jsonstore.rdd.schemaSampleSize|1| the sample size for RDD schema discovery. -1 means unlimited
+
+Default values are defined in [here](cloudant-spark-sql/src/main/resources/application.conf)
+
 ### Configuration on SparkConf
 
 Configuration can also be passed on DataFrame using option, which overrides what is defined in SparkConf.
