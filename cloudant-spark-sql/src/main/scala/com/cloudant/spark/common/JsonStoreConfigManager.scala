@@ -25,6 +25,18 @@ import com.cloudant.spark.CloudantConfig
 
   val SCHEMA_FOR_ALL_DOCS_NUM = -1
   
+  val SPARK_CLOUDANT_PROTOCOL_CONFIG = "spark.cloudant.protocol"
+  val SPARK_CLOUDANT_HOST_CONFIG = "spark.cloudant.host"
+  val SPARK_CLOUDANT_USERNAME_CONFIG = "spark.cloudant.username"
+  val SPARK_CLOUDANT_PASSWORD_CONFIG = "spark.cloudant.password"
+  val SPARK_PARTITION_CONFIG = "spark.jsonstore.rdd.partitions"
+  val SPARK_MAX_IN_PARTITION_CONFIG = "spark.jsonstore.rdd.maxInPartition"
+  val SPARK_MIN_IN_PARTITION_CONFIG = "spark.jsonstore.rdd.minInPartition"
+  val SPARK_REQUEST_TIMEOUT_CONFIG = "spark.jsonstore.rdd.requestTimeout"
+  val SPARK_CONCURRENT_SAVE_CONFIG = "spark.jsonstore.rdd.concurrentSave"
+  val SPARK_BULK_SIZE_CONFIG = "spark.jsonstore.rdd.bulkSize"
+  val SPARK_SCHEMA_SAMPLE_SIZE_CONFIG = "spark.jsonstore.rdd.schemaSampleSize"
+
   val CLOUDANT_HOST_CONFIG = "cloudant.host"
   val CLOUDANT_USERNAME_CONFIG = "cloudant.username"
   val CLOUDANT_PASSWORD_CONFIG = "cloudant.password"
@@ -63,14 +75,14 @@ import com.cloudant.spark.CloudantConfig
   
   def getConfig(context: SQLContext, dbName: String, indexName:String = null, viewName:String = null, schemaSampleSize: String): CloudantConfig = {
       val sparkConf = context.sparkContext.getConf
-      implicit val total = sparkConf.getInt(PARTITION_CONFIG,defaultPartitions)
-      implicit val max = sparkConf.getInt(MAX_IN_PARTITION_CONFIG,defaultMaxInPartition)
-      implicit val min =sparkConf.getInt(MIN_IN_PARTITION_CONFIG,defaultMinInPartition)
-      implicit val requestTimeout =sparkConf.getLong(REQUEST_TIMEOUT_CONFIG,defaultRequestTimeout)
-      implicit val concurrentSave =sparkConf.getInt(CONCURRENT_SAVE_CONFIG,defaultConcurrentSave)
-      implicit val bulkSize =sparkConf.getInt(BULK_SIZE_CONFIG,defaultBulkSize)
-      
-      var varSchemaSampleSize = schemaSampleSize;
+      implicit val total = sparkConf.getInt(SPARK_PARTITION_CONFIG, sparkConf.getInt(PARTITION_CONFIG, defaultPartitions))
+      implicit val max = sparkConf.getInt(SPARK_MAX_IN_PARTITION_CONFIG, sparkConf.getInt(MAX_IN_PARTITION_CONFIG, defaultMaxInPartition))
+      implicit val min = sparkConf.getInt(SPARK_MIN_IN_PARTITION_CONFIG, sparkConf.getInt(MIN_IN_PARTITION_CONFIG, defaultMinInPartition))
+      implicit val requestTimeout = sparkConf.getLong(SPARK_REQUEST_TIMEOUT_CONFIG, sparkConf.getLong(REQUEST_TIMEOUT_CONFIG, defaultRequestTimeout))
+      implicit val concurrentSave = sparkConf.getInt(SPARK_CONCURRENT_SAVE_CONFIG, sparkConf.getInt(CONCURRENT_SAVE_CONFIG, defaultConcurrentSave))
+      implicit val bulkSize = sparkConf.getInt(SPARK_BULK_SIZE_CONFIG, sparkConf.getInt(BULK_SIZE_CONFIG, defaultBulkSize))
+
+      var varSchemaSampleSize = sparkConf.get(SPARK_SCHEMA_SAMPLE_SIZE_CONFIG, schemaSampleSize)
       if (varSchemaSampleSize == null && sparkConf.contains(SCHEMA_SAMPLE_SIZE_CONFIG)){
         varSchemaSampleSize = sparkConf.get(SCHEMA_SAMPLE_SIZE_CONFIG)
       }
@@ -84,10 +96,10 @@ import com.cloudant.spark.CloudantConfig
           s"$CONCURRENT_SAVE_CONFIG=$concurrentSave, $BULK_SIZE_CONFIG=$bulkSize," +
           s"$SCHEMA_SAMPLE_SIZE_CONFIG=$intSchemaSampleSize")
 
-      val protocol = if (sparkConf.contains(CLOUDANT_PROTOCOL_CONFIG)) sparkConf.get(CLOUDANT_PROTOCOL_CONFIG) else "https"
-      val host = if (sparkConf.contains(CLOUDANT_HOST_CONFIG)) sparkConf.get(CLOUDANT_HOST_CONFIG) else null
-      val user = if (sparkConf.contains(CLOUDANT_USERNAME_CONFIG)) sparkConf.get(CLOUDANT_USERNAME_CONFIG) else null
-      val passwd = if (sparkConf.contains(CLOUDANT_PASSWORD_CONFIG)) sparkConf.get(CLOUDANT_PASSWORD_CONFIG) else null
+      val protocol = sparkConf.get(SPARK_CLOUDANT_PROTOCOL_CONFIG, sparkConf.get(CLOUDANT_PROTOCOL_CONFIG, "https"))
+      val host = sparkConf.get(SPARK_CLOUDANT_HOST_CONFIG, sparkConf.get(CLOUDANT_HOST_CONFIG, null))
+      val user = sparkConf.get(SPARK_CLOUDANT_USERNAME_CONFIG, sparkConf.get(CLOUDANT_USERNAME_CONFIG, null))
+      val passwd = sparkConf.get(SPARK_CLOUDANT_PASSWORD_CONFIG, sparkConf.get(CLOUDANT_PASSWORD_CONFIG, null))
       
       if (host != null) {
         return new CloudantConfig(protocol, host,  dbName, indexName, viewName, intSchemaSampleSize)(user, passwd, total, max, min,requestTimeout,concurrentSave, bulkSize)
@@ -104,24 +116,27 @@ import com.cloudant.spark.CloudantConfig
   def getConfig(context: SQLContext,  parameters: Map[String, String]): CloudantConfig = {
     
       val sparkConf = context.sparkContext.getConf
-      
-      val totalS = parameters.getOrElse(PARTITION_CONFIG,null)
+
+      val totalS = sparkConf.get(SPARK_PARTITION_CONFIG, parameters.getOrElse(PARTITION_CONFIG, null))
       implicit val total = if (totalS ==null) sparkConf.getInt(PARTITION_CONFIG,defaultPartitions) else totalS.toInt
-      val maxS = parameters.getOrElse(MAX_IN_PARTITION_CONFIG,null)
+      val maxS = sparkConf.get(SPARK_MAX_IN_PARTITION_CONFIG, parameters.getOrElse(MAX_IN_PARTITION_CONFIG, null))
       implicit val max = if (maxS ==null) sparkConf.getInt(MAX_IN_PARTITION_CONFIG,defaultMaxInPartition) else maxS.toInt
-      val minS = parameters.getOrElse(MIN_IN_PARTITION_CONFIG,null)
+      val minS = sparkConf.get(SPARK_MIN_IN_PARTITION_CONFIG, parameters.getOrElse(MIN_IN_PARTITION_CONFIG, null))
       implicit val min = if (minS ==null) sparkConf.getInt(MIN_IN_PARTITION_CONFIG,defaultMinInPartition) else minS.toInt
-      
-      implicit val requestTimeout =sparkConf.getLong(REQUEST_TIMEOUT_CONFIG,defaultRequestTimeout)
-      implicit val concurrentSave =sparkConf.getInt(CONCURRENT_SAVE_CONFIG,defaultConcurrentSave)
-      val bulkSizeS = parameters.getOrElse(PARAM_BULK_SIZE_CONFIG, null)
+
+      val requestTimeoutS = sparkConf.get(SPARK_REQUEST_TIMEOUT_CONFIG, parameters.getOrElse(REQUEST_TIMEOUT_CONFIG, null))
+      implicit val requestTimeout = if (requestTimeoutS == null) sparkConf.getLong(REQUEST_TIMEOUT_CONFIG, defaultRequestTimeout) else requestTimeoutS.toLong
+  
+      val concurrentSaveS = sparkConf.get(SPARK_CONCURRENT_SAVE_CONFIG, parameters.getOrElse(CONCURRENT_SAVE_CONFIG, null))
+      implicit val concurrentSave = if (concurrentSaveS == null) sparkConf.getInt(CONCURRENT_SAVE_CONFIG, defaultConcurrentSave) else concurrentSaveS.toInt
+      val bulkSizeS = sparkConf.get(SPARK_BULK_SIZE_CONFIG,parameters.getOrElse(PARAM_BULK_SIZE_CONFIG, null))
       implicit val bulkSize = if (bulkSizeS == null) sparkConf.getInt(BULK_SIZE_CONFIG, defaultBulkSize) else bulkSizeS.toInt
 
       val dbName = parameters.getOrElse("database", parameters.getOrElse("path",null))
       val indexName = parameters.getOrElse("index",null)
       val viewName = parameters.getOrElse("view", null)
 
-      var schemaSampleSize = parameters.getOrElse(PARAM_SCHEMA_SAMPLE_SIZE_CONFIG, null)
+      var schemaSampleSize = sparkConf.get(SPARK_SCHEMA_SAMPLE_SIZE_CONFIG, parameters.getOrElse(PARAM_SCHEMA_SAMPLE_SIZE_CONFIG, null))
       if (schemaSampleSize == null && sparkConf.contains(SCHEMA_SAMPLE_SIZE_CONFIG) ) {
         schemaSampleSize = sparkConf.get(SCHEMA_SAMPLE_SIZE_CONFIG)
       }
@@ -135,10 +150,10 @@ import com.cloudant.spark.CloudantConfig
           s"$CONCURRENT_SAVE_CONFIG=$concurrentSave, $BULK_SIZE_CONFIG=$bulkSize," +
           s"$SCHEMA_SAMPLE_SIZE_CONFIG=$intSchemaSampleSize")
 
-      val protocolParam = parameters.getOrElse(CLOUDANT_PROTOCOL_CONFIG, null)
-      val hostParam = parameters.getOrElse(CLOUDANT_HOST_CONFIG, null)
-      val userParam = parameters.getOrElse(CLOUDANT_USERNAME_CONFIG, null)
-      val passwdParam = parameters.getOrElse(CLOUDANT_PASSWORD_CONFIG, null)
+      val protocolParam = sparkConf.get(SPARK_CLOUDANT_PROTOCOL_CONFIG, parameters.getOrElse(CLOUDANT_PROTOCOL_CONFIG, null))
+      val hostParam = sparkConf.get(SPARK_CLOUDANT_HOST_CONFIG, parameters.getOrElse(CLOUDANT_HOST_CONFIG, null))
+      val userParam = sparkConf.get(SPARK_CLOUDANT_USERNAME_CONFIG, parameters.getOrElse(CLOUDANT_USERNAME_CONFIG, null))
+      val passwdParam = sparkConf.get(SPARK_CLOUDANT_PASSWORD_CONFIG, parameters.getOrElse(CLOUDANT_PASSWORD_CONFIG, null))
       val protocol = if (protocolParam == null) sparkConf.get(CLOUDANT_PROTOCOL_CONFIG, "https") else protocolParam
       val host = if (hostParam == null) sparkConf.get(CLOUDANT_HOST_CONFIG, null) else hostParam
       val user = if (userParam == null) sparkConf.get(CLOUDANT_USERNAME_CONFIG, null) else userParam
