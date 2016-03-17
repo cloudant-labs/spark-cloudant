@@ -45,21 +45,28 @@ df.printSchema()
 
 df.filter(df.airportName >= 'Moscow').select("_id",'airportName').show()
 df.filter(df._id >= 'CAA').select("_id",'airportName').show()
-df.filter(df._id >= 'CAA').select("_id",'airportName').save("airportcodemapping_df", "com.cloudant.spark", bulkSize = "22222222")
+df.filter(df._id >= 'CAA').select("_id",'airportName').save("airportcodemapping_df",
+        "com.cloudant.spark", bulkSize = "100")
 
 df = sqlContext.load(source="com.cloudant.spark", database="n_flight")
 df.printSchema()
 
-total = df.filter(df.flightSegmentId >'AA9').select("flightSegmentId", "scheduledDepartureTime").orderBy(df.flightSegmentId).count()
+total = df.filter(df.flightSegmentId >'AA9').select("flightSegmentId", 
+        "scheduledDepartureTime").orderBy(df.flightSegmentId).count()
 print "Total", total, "flights from table"
 
-df = sqlContext.load(source="com.cloudant.spark", database="n_flight", index="_design/view/_search/n_flights")
+# Loading data from a search index
+df = sqlContext.load(source="com.cloudant.spark", database="n_flight", 
+        index="_design/view/_search/n_flights")
 df.printSchema()
 
-total = df.filter(df.flightSegmentId >'AA9').select("flightSegmentId", "scheduledDepartureTime").orderBy(df.flightSegmentId).count()
+total = df.filter(df.flightSegmentId >'AA9').select("flightSegmentId", 
+        "scheduledDepartureTime").orderBy(df.flightSegmentId).count()
 print "Total", total, "flights from index"
 
-# Loading data from views
-df = sqlContext.load(source="com.cloudant.spark", path="movies-glynn", view="_design/view1/_view/titleyear2")
+# Loading data from a view
+df = sqlContext.load(source="com.cloudant.spark", path="movies-glynn", 
+        view="_design/view1/_view/titleyear2", schemaSampleSize="20")
 df.printSchema()
-df.filter(df.value.year >= 1950).select(df.value.title.alias("title"), df.value.year.alias("year")).show()
+df.filter(df.value.year >= 1950).select(df.value.title.alias("title"),
+        df.value.year.alias("year")).show()

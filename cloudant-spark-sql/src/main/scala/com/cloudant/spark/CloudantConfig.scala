@@ -89,7 +89,11 @@ as the filter today does not tell how to link the filters out And v.s. Or
         dbUrl + "/_all_docs?limit=" + limit + "&include_docs=true"
       }
     } else {
-      dbUrl + "/" + viewName + "?limit=1"
+      if (limit == JsonStoreConfigManager.SCHEMA_FOR_ALL_DOCS_NUM) {
+        dbUrl + "/" + viewName
+      } else {
+        dbUrl + "/" + viewName + "?limit=" + limit
+      }
     }
   }
     
@@ -99,7 +103,6 @@ as the filter today does not tell how to link the filters out And v.s. Or
       includeDoc: Boolean = true): (String, Boolean) = {
     val (url:String, pusheddown:Boolean) = calculate(field, start, 
       startInclusive, end, endInclusive)
-    print("Includedoc:" + includeDoc)
     if (includeDoc){
       if (url.indexOf('?')>0) (url+"&include_docs=true",pusheddown)
       else (url+"?include_docs=true",pusheddown)
