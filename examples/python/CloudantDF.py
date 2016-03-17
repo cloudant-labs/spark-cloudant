@@ -23,8 +23,9 @@ conf = SparkConf().setAppName("Cloudant Spark SQL External Datasource in Python"
 # conf.set("cloudant.protocol","http")
 conf.set("cloudant.host","ACCOUNT.cloudant.com")
 conf.set("cloudant.username", "USERNAME")
-conf.set("cloudant.password","PASSWORD")
+conf.set("cloudant.password", "PASSWORD")
 conf.set("jsonstore.rdd.maxInPartition",1000)
+conf.set("schemaSampleSize", 10)
 
 sc = SparkContext(conf=conf)
 sqlContext = SQLContext(sc)
@@ -45,7 +46,7 @@ df.printSchema()
 
 df.filter(df.airportName >= 'Moscow').select("_id",'airportName').show()
 df.filter(df._id >= 'CAA').select("_id",'airportName').show()
-df.filter(df._id >= 'CAA').select("_id",'airportName').save("airportcodemapping_df", "com.cloudant.spark")
+df.filter(df._id >= 'CAA').select("_id",'airportName').save("airportcodemapping_df", "com.cloudant.spark", bulkSize = "100")
 
 df = sqlContext.load(source="com.cloudant.spark", database="n_flight")
 df.printSchema()
@@ -63,3 +64,5 @@ print "Total", total, "flights from index"
 df = sqlContext.load(source="com.cloudant.spark", path="movies-glynn", view="_design/view1/_view/titleyear2")
 df.printSchema()
 df.filter(df.value.year >= 1950).select(df.value.title.alias("title"), df.value.year.alias("year")).show()
+
+sc.stop()

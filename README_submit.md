@@ -23,6 +23,9 @@ submission with flavors
 		
 	replace --master with spark cluster URL. e.g. spark://<spark host>:7077 
 		
+##### by loading a spark-cloudant package from http://spark-packages.org/package/cloudant-labs/spark-cloudant
+
+	spark-submit  --master local[4]  --packages cloudant-labs:spark-cloudant:VERSION examples/python/CloudantApp.py
 
 
 #### For Scala

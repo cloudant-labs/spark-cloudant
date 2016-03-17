@@ -28,7 +28,6 @@ conf.set("cloudant.password","PASSWORD")
 sc = SparkContext(conf=conf)
 sqlContext = SQLContext(sc)
 
-
 print 'About to test com.cloudant.spark for n_airportcodemapping'
 sqlContext.sql(" CREATE TEMPORARY TABLE airportTable USING com.cloudant.spark OPTIONS ( database 'n_airportcodemapping')")
 airportData = sqlContext.sql("SELECT _id, airportName FROM airportTable WHERE _id >= 'CAA' AND _id <= 'GAA' ORDER BY _id")
@@ -52,3 +51,5 @@ flightData = sqlContext.sql("SELECT flightSegmentId, scheduledDepartureTime FROM
 flightData.printSchema()
 for code in flightData.collect():
 	print 'Flight {0} on {1}'.format(code.flightSegmentId, code.scheduledDepartureTime)
+
+sc.stop()

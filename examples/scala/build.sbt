@@ -17,7 +17,9 @@ libraryDependencies ++= {
   val sparkV =  "1.5.1"
   Seq(
     "org.apache.spark"    %%  "spark-core"	  %  sparkV % "provided",
-    "org.apache.spark"    %%  "spark-sql"	  %  sparkV % "provided"
+    "org.apache.spark"    %%  "spark-sql"	  %  sparkV % "provided",
+    "org.apache.spark"    %%  "spark-streaming"   %  sparkV % "provided"
   )
 }
 
+sparkVersion  := "1.5.1"

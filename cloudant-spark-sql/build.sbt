@@ -1,8 +1,8 @@
-organization  := "com.cloudant.spark"
+organization  := "cloudant-labs"
 
-name := "spark-sql"
+name := "spark-cloudant"
 
-version       := "0.1-SNAPSHOT"
+version       := "1.6.2"
 
 scalaVersion  := "2.10.4"
 
@@ -20,6 +20,7 @@ libraryDependencies ++= {
   Seq(
     "org.apache.spark"    %%  "spark-core"	  %  sparkV % "provided",
     "org.apache.spark"    %%  "spark-sql"	  %  sparkV % "provided",
+    "org.apache.spark"    %%  "spark-streaming"   %  sparkV % "provided",
     "io.spray"            %%  "spray-client"  %  sprayV,
     "io.spray"            %%  "spray-can"  %  sprayV,
     "com.typesafe.play"   %%  "play-json"     %  playJsonV
@@ -37,3 +38,27 @@ assemblyMergeStrategy in assembly := {
 }
 
 assemblyJarName in assembly := "cloudant-spark.jar"
+
+
+spAppendScalaVersion := true
+
+spName := "cloudant-labs/spark-cloudant"
+
+sparkVersion  := "1.5.1"
+
+sparkComponents := Seq("sql")
+
+spShortDescription := "Spark SQL Cloudant External Datasource"
+
+spDescription := """Spark SQL Cloudant External Datasource.
+                   |Cloudant integration with Spark as Spark SQL external datasource.
+                   | - Allows to load data from Cloudant dabases and indexes into Spark.
+                   | - Allows to save resulting data from Spark to existing Cloudant databases.
+                   | - Supports predicates push down (only based on _id field in databases, but varios fields for indexes).
+                   | - Support column pruning for indexes.""".stripMargin
+
+spAppendScalaVersion := true
+
+licenses += "Apache-2.0" -> url("http://opensource.org/licenses/Apache-2.0")
+
+credentials += Credentials(Path.userHome / ".ivy2" / ".sbtcredentials")

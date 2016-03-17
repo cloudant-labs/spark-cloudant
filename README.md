@@ -5,13 +5,14 @@ Cloudant integration with Spark as Spark SQL external datasource.
 
 ##  Contents:
 - [Implementation of RelationProvider](#id-section1)
-- [Binary download](#id-section2)
-- [Build from source](#id-section3)
-- [Sample application ](#id-section4)
-- [Job Submission](#id-section5)
-- [Configuration Overview](#id-section6)
-- [Troubleshooting](#id-section7)
-- [Known limitations and areas for improvement] (#id-section8)
+- [Implementation of Receiver](#id-section2)
+- [Binary download](#id-section3)
+- [Build from source](#id-section4)
+- [Sample application ](#id-section5)
+- [Job Submission](#id-section6)
+- [Configuration Overview](#id-section7)
+- [Troubleshooting](#id-section8)
+- [Known limitations and areas for improvement] (#id-section9)
 
 <div id='id-section1'/>
 ### Implementation of RelationProvider
@@ -26,9 +27,15 @@ Column Pruning | yes
 Predicates Push Down | _id or first predicate 
 Parallel Loading | yes, except with search index
  Insertable | yes
-
+ 
 
 <div id='id-section2'/>
+### Implementation of Receiver
+
+Spark Input DStreams can also be created out of custom data sources. All we have to do is implement a user-defined receiver. [CloudantReceiver.scala](cloudant-spark-sql/src/main/scala/com/cloudant/spark/CloudantReceiver.scala) is a Custom Receiver that gets the Cloudant data continuously by `Cloudant _changes feed` and pushs it into Spark. We can easily [use DataFrames and SQL operations on these data](examples/scala/src/main/scala/mytest/spark/CloudantStreaming.scala).
+
+
+<div id='id-section3'/>
 ### Binary download:
 
 Spark Version | Release # | Binary Location
@@ -40,15 +47,15 @@ Spark Version | Release # | Binary Location
 1.4.1 | v1.4.1.4 | [Location] (https://github.com/cloudant-labs/spark-cloudant/releases/download/v1.4.1.4/cloudant-spark-1.4.1.jar)
 1.4.1 | v1.4.1.5 | [Location] (https://github.com/cloudant-labs/spark-cloudant/releases/download/v1.4.1.5/cloudant-spark.jar)
 1.6.0 | v1.6.1.0 | [Location] (https://github.com/cloudant-labs/spark-cloudant/releases/download/v1.6.1/cloudant-spark-v1.6.1-43.jar)
+1.6.0 | v1.6.2 | [Location] (https://github.com/cloudant-labs/spark-cloudant/releases/download/v1.6.2/cloudant-spark-v1.6.2-102.jar)
 
-
-<div id='id-section3'/>
+<div id='id-section4'/>
 ### Build from source:
 
 [Instructions](README_build.md)
 	
 
-<div id='id-section4'/>
+<div id='id-section5'/>
 ## Sample application 
 
 ### Using SQL In Python 
@@ -114,6 +121,56 @@ data.printSchema()
 
 // print data
 data.map(t => "airportCode: " + t(0) +"airportName: " + t(1)).collect().foreach(println) 
+	
+```	
+
+
+### Using StreamingContext In Scala 
+
+[Scala code](examples/scala/src/main/scala/mytest/spark/CloudantStreaming.scala)
+
+```scala
+val sparkConf = new SparkConf().setAppName("Cloudant Spark SQL External Datasource in Scala")
+
+// Create the context with a 10 seconds batch size
+
+val duration = new Duration(10000)
+val ssc = new StreamingContext(sparkConf, duration)
+    
+val changes = ssc.receiverStream(new CloudantReceiver(Map(
+"cloudant.host" -> "ACCOUNT.cloudant.com",
+"cloudant.username" -> "USERNAME",
+"cloudant.password" -> "PASSWORD",
+"database" -> "n_airportcodemapping"), duration.milliseconds / 2))
+    
+changes.foreachRDD((rdd: RDD[String], time: Time) => {
+
+// Get the singleton instance of SQLContext
+val sqlContext = SQLContextSingleton.getInstance(rdd.sparkContext)
+
+println(s"========= $time =========")
+
+// Convert RDD[String] to DataFrame
+
+val changesDataFrame = sqlContext.read.json(rdd)
+
+if (!changesDataFrame.schema.isEmpty) {
+
+changesDataFrame.filter(changesDataFrame("airportName") >= "Paris").select("*").show()
+
+changesDataFrame.registerTempTable("airportcodemapping")
+
+val airportCountsDataFrame = sqlContext.sql("select airportName, count(*) as total from airportcodemapping group by airportName")
+
+airportCountsDataFrame.show()
+
+}
+
+changesDataFrame.printSchema()
+
+changesDataFrame.select("*").show()
+
+})
 	
 ```	
 
@@ -189,7 +246,7 @@ df.filter(df("airportCode") >= "CAA").select("airportCode","airportName").write.
  [Sample code on using DataFrame option to define cloudant configuration](examples/scala/src/main/scala/mytest/spark/CloudantDFOption.scala)
 
 
-<div id='id-section5'/>
+<div id='id-section6'/>
 	
 ## Job Submission
 
@@ -206,13 +263,24 @@ df.filter(df("airportCode") >= "CAA").select("airportCode","airportName").write.
 	spark-submit --class "<your class>" --master local[4] --jars <path to cloudant-spark.jar> <path to your app jar>
 		
 		
-<div id='id-section6'/>
+<div id='id-section7'/>
 
-## Configuration Overview		
+
+## Configuration Overview	
+The configuration is obtained in the following sequence:
+
+1. default in the Config, which is set in the application.conf
+2. key in the SparkConf, which is set in SparkConf
+3. key in the parameters, which is set in a dataframe or temporaty table options
+4. "spark."+key in the SparkConf (as they are treated as the one passed in through spark-submit using --conf option)
+
+Here each subsequent configuration overrides the previous one. Thus, configuration set using DataFrame option overrides what has beens set in SparkConf. And configuration passed in spark-submit using --conf takes precedence over any setting in the code.
+
+
+### Cofiguration in application.conf
+Default values are defined in [here](cloudant-spark-sql/src/main/resources/application.conf)
 
 ### Configuration on SparkConf
-
-Configuration can also be passed on DataFrame using option, which overrides what is defined in SparkConf.
 
 Name | Default | Meaning
 --- |:---:| ---
@@ -224,15 +292,14 @@ jsonstore.rdd.partitions|5|the number of partitions intent used to drive JsonSto
 jsonstore.rdd.maxInPartition|-1|the max rows in a partition. -1 means unlimited
 jsonstore.rdd.minInPartition|10|the min rows in a partition.
 jsonstore.rdd.requestTimeout|100000| the request timeout in milli-second
-jsonstore.rdd.concurrentSave|-1| the parallel saving size. -1 means unlimited
-jsonstore.rdd.bulkSize|1| the bulk save size
-jsonstore.rdd.schemaSampleSize|1| the sample size for RDD schema discovery. -1 means unlimited
+jsonstore.rdd.bulkSize|20| the bulk save size
+jsonstore.rdd.schemaSampleSize|1| the sample size for RDD schema discovery. 1 means first document; -1 means all document; 0 will be treated as 1; N means min(n, total) document 
 
-Default values are defined in [here](cloudant-spark-sql/src/main/resources/application.conf)
 
-### Configuration on Spark SQL temp table
 
-Configuration can also be passed on DataFrame using option.
+###  Configuration on Spark SQL Temporary Table or DataFrame
+
+Besides all the configurations passed to a temporary table or dataframe through SparkConf, it is also possible to set the following configurations in temporary table or dataframe using OPTIONS: 
 
 Name | Default | Meaning
 --- |:---:| ---
@@ -240,15 +307,25 @@ database||cloudant database name
 view||cloudant view w/o the database name. only used for load.
 index||cloudant search index w/o the database name. only used for load data with less than or equal to 200 results.
 path||cloudant: as database name if database is not present
-schemaSampleSize|1| the sample size used to discover the schema for this temp table. -1 scans all documents
+jsonstore.rdd.schemaSampleSize|1| the sample size used to discover the schema for this temp table. -1 scans all documents
+jsonstore.rdd.bulkSize|20| the bulk save size
+
 
 For fast loading, views are loaded without include_docs. Thus, a derived schema will always be: `{id, key, value}`, where `value `can be a compount field. An example of loading data from a view: 
 
 ```python
 sqlContext.sql(" CREATE TEMPORARY TABLE flightTable1 USING com.cloudant.spark OPTIONS ( database 'n_flight', view '_design/view/_view/AA0')")
+
 ```
 
-<div id='id-section7'/>
+###  Configuration in spark-submit using --conf option
+
+The above stated configuration keys can also be set using `spark-submit --conf` option. When passing configuration in spark-submit, make sure adding "spark." as prefix to the keys.
+
+
+<div id='id-section8'/>
+
+
 ## Troubleshooting
 
 ### Schema variance
@@ -290,7 +367,7 @@ sqlContext = SQLContext(sc)
 For a local setting applied to a single RDD only, use:
 
 ``` python
-sqlContext.sql("CREATE TEMPORARY TABLE schema-test USING com.cloudant.spark.CloudantRP OPTIONS ( schemaSampleSize '10',database 'schema-test')")
+sqlContext.sql("CREATE TEMPORARY TABLE schema-test USING com.cloudant.spark OPTIONS ( schemaSampleSize '10',database 'schema-test')")
 schemaTestTable = sqlContext.sql("SELECT * FROM schema-test")
 ```
 
@@ -325,7 +402,7 @@ sys.setdefaultencoding('utf-8')
 See [https://issues.apache.org/jira/browse/SPARK-11772](https://issues.apache.org/jira/browse/SPARK-11772) for details.
 
 
-<div id='id-section8'/>
+<div id='id-section9'/>
 
 ## Known limitations and areas for improvement
 
