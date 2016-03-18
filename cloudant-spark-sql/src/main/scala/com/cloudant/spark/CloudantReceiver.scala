@@ -53,6 +53,7 @@ class CloudantReceiver(cloudantParams: Map[String, String], interval: Long = 500
 
   def onStop() {
     stopped = true
+    config.shutdown()
   }
 
 }

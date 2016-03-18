@@ -40,148 +40,28 @@ class TestCloudantSparkConnector:
 		returncode, out, err = self.run_test(self.get_script_path(script_name), sparksubmit)
 		assert returncode == 1
 		print(err)
-		err = err[err.index("java.lang.RuntimeException"):]
+		err = err[err.index("java.lang.NumberFormatException"):]
 		err = err[:err.index("\n")]
-		assert err == "java.lang.RuntimeException: Database n_customer schema sample size is 0!"
+		assert err == "java.lang.NumberFormatException: For input string: \"str\""
 
 	def test_003(self, sparksubmit):
 		script_name = "schema_sample_size_003.py"
 		returncode, out, err = self.run_test(self.get_script_path(script_name), sparksubmit)
-		assert returncode == 1
-		print(err)
-		err = err[err.index("java.lang.RuntimeException"):]
-		err = err[:err.index("\n")]
-		assert err == "java.lang.RuntimeException: Database n_customer schema sample size is 0!"
+		cloudantUtils = CloudantDbUtils(test_properties)
+		if cloudantUtils.check_if_doc_exists("n_customer", "zzzzzzzzzzzzzz") :
+			print(err)
+			assert err.index("org.apache.spark.SparkException") > 0
+			assert returncode == 1
+		else :
+			assert returncode == 0
 
 	def test_004(self, sparksubmit):
 		script_name = "schema_sample_size_004.py"
 		returncode, out, err = self.run_test(self.get_script_path(script_name), sparksubmit)
-		assert returncode == 1
-		print(err)
-		err = err[err.index("java.lang.RuntimeException"):]
-		err = err[:err.index("\n")]
-		assert err == "java.lang.RuntimeException: Database n_customer schema sample size is 0!"
+		assert returncode == 0
 
 	def test_005(self, sparksubmit):
 		script_name = "schema_sample_size_005.py"
-		returncode, out, err = self.run_test(self.get_script_path(script_name), sparksubmit)
-		assert returncode == 1
-		print(err)
-		err = err[err.index("java.lang.NumberFormatException"):]
-		err = err[:err.index("\n")]
-		assert err == "java.lang.NumberFormatException: For input string: \"str\""
-
-	def test_006(self, sparksubmit):
-		script_name = "schema_sample_size_006.py"
-		returncode, out, err = self.run_test(self.get_script_path(script_name), sparksubmit)
-		assert returncode == 1
-		print(err)
-		err = err[err.index("java.lang.NumberFormatException"):]
-		err = err[:err.index("\n")]
-		assert err == "java.lang.NumberFormatException: For input string: \"str\""
-
-	def test_007(self, sparksubmit):
-		script_name = "schema_sample_size_007.py"
-		returncode, out, err = self.run_test(self.get_script_path(script_name), sparksubmit)
-		assert returncode == 1
-		print(err)
-		err = err[err.index("java.lang.NumberFormatException"):]
-		err = err[:err.index("\n")]
-		assert err == "java.lang.NumberFormatException: For input string: \"str\""
-
-	def test_008(self, sparksubmit):
-		script_name = "schema_sample_size_008.py"
-		returncode, out, err = self.run_test(self.get_script_path(script_name), sparksubmit)
-		assert returncode == 1
-		print(err)
-		err = err[err.index("java.lang.NumberFormatException"):]
-		err = err[:err.index("\n")]
-		assert err == "java.lang.NumberFormatException: For input string: \"str\""	
-
-	def test_009(self, sparksubmit):
-		script_name = "schema_sample_size_009.py"
-		returncode, out, err = self.run_test(self.get_script_path(script_name), sparksubmit)
-		cloudantUtils = CloudantDbUtils(test_properties)
-		if cloudantUtils.check_if_doc_exists("n_customer", "zzzzzzzzzzzzzz") :
-			print(err)
-			assert err.index("org.apache.spark.SparkException") > 0
-			assert returncode == 1
-		else :
-			assert returncode == 0
-
-	def test_010(self, sparksubmit):
-		script_name = "schema_sample_size_010.py"
-		returncode, out, err = self.run_test(self.get_script_path(script_name), sparksubmit)
-		cloudantUtils = CloudantDbUtils(test_properties)
-		if cloudantUtils.check_if_doc_exists("n_customer", "zzzzzzzzzzzzzz") :
-			print(err)
-			assert err.index("org.apache.spark.SparkException") > 0
-			assert returncode == 1
-		else :
-			assert returncode == 0
-
-	def test_011(self, sparksubmit):
-		script_name = "schema_sample_size_011.py"
-		returncode, out, err = self.run_test(self.get_script_path(script_name), sparksubmit)
-		cloudantUtils = CloudantDbUtils(test_properties)
-		if cloudantUtils.check_if_doc_exists("n_customer", "zzzzzzzzzzzzzz") :
-			print(err)
-			assert err.index("org.apache.spark.SparkException") > 0
-			assert returncode == 1
-		else :
-			assert returncode == 0
-
-	def test_012(self, sparksubmit):
-		script_name = "schema_sample_size_012.py"
-		returncode, out, err = self.run_test(self.get_script_path(script_name), sparksubmit)
-		cloudantUtils = CloudantDbUtils(test_properties)
-		if cloudantUtils.check_if_doc_exists("n_customer", "zzzzzzzzzzzzzz") :
-			print(err)
-			assert err.index("org.apache.spark.SparkException") > 0
-			assert returncode == 1
-		else :
-			assert returncode == 0
-
-	def test_013(self, sparksubmit):
-		script_name = "schema_sample_size_013.py"
-		returncode, out, err = self.run_test(self.get_script_path(script_name), sparksubmit)
-		assert returncode == 0
-
-	def test_014(self, sparksubmit):
-		script_name = "schema_sample_size_014.py"
-		returncode, out, err = self.run_test(self.get_script_path(script_name), sparksubmit)
-		cloudantUtils = CloudantDbUtils(test_properties)
-		if cloudantUtils.check_if_doc_exists("n_customer", "zzzzzzzzzzzzzz") :
-			print(err)
-			assert err.index("org.apache.spark.SparkException") > 0
-			assert returncode == 1
-		else :
-			assert returncode == 0
-
-	def test_015(self, sparksubmit):
-		script_name = "schema_sample_size_015.py"
-		returncode, out, err = self.run_test(self.get_script_path(script_name), sparksubmit)
-		cloudantUtils = CloudantDbUtils(test_properties)
-		if cloudantUtils.check_if_doc_exists("n_customer", "zzzzzzzzzzzzzz") :
-			print(err)
-			assert err.index("org.apache.spark.SparkException") > 0
-			assert returncode == 1
-		else :
-			assert returncode == 0
-
-	def test_016(self, sparksubmit):
-		script_name = "schema_sample_size_016.py"
-		returncode, out, err = self.run_test(self.get_script_path(script_name), sparksubmit)
-		cloudantUtils = CloudantDbUtils(test_properties)
-		if cloudantUtils.check_if_doc_exists("n_customer", "zzzzzzzzzzzzzz") :
-			print(err)
-			assert err.index("org.apache.spark.SparkException") > 0
-			assert returncode == 1
-		else :
-			assert returncode == 0
-
-	def test_017(self, sparksubmit):
-		script_name = "schema_sample_size_017.py"
 		returncode, out, err = self.run_test(self.get_script_path(script_name), sparksubmit)
 		cloudantUtils = CloudantDbUtils(test_properties)
 		if cloudantUtils.check_if_doc_exists("n_customer", "zzzzzzzzzzzzzz") :

@@ -52,7 +52,7 @@ print ('About to test com.cloudant.spark for n_flight with view')
 sqlContext.sql(" CREATE TEMPORARY TABLE flightTable1 USING com.cloudant.spark OPTIONS ( database 'n_flight', view '_design/view/_view/AA0')")
 verifyViewOption()
 
-
+sc.stop()
 
 	
 

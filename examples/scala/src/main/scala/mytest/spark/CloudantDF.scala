@@ -69,5 +69,6 @@ object CloudantDF{
         df4.printSchema()
         import sqlContext.implicits._
         df4.filter($"value.year" >= 1930).select($"value.title", $"value.year").show()
+        sc.stop()
 }
 }

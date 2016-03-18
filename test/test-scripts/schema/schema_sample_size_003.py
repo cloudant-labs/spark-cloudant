@@ -17,6 +17,7 @@ from pyspark.sql import SQLContext
 from pyspark import SparkContext, SparkConf
 from os.path import dirname as dirname
 import sys
+import requests
 # add /test to pythonpath so utils can be imported when running from spark
 sys.path.append(dirname(dirname(dirname(__file__))))
 import helpers.utils as utils
@@ -25,12 +26,26 @@ conf = utils.createSparkConf()
 sc = SparkContext(conf=conf)
 sqlContext = SQLContext(sc)
 
-print ('About to test com.cloudant.spark for n_customer with setting schemaSampleSize to 0')
-sqlContext.sql(" CREATE TEMPORARY TABLE customerTable USING com.cloudant.spark OPTIONS ( schemaSampleSize '0',database 'n_customer')")
-customerData = sqlContext.sql("SELECT * FROM customerTable")
-customerData.printSchema()
-      
+def verify():
+	customerData = sqlContext.sql("SELECT miles_ytd, total_miles FROM customerTable")
+	customerData.printSchema()
+	customerData.show(5)
+	assert customerData.count() == doc_count
 
+# query the index using Cloudant API to get expected count
+test_properties = utils.get_test_properties()
+url = url = "https://{}/{}".format(
+			test_properties["cloudanthost"], 'n_customer')
+print(url)
+response = requests.get(url, auth=(test_properties["cloudantusername"], test_properties["cloudantpassword"]))
+assert response.status_code == 200
+doc_count = response.json().get("doc_count")
+
+print ('About to test com.cloudant.spark for n_customer with setting schemaSampleSize to 5')
+sqlContext.sql(" CREATE TEMPORARY TABLE customerTable USING com.cloudant.spark OPTIONS ( schemaSampleSize '5',database 'n_customer')")
+verify()
+      
+sc.stop()
 	
 
 

@@ -56,3 +56,5 @@ if total_rows == 0:
 print ('About to test com.cloudant.spark for n_booking')
 sqlContext.sql(" CREATE TEMPORARY TABLE bookingTable1 USING com.cloudant.spark OPTIONS ( database 'n_booking')")
 verifySpecCharValuePredicate()
+
+sc.stop()
