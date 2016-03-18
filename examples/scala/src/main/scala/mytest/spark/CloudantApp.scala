@@ -72,5 +72,6 @@ object CloudantApp {
     flightData.printSchema()
     flightData.map(t => "flightSegmentId: " + t(0) + ", scheduledDepartureTime: " + t(1)).collect().foreach(println) 
   
+    sc.stop()
   }
 }

@@ -45,3 +45,5 @@ def verifyRangePredicate():
 print ('About to range test com.cloudant.spark for n_airportcodemapping')
 sqlContext.sql("CREATE TEMPORARY TABLE airportTable USING com.cloudant.spark OPTIONS ( database 'n_airportcodemapping')")
 verifyRangePredicate()
+
+sc.stop()

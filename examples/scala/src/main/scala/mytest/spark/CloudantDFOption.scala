@@ -60,5 +60,6 @@ object CloudantDFOption{
         val df3 = sqlContext.read.format("com.cloudant.spark").option("index", "_design/view/_search/n_flights").option("cloudant.host",cloudantHost).option("cloudant.username", cloudantUser).option("cloudant.password",cloudantPassword).load("n_flight")
         val total2 = df3.filter(df3("flightSegmentId") >"AA9").select("flightSegmentId", "scheduledDepartureTime").orderBy(df3("flightSegmentId")).count()
         println(s"Total $total2 flights from index")
+        sc.stop()
 }
 }

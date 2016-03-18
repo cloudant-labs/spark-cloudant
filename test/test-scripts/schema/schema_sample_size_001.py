@@ -30,6 +30,7 @@ sqlContext.sql(" CREATE TEMPORARY TABLE customerTable USING com.cloudant.spark O
 customerData = sqlContext.sql("SELECT * FROM customerTable")
 customerData.printSchema()
       
+sc.stop()
 
 	
 

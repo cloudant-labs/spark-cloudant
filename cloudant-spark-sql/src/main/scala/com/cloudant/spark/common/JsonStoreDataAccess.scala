@@ -31,6 +31,8 @@ import play.api.libs.json.JsString
 import com.typesafe.config.ConfigFactory
 import scala.util.Random
 import scala.concurrent.Future
+import java.util.concurrent.TimeUnit
+import scala.concurrent.duration._
 
 import akka.actor.ActorSystem
 import akka.util.Timeout
@@ -46,8 +48,11 @@ import HttpMethods._
  */
 class JsonStoreDataAccess (config: CloudantConfig)  {
   implicit lazy val timeout = {Timeout(config.requestTimeout)}
-  lazy val envSystem = {SparkEnv.get.actorSystem}
-  lazy val logger = {Logging(envSystem, getClass)}
+  implicit lazy val system = config.getSystem()
+  
+  implicit lazy val executionContext = system.dispatchers.lookup("thread-pool-dispatcher")
+    
+  lazy val logger = {Logging(system, getClass)}
 
   private lazy val validCredentials: BasicHttpCredentials = {
     if (config.username !=null) BasicHttpCredentials(config.username, 
@@ -147,34 +152,16 @@ class JsonStoreDataAccess (config: CloudantConfig)  {
     result
   }
 
-  private def getSystem(): (ActorSystem, Boolean) = {
-    val checkSprayConfig = envSystem.settings.config.withFallback(ConfigFactory.parseString("""
-        spray = NOT_FOUND
-     """) )
-    val sprayValue = checkSprayConfig.getValue("spray").unwrapped().toString()
-    if ( !sprayValue.equals("NOT_FOUND")) // The env actorSystem loaded spary config
-    {
-      logger.info("reuse SparkEnv ActorSystem as it contains spray")
-      (envSystem, true)
-    }
-    else{
-      logger.info("create new ActorSystem as the SparkEnv one does not contain spray")
-      val classLoader = this.getClass.getClassLoader
-      val myconfig = ConfigFactory.load(classLoader)// force config from my classloader
-      val nextRamdomNum = new Random().nextInt
-        (ActorSystem("CloudantSpark-"+nextRamdomNum,myconfig,classLoader), false)
-    }
-  }
+
   
   def getChanges(url: String, processResults: (String) => String): String = {
     getQueryResult(url, processResults)
   }
-  
+
   private def getQueryResult[T](url: String, postProcessor:(String) => T)
       (implicit columns: Array[String] = null, 
       attrToFilters: Map[String, Array[Filter]] =null) : T={
     logger.warning("Loading data from Cloudant using query: "+ url)
-    implicit val ( system, existing) = getSystem()
 
     val request: HttpRequest = if (validCredentials != null) {
       Get(url) ~> addCredentials(validCredentials)
@@ -191,73 +178,57 @@ class JsonStoreDataAccess (config: CloudantConfig)  {
     }
     val data = postProcessor(result.entity.asString)
     logger.debug(s"got result:$data")
-    if(!existing){
-      logger.info("shutdown newly created ActorSystem")
-      system.shutdown()
-    }
     data
   }
 
-  def saveAll(rows: Array[String]) {
+
+  def saveAll(rows: List[String]): Unit = {
     if (rows.size == 0) {
       throw new RuntimeException("Database " + config.getDbname() +
         ": nothing was saved because the number of records was 0!")
     }
-    implicit val (system, existing) = getSystem()
-    import system.dispatcher 
-    
     val useBulk = (config.getBulkPostUrl() != null && config.bulkSize>1)
     val bulkSize = if (useBulk) config.bulkSize else 1
     val bulks = rows.grouped(bulkSize).toList
+    val totalBulks = bulks.size
+    logger.debug(s"total records:${rows.size}=bulkSize:$bulkSize * totalBulks:$totalBulks, execute in parallel $totalBulks")
     
     val url = if (bulkSize>1) config.getBulkPostUrl() else config.getPostUrl()
-    logger.info(s"Post:$url")
+    logger.debug(s"Post:$url")
     
     if (url == null) return
     import ContentTypes._
     implicit val stringMarshaller = Marshaller.of[String](`application/json`) {
       (value, ct, ctx) => ctx.marshalTo(HttpEntity(ct, value))
     }
-    val parallelSize = if (config.concurrentSave>0) config.concurrentSave else bulks.size
-    val blocks = bulks.size/parallelSize + (if ( bulks.size % parallelSize != 0) 1 else 0)
-    
-    for (i <- 0 until blocks){
-      val start = parallelSize*i
-      val end = if (parallelSize+start<bulks.size) parallelSize+start else bulks.size
-      logger.info(s"Save from $start to ${end-1} for bulkSize=$bulkSize and paralellSize=$parallelSize at ${i+1}/$blocks")
-      val allFutures =  { 
-        for ( j <- start until end) yield
-        {
-          val  x: String = if (bulkSize >1) config.getBulkRows(bulks(j)) else bulks(j)(0)
-          logger.debug(s"content:$x")
-          var pipeline: HttpRequest => Future[HttpResponse] = null
-          if (validCredentials!=null)
-          {
-            pipeline = ( 
-            addCredentials(validCredentials) 
-            ~> sendReceive
-            )
-          }else
-          {
-            pipeline = sendReceive
-          }
-          val request = Post(url,x)
-          val response: Future[HttpResponse] = pipeline(request)
+    // Better parallelism 
+    val start_ts: Long = System.currentTimeMillis / 1000
+    // Share the pipeline . TODO use connector?
+    val pipeline: HttpRequest => Future[HttpResponse] = 
+            if (validCredentials!=null)
+            {
+              ( 
+              addCredentials(validCredentials) 
+              ~> sendReceive
+              )
+            }else
+            {
+              sendReceive
+            }
+    val allFutures =  Future.traverse(bulks){ bulk=>
+            val  x: String = if (bulkSize >1) config.getBulkRows(bulk) else bulk(0)
+            logger.debug(s"content:$x")
+            val request = Post(url,x)
+            val response: Future[HttpResponse] = pipeline(request)
             response
-          } 
-      }
-      val f = Future.sequence(allFutures.toList)
-      val result = Await.result(f, timeout.duration)
-      val isSuccessful= result.forall { x => x.status.isSuccess }
-      if(!existing)
-      {
-        logger.info("shutdown newly created ActorSystem")
-        system.shutdown()
-      }
-      logger.info(s"Save total ${end-start}=${result.length} successful=$isSuccessful")
-      if (!isSuccessful)
-         throw new RuntimeException("Database " + config.getDbname() +
-          " does not exist or is not accessible. Failed to save data!")
+    }
+    val failureFuture = allFutures.map { x => x.filter {  y => (! y.status.isSuccess) }.map { z => z.status.reason }}
+    val reason= Await.result(failureFuture, (config.requestTimeout * totalBulks).millis).toSet
+    val end_ts: Long = System.currentTimeMillis / 1000
+    logger.info(s"Save total ${rows.length} with bulkSize $bulkSize in ${end_ts-start_ts}s")
+    if (reason.size>0)
+    {
+         throw new RuntimeException(s"Save to Database ${config.getDbname()} failed with $reason")
     }
   }
 }

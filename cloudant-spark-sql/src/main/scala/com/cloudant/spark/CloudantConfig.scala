@@ -22,6 +22,7 @@ import play.api.libs.json.JsUndefined
 import java.net.URLEncoder
 import com.cloudant.spark.common._
 import play.api.libs.json.JsNumber
+import akka.actor.ActorSystem
 
 /*
 @author yanglei
@@ -29,12 +30,12 @@ Only allow one field pushdown now
 as the filter today does not tell how to link the filters out And v.s. Or
 */
 @serializable class CloudantConfig(val protocol:String, val host: String, val dbName: String,
-    val indexName: String = null, val viewName:String = null,
-    val schemaSampleSize: Int = JsonStoreConfigManager.defaultSchemaSampleSize)
+    val indexName: String = null, val viewName:String = null)
     (implicit val username: String, val password: String,
     val partitions:Int, val maxInPartition: Int, val minInPartition:Int,
-    val requestTimeout:Long,val concurrentSave:Int, val bulkSize: Int) {
+    val requestTimeout:Long,val bulkSize: Int, val schemaSampleSize: Int) {
   
+   private val SCHEMA_FOR_ALL_DOCS_NUM = -1
   private lazy val dbUrl = {protocol + "://"+ host+"/"+dbName}
 
   val pkField = "_id"
@@ -44,7 +45,15 @@ as the filter today does not tell how to link the filters out And v.s. Or
   def getChangesUrl(): String = {
     dbUrl + "/_changes?include_docs=true&feed=normal"
   }
+
+  def getSystem(): ActorSystem  = {
+    JsonStoreConfigManager.getActorSystem()
+  }
   
+  def shutdown() = {
+    JsonStoreConfigManager.shutdown()
+  }
+
   def getPostUrl(): String ={dbUrl}
   
   def getLastUrl(skip: Int): String = {
@@ -83,7 +92,7 @@ as the filter today does not tell how to link the filters out And v.s. Or
   
   def getAllDocsUrl(limit: Int): String = {
     if (viewName == null) {
-      if (limit == JsonStoreConfigManager.SCHEMA_FOR_ALL_DOCS_NUM) {
+      if (limit == SCHEMA_FOR_ALL_DOCS_NUM) {
         dbUrl + "/_all_docs?include_docs=true"
       } else {
         dbUrl + "/_all_docs?limit=" + limit + "&include_docs=true"
@@ -202,8 +211,9 @@ as the filter today does not tell how to link the filters out And v.s. Or
     dbUrl + "/_bulk_docs"
   }
     
-  def getBulkRows(rows: Array[String]): String = {
+  def getBulkRows(rows: List[String]): String = {
     val docs = rows.map { x => Json.parse(x) }
     Json.stringify(Json.obj("docs" -> Json.toJson(docs.toSeq)))
   }
+ 
 }
