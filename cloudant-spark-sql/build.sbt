@@ -2,7 +2,7 @@ organization  := "cloudant-labs"
 
 name := "spark-cloudant"
 
-version       := "1.6.2"
+version       := "1.6.3"
 
 scalaVersion  := "2.10.4"
 
