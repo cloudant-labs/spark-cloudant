@@ -42,7 +42,7 @@ assert response.status_code == 200
 doc_count = response.json().get("doc_count")
 
 print ('About to test com.cloudant.spark for n_customer with setting schemaSampleSize to 1')
-sqlContext.sql(" CREATE TEMPORARY TABLE customerTable USING com.cloudant.spark OPTIONS ( database 'n_customer')")
+sqlContext.sql(" CREATE TEMPORARY TABLE customerTable USING com.cloudant.spark OPTIONS ( database 'n_customer', schemaSampleSize '1')")
 verify()
   
 sc.stop()    
