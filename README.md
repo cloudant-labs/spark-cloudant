@@ -293,7 +293,7 @@ jsonstore.rdd.maxInPartition|-1|the max rows in a partition. -1 means unlimited
 jsonstore.rdd.minInPartition|10|the min rows in a partition.
 jsonstore.rdd.requestTimeout|100000| the request timeout in milli-second
 bulkSize|20| the bulk save size
-schemaSampleSize|1| the sample size for RDD schema discovery. 1 means first document; -1 means all document; 0 will be treated as 1; N means min(n, total) document 
+schemaSampleSize| -1 | the sample size for RDD schema discovery. 1 means we are using only first document for schema discovery; -1 means all documents; 0 will be treated as 1; any number N means min(N, total) docs 
 
 
 
@@ -307,7 +307,7 @@ database||cloudant database name
 view||cloudant view w/o the database name. only used for load.
 index||cloudant search index w/o the database name. only used for load data with less than or equal to 200 results.
 path||cloudant: as database name if database is not present
-schemaSampleSize|1| the sample size used to discover the schema for this temp table. -1 scans all documents
+schemaSampleSize|-1| the sample size used to discover the schema for this temp table. -1 scans all documents
 bulkSize|20| the bulk save size
 
 

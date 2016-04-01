@@ -15,18 +15,11 @@
 *******************************************************************************/
 package com.cloudant.spark
 
-import org.apache.spark.{SparkContext, SparkConf}
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.SQLContext
 import org.apache.spark.sql.Row
 import org.apache.spark.sql.types._
 import org.apache.spark.sql.sources._
-import scala.collection.mutable.ArrayBuffer
-import scala.collection.immutable.StringOps
-import play.api.libs.json.JsValue
-import play.api.libs.json.Json
-import play.api.libs.json.JsSuccess
-import play.api.libs.json.JsError
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.SaveMode
 import org.apache.spark.SparkEnv
@@ -64,7 +57,8 @@ case class CloudantReadWriteRelation (config:CloudantConfig, schema: StructType,
         
         val (min, minInclusive, max, maxInclusive) = filterInterpreter.getInfo(searchField)
         implicit val columns = requiredColumns
-        val (url: String, pusheddown: Boolean) =  config.getRangeUrl(searchField, min,minInclusive, max,maxInclusive, false)
+        val (url: String, pusheddown: Boolean) =  config.getRangeUrl(searchField,
+            min, minInclusive, max, maxInclusive, false)
         if (!pusheddown) searchField = null
         implicit val attrToFilters = filterInterpreter.getFiltersForPostProcess(searchField)
         
@@ -102,22 +96,32 @@ class DefaultSource extends RelationProvider with CreatableRelationProvider with
       
     private def create(sqlContext: SQLContext, parameters: Map[String, String], inSchema: StructType) = {
     
-      val config: CloudantConfig = JsonStoreConfigManager.getConfig(sqlContext, parameters).asInstanceOf[CloudantConfig]
+      val config: CloudantConfig = JsonStoreConfigManager.getConfig(sqlContext, parameters)
 
       var allDocsDF: DataFrame = null
       
       val schema: StructType = {
-        if (inSchema!=null) inSchema
+        if (inSchema!=null)
+          inSchema
         else{
+          val df = if (config.getSchemaSampleSize() == JsonStoreConfigManager.SCHEMA_FOR_ALL_DOCS_NUM
+              && config.viewName == null && config.indexName == null) {
+            val filterInterpreter = new FilterInterpreter(null)
+            var searchField = null
+            val (min, minInclusive, max, maxInclusive) =
+                filterInterpreter.getInfo(searchField)
+            val (url: String, pusheddown: Boolean) = config.getRangeUrl(searchField,
+                min, minInclusive, max, maxInclusive, false)
+            val cloudantRDD  = new JsonStoreRDD(sqlContext.sparkContext,config, url)
+            allDocsDF = sqlContext.read.json(cloudantRDD)
+            allDocsDF
+          } else {
             val dataAccess = new JsonStoreDataAccess(config)
-
-            val aRDD = sqlContext.sparkContext.parallelize(dataAccess.getMany(config.getSchemaSampleSize()))
-            val df = sqlContext.read.json(aRDD)
-            if (config.getSchemaSampleSize() == JsonStoreConfigManager.SCHEMA_FOR_ALL_DOCS_NUM && config.viewName == null && config.indexName == null) {
-              allDocsDF = df
-            }
-            
-            df.schema
+            val aRDD = sqlContext.sparkContext.parallelize(
+                dataAccess.getMany(config.getSchemaSampleSize()))
+            sqlContext.read.json(aRDD)
+          }
+          df.schema
         }
       }
 

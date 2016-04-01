@@ -43,7 +43,9 @@ class CloudantDbUtils:
 		url = "https://{}/{}".format(
 				self.cloudanthost, db_name)
 		response = self.r.delete(url)
-		assert response.status_code == 200
+		if response.status_code != 200:
+		    print ("url:{}, status_code:{}".format(url, response.status_code))
+		assert (response.status_code == 200 or response.status_code == 202)
 		
 		
 	def create_database(self, db_name):
@@ -51,7 +53,9 @@ class CloudantDbUtils:
 		url = "https://{}/{}".format(
 				self.cloudanthost, db_name)
 		response = self.r.put(url)
-		assert response.status_code == 201
+		if response.status_code != 201:
+		    print ("url: {}, status_code: {}".format(url, response.status_code))
+		assert (response.status_code == 201 or response.status_code == 202)
 		
 	
 	def create_index(self, db_name):
