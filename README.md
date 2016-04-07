@@ -38,16 +38,9 @@ Spark Input DStreams can also be created out of custom data sources. All we have
 <div id='id-section3'/>
 ### Binary download:
 
-Spark Version | Release # | Binary Location
---- | --- | ---
-1.3.0 | v0.1 | [Location] (https://github.com/cloudant/spark-cloudant/releases/download/v0.1/cloudant-spark.jar)
-1.3.1 | v1.3.1.2 | [Location] (https://github.com/cloudant/spark-cloudant/releases/download/v1.3.1.2/cloudant-spark.jar)
-1.4.0 | v1.4.0.0 | [Location] (https://github.com/cloudant/spark-cloudant/releases/download/1.4.0.0/cloudant-spark.jar)
-1.4.1 | v1.4.1.3 | [Location] (https://github.com/cloudant/spark-cloudant/releases/download/v1.4.1.3/cloudant-spark.jar)
-1.4.1 | v1.4.1.4 | [Location] (https://github.com/cloudant-labs/spark-cloudant/releases/download/v1.4.1.4/cloudant-spark-1.4.1.jar)
-1.4.1 | v1.4.1.5 | [Location] (https://github.com/cloudant-labs/spark-cloudant/releases/download/v1.4.1.5/cloudant-spark.jar)
-1.6.0 | v1.6.1.0 | [Location] (https://github.com/cloudant-labs/spark-cloudant/releases/download/v1.6.1/cloudant-spark-v1.6.1-43.jar)
-1.6.0 | v1.6.2 | [Location] (https://github.com/cloudant-labs/spark-cloudant/releases/download/v1.6.2/cloudant-spark-v1.6.2-102.jar)
+The latest release 1.6.3 is available [here] (https://github.com/cloudant-labs/spark-cloudant/releases/download/v1.6.3/cloudant-spark-v1.6.3-125.jar). It is tested to work with versions of Spark 1.4, 1.5 and 1.6.
+
+
 
 <div id='id-section4'/>
 ### Build from source:
