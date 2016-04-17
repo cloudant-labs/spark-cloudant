@@ -44,6 +44,10 @@ class TestCloudantSparkConnector:
         script_name = "ViewOption.py"
         helpers.utils.run_test(self.get_script_path(script_name), sparksubmit)      
     
+    def test_Save(self, sparksubmit):
+        script_name = "Save.py"
+        helpers.utils.run_test(self.get_script_path(script_name), sparksubmit)      
+    
     def get_script_path(self, script_name):
         return os.path.join(os.path.dirname(__file__), self.script_dir, script_name)
             

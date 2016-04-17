@@ -74,10 +74,13 @@ case class CloudantReadWriteRelation (config:CloudantConfig, schema: StructType,
     }
 
     def  insert( data:DataFrame, overwrite: Boolean) ={
-      // Better parallelism 
+      // Create a database if an option createDbOnSave is true
+      if (config.getCreateDBonSave()) {
+        dataAccess.createDB()
+      }
       val result = data.toJSON.foreachPartition { x =>
-            val list = x.toList // Has to pass as List, Iterator results in 0 data
-              dataAccess.saveAll(list)
+        val list = x.toList // Has to pass as List, Iterator results in 0 data
+        dataAccess.saveAll(list)
       }
     }
 }

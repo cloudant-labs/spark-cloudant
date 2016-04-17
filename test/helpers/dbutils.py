@@ -23,6 +23,7 @@ class CloudantDbUtils:
 
 	test_dbs = [
 		"n_airportcodemapping",
+		"n_airportcodemapping2",
 		"n_booking",
 		"n_customer",
 		"n_customersession",

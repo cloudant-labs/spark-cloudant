@@ -29,7 +29,11 @@ cloudant_host = "ACCOUNT.cloudant.com"
 cloudant_username = "USERNAME"
 cloudant_password = "PASSWORD"
 
-df = sqlContext.read.format("com.cloudant.spark").option("cloudant.host",cloudant_host).option("cloudant.username",cloudant_username).option("cloudant.password",cloudant_password).load("n_airportcodemapping")
+df = sqlContext.read.format("com.cloudant.spark") \
+    .option("cloudant.host", cloudant_host) \
+    .option("cloudant.username", cloudant_username) \
+    .option("cloudant.password",cloudant_password) \
+    .load("n_airportcodemapping")
 
 # In case of doing multiple operations on a dataframe (select, filter etc.)
 # you should persist the dataframe.
@@ -41,20 +45,40 @@ df.cache() # persisting in memory
 # df.persist(storageLevel = StorageLevel(True, True, False, True, 1)) 
 
 df.printSchema()
-
 df.filter(df._id >= 'CAA').select("_id",'airportName').show()
-df.filter(df._id >= 'CAA').select("_id",'airportName').write.format("com.cloudant.spark").option("cloudant.host",cloudant_host).option("cloudant.username",cloudant_username).option("cloudant.password",cloudant_password).option("bulkSize","22222222").save("airportcodemapping_df")
 
-df = sqlContext.read.format("com.cloudant.spark").option("cloudant.host",cloudant_host).option("cloudant.username",cloudant_username).option("cloudant.password",cloudant_password).load("n_flight")
+# To create a db during save, set createDBOnSave=true
+df.filter(df._id >= 'CAA').select("_id",'airportName') \
+        .write.format("com.cloudant.spark") \
+        .option("cloudant.host", cloudant_host) \
+        .option("cloudant.username", cloudant_username) \
+        .option("cloudant.password",cloudant_password) \
+        .option("bulkSize","100") \
+        .option("createDBOnSave", "true") \
+        .save("airportcodemapping_df")
+
+df = sqlContext.read.format("com.cloudant.spark") \
+        .option("cloudant.host", cloudant_host) \
+        .option("cloudant.username", cloudant_username) \
+        .option("cloudant.password", cloudant_password) \
+        .load("n_flight")
 df.printSchema()
 
-total = df.filter(df.flightSegmentId >'AA9').select("flightSegmentId", "scheduledDepartureTime").orderBy(df.flightSegmentId).count()
+total = df.filter(df.flightSegmentId >'AA9') \
+        .select("flightSegmentId", "scheduledDepartureTime") \
+        .orderBy(df.flightSegmentId).count()
 print "Total", total, "flights from table"
 
-df = sqlContext.read.format("com.cloudant.spark").option("cloudant.host",cloudant_host).option("cloudant.username",cloudant_username).option("cloudant.password",cloudant_password).option("index","_design/view/_search/n_flights").load("n_flight")
+df = sqlContext.read.format("com.cloudant.spark") \
+        .option("cloudant.host",cloudant_host) \
+        .option("cloudant.username",cloudant_username) \
+        .option("cloudant.password",cloudant_password) \
+        .option("index","_design/view/_search/n_flights").load("n_flight")
 df.printSchema()
 
-total = df.filter(df.flightSegmentId >'AA9').select("flightSegmentId", "scheduledDepartureTime").orderBy(df.flightSegmentId).count()
+total = df.filter(df.flightSegmentId >'AA9') \
+        .select("flightSegmentId", "scheduledDepartureTime") \
+        .orderBy(df.flightSegmentId).count()
 print "Total", total, "flights from index"
 
 sc.stop()

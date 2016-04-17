@@ -29,13 +29,14 @@ import akka.actor.ActorSystem
 Only allow one field pushdown now
 as the filter today does not tell how to link the filters out And v.s. Or
 */
-@serializable class CloudantConfig(val protocol:String, val host: String, val dbName: String,
-    val indexName: String = null, val viewName:String = null)
+@serializable class CloudantConfig(val protocol:String, val host: String,
+    val dbName: String, val indexName: String = null, val viewName:String = null)
     (implicit val username: String, val password: String,
-    val partitions:Int, val maxInPartition: Int, val minInPartition:Int,
-    val requestTimeout:Long,val bulkSize: Int, val schemaSampleSize: Int) {
+    val partitions:Int, val maxInPartition: Int, val minInPartition: Int,
+    val requestTimeout:Long,val bulkSize: Int, val schemaSampleSize: Int,
+    val createDBOnSave: Boolean) {
   
-   private val SCHEMA_FOR_ALL_DOCS_NUM = -1
+  private val SCHEMA_FOR_ALL_DOCS_NUM = -1
   private lazy val dbUrl = {protocol + "://"+ host+"/"+dbName}
 
   val pkField = "_id"
@@ -54,8 +55,10 @@ as the filter today does not tell how to link the filters out And v.s. Or
     JsonStoreConfigManager.shutdown()
   }
 
-  def getPostUrl(): String ={dbUrl}
-  
+  def getPostUrl(): String = {dbUrl}
+
+  def getPutUrl(): String = {dbUrl}
+
   def getLastUrl(skip: Int): String = {
     if (skip ==0 ) null
     else s"$dbUrl/$defaultIndex?limit=$skip"
@@ -63,6 +66,10 @@ as the filter today does not tell how to link the filters out And v.s. Or
 
   def getSchemaSampleSize(): Int = {
     schemaSampleSize
+  }
+
+  def getCreateDBonSave(): Boolean = {
+    createDBOnSave
   }
   
   def getLastNum(result: JsValue): JsValue = {result \ "last_seq"}

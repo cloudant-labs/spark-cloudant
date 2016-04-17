@@ -51,7 +51,8 @@ object CloudantDFOption{
         df.printSchema()
 
         df.filter(df("_id") >= "CAA").select("_id","airportName").show()
-        df.filter(df("_id") >= "CAA").select("_id","airportName").write.format("com.cloudant.spark").option("cloudant.host",cloudantHost).option("cloudant.username", cloudantUser).option("cloudant.password",cloudantPassword).save("airportcodemapping_df")
+        // To create a db on save set the option createDBOnSave=true
+        df.filter(df("_id") >= "CAA").select("_id","airportName").write.format("com.cloudant.spark").option("cloudant.host",cloudantHost).option("cloudant.username", cloudantUser).option("cloudant.password",cloudantPassword).option("createDBOnSave", "true").save("airportcodemapping_df")
 
         val df2 = sqlContext.read.format("com.cloudant.spark").option("cloudant.host",cloudantHost).option("cloudant.username", cloudantUser).option("cloudant.password",cloudantPassword).load("n_flight")
         val total = df2.filter(df2("flightSegmentId") >"AA9").select("flightSegmentId", "scheduledDepartureTime").orderBy(df2("flightSegmentId")).count()
