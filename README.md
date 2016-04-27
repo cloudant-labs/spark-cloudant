@@ -287,6 +287,7 @@ jsonstore.rdd.minInPartition|10|the min rows in a partition.
 jsonstore.rdd.requestTimeout|100000| the request timeout in milli-second
 bulkSize|20| the bulk save size
 schemaSampleSize| -1 | the sample size for RDD schema discovery. 1 means we are using only first document for schema discovery; -1 means all documents; 0 will be treated as 1; any number N means min(N, total) docs 
+createDBOnSave|"false"| whether to create a new database during save operation. If false, a database should already exist. If true, a new database will be created. If true, and a database with a provided name already exists, an error will be raised. 
 
 
 
@@ -302,6 +303,8 @@ index||cloudant search index w/o the database name. only used for load data with
 path||cloudant: as database name if database is not present
 schemaSampleSize|-1| the sample size used to discover the schema for this temp table. -1 scans all documents
 bulkSize|20| the bulk save size
+createDBOnSave|"false"| whether to create a new database during save operation. If false, a database should already exist. If true, a new database will be created. If true, and a database with a provided name already exists, an error will be raised. 
+
 
 
 For fast loading, views are loaded without include_docs. Thus, a derived schema will always be: `{id, key, value}`, where `value `can be a compount field. An example of loading data from a view: 

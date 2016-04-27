@@ -182,6 +182,28 @@ class JsonStoreDataAccess (config: CloudantConfig)  {
   }
 
 
+  def createDB() = {
+    val url = config.getPutUrl()
+    val request: HttpRequest = if (validCredentials != null) {
+      Put(url) ~> addCredentials(validCredentials)
+    } else {
+      HttpRequest(PUT, Uri(url))
+    }
+
+    val response: Future[HttpResponse] =
+      (IO(Http) ? request).mapTo[HttpResponse]
+    val result = Await.result(response, timeout.duration)
+    val dbName = config.getDbname()
+
+    if (result.status.isFailure){
+      throw new RuntimeException("Database " + dbName +
+        " create error: " + result.entity.asString)
+    } else {
+      logger.info(s"Database ${config.getDbname()} was created.")
+    }
+  }
+
+
   def saveAll(rows: List[String]): Unit = {
     if (rows.size == 0) {
       throw new RuntimeException("Database " + config.getDbname() +

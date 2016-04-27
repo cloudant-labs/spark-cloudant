@@ -41,7 +41,9 @@ import org.apache.spark.SparkConf
   private val REQUEST_TIMEOUT_CONFIG = "jsonstore.rdd.requestTimeout"
   private val BULK_SIZE_CONFIG = "bulkSize"
   private val SCHEMA_SAMPLE_SIZE_CONFIG = "schemaSampleSize"
-  
+  private val CREATE_DB_ON_SAVE = "createDBOnSave"
+
+
   private val configFactory = ConfigFactory.load()
 
   private val ROOT_CONFIG_NAME = "spark-sql"
@@ -119,47 +121,62 @@ import org.apache.spark.SparkConf
     }else
       if (valueS == null) defaultInConfig else valueS
   }
+
+  private def getBool(sparkConf: SparkConf, parameters: Map[String, String],
+      key: String) : Boolean = {
+    val valueS = parameters.getOrElse(key, null)
+    if (sparkConf != null) {
+      val default = if (valueS == null)
+        sparkConf.getBoolean(key, rootConfig.getBoolean(key))
+      else
+        valueS.toBoolean
+      sparkConf.getBoolean(s"spark.$key", default)
+    }else
+    if (valueS == null) rootConfig.getBoolean(key) else valueS.toBoolean
+  }
   
 
   
   def getConfig(context: SQLContext,  parameters: Map[String, String]): CloudantConfig = {
     
-      val sparkConf = context.sparkContext.getConf
-      
-      implicit val total =  getInt(sparkConf,parameters, PARTITION_CONFIG)
-      implicit val max = getInt(sparkConf,parameters, MAX_IN_PARTITION_CONFIG)
-      implicit val min = getInt(sparkConf,parameters, MIN_IN_PARTITION_CONFIG)
-      implicit val requestTimeout = getLong(sparkConf,parameters, REQUEST_TIMEOUT_CONFIG)
-      implicit val bulkSize = getInt(sparkConf,parameters,BULK_SIZE_CONFIG)
-      implicit val schemaSampleSize = getInt(sparkConf, parameters, SCHEMA_SAMPLE_SIZE_CONFIG)
+    val sparkConf = context.sparkContext.getConf
 
-      val dbName = parameters.getOrElse("database", parameters.getOrElse("path",null))
-      val indexName = parameters.getOrElse("index",null)
-      val viewName = parameters.getOrElse("view", null)
+    implicit val total =  getInt(sparkConf,parameters, PARTITION_CONFIG)
+    implicit val max = getInt(sparkConf,parameters, MAX_IN_PARTITION_CONFIG)
+    implicit val min = getInt(sparkConf,parameters, MIN_IN_PARTITION_CONFIG)
+    implicit val requestTimeout = getLong(sparkConf,parameters, REQUEST_TIMEOUT_CONFIG)
+    implicit val bulkSize = getInt(sparkConf,parameters,BULK_SIZE_CONFIG)
+    implicit val schemaSampleSize = getInt(sparkConf, parameters, SCHEMA_SAMPLE_SIZE_CONFIG)
+    implicit val createDBOnSave = getBool(sparkConf, parameters, CREATE_DB_ON_SAVE)
 
-      println(s"Use connectorVersion=$CLOUDANT_CONNECTOR_VERSION, dbName=$dbName, " +
-          s"indexName=$indexName, viewName=$viewName," +
-          s"$PARTITION_CONFIG=$total, + $MAX_IN_PARTITION_CONFIG=$max," +
-          s"$MIN_IN_PARTITION_CONFIG=$min, $REQUEST_TIMEOUT_CONFIG=$requestTimeout," +
-          s"$BULK_SIZE_CONFIG=$bulkSize, $SCHEMA_SAMPLE_SIZE_CONFIG=$schemaSampleSize")
+    val dbName = parameters.getOrElse("database", parameters.getOrElse("path",null))
+    val indexName = parameters.getOrElse("index",null)
+    val viewName = parameters.getOrElse("view", null)
 
-      val protocol = getString(sparkConf, parameters,CLOUDANT_PROTOCOL_CONFIG)
-      val host = getString( sparkConf, parameters, CLOUDANT_HOST_CONFIG) 
-      val user = getString(sparkConf, parameters,CLOUDANT_USERNAME_CONFIG) 
-      val passwd = getString(sparkConf, parameters, CLOUDANT_PASSWORD_CONFIG)
-      
-      if (host != null) {
-        val config= new CloudantConfig(protocol, host, dbName, indexName,
-            viewName)(user, passwd, total, max, min, requestTimeout, bulkSize, schemaSampleSize)
-        context.sparkContext.addSparkListener(new SparkListener(){
-          override def onApplicationEnd(applicationEnd: SparkListenerApplicationEnd) {
-              config.shutdown()
-              println("Finish shutdown at application end")
-          }
-        })
-        config
-      } else {
-        throw new RuntimeException("Spark configuration is invalid! Please make sure to supply required values for cloudant.host.")
+    println(s"Use connectorVersion=$CLOUDANT_CONNECTOR_VERSION, dbName=$dbName, " +
+        s"indexName=$indexName, viewName=$viewName," +
+        s"$PARTITION_CONFIG=$total, $MAX_IN_PARTITION_CONFIG=$max," +
+        s"$MIN_IN_PARTITION_CONFIG=$min, $REQUEST_TIMEOUT_CONFIG=$requestTimeout," +
+        s"$BULK_SIZE_CONFIG=$bulkSize, $SCHEMA_SAMPLE_SIZE_CONFIG=$schemaSampleSize")
+
+    val protocol = getString(sparkConf, parameters,CLOUDANT_PROTOCOL_CONFIG)
+    val host = getString( sparkConf, parameters, CLOUDANT_HOST_CONFIG)
+    val user = getString(sparkConf, parameters,CLOUDANT_USERNAME_CONFIG)
+    val passwd = getString(sparkConf, parameters, CLOUDANT_PASSWORD_CONFIG)
+
+    if (host != null) {
+      val config = new CloudantConfig(protocol, host, dbName, indexName,
+        viewName) (user, passwd, total, max, min, requestTimeout, bulkSize,
+        schemaSampleSize, createDBOnSave)
+      context.sparkContext.addSparkListener(new SparkListener(){
+        override def onApplicationEnd(applicationEnd: SparkListenerApplicationEnd) {
+            config.shutdown()
+            println("Finish shutdown at application end")
+        }
+      })
+      config
+    } else {
+      throw new RuntimeException("Spark configuration is invalid! Please make sure to supply required values for cloudant.host.")
       }
   }
 
@@ -173,6 +190,7 @@ import org.apache.spark.SparkConf
     implicit val requestTimeout = getLong(sparkConf, parameters, REQUEST_TIMEOUT_CONFIG)
     implicit val bulkSize = getInt(sparkConf, parameters, BULK_SIZE_CONFIG)
     implicit val schemaSampleSize = getInt(sparkConf, parameters, SCHEMA_SAMPLE_SIZE_CONFIG)
+    implicit val createDBOnSave = getBool(sparkConf, parameters, CREATE_DB_ON_SAVE)
 
     val dbName = parameters.getOrElse("database", null)
 
@@ -186,7 +204,8 @@ import org.apache.spark.SparkConf
 
     if (host != null) {
       new CloudantConfig(protocol, host, dbName)(user, passwd,
-        total, max, min, requestTimeout, bulkSize, schemaSampleSize)
+        total, max, min, requestTimeout, bulkSize,
+        schemaSampleSize, createDBOnSave)
     } else {
       throw new RuntimeException("Cloudant parameters are invalid!" +
           "Please make sure to supply required values for cloudant.host.")

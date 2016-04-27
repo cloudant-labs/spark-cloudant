@@ -35,6 +35,8 @@ object CloudantDF{
         conf.set("cloudant.host","ACCOUNT.cloudant.com")
         conf.set("cloudant.username", "USERNAME")
         conf.set("cloudant.password","PASSWORD")
+        // to create a db on save
+        conf.set("createDBOnSave","true")
         val sc = new SparkContext(conf)
         
         val sqlContext = new SQLContext(sc)
