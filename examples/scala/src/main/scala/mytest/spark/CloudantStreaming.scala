@@ -18,7 +18,7 @@ object CloudantStreaming {
       "cloudant.host" -> "ACCOUNT.cloudant.com",
       "cloudant.username" -> "USERNAME",
       "cloudant.password" -> "PASSWORD",
-      "database" -> "n_airportcodemapping"), duration.milliseconds / 2))
+      "database" -> "n_airportcodemapping")))
 
     changes.foreachRDD((rdd: RDD[String], time: Time) => {
       // Get the singleton instance of SQLContext

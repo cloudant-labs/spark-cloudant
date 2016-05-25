@@ -163,11 +163,12 @@ import org.apache.spark.SparkConf
     val host = getString( sparkConf, parameters, CLOUDANT_HOST_CONFIG)
     val user = getString(sparkConf, parameters,CLOUDANT_USERNAME_CONFIG)
     val passwd = getString(sparkConf, parameters, CLOUDANT_PASSWORD_CONFIG)
+    val selector = getString(sparkConf, parameters, "selector")
 
     if (host != null) {
       val config = new CloudantConfig(protocol, host, dbName, indexName,
         viewName) (user, passwd, total, max, min, requestTimeout, bulkSize,
-        schemaSampleSize, createDBOnSave)
+        schemaSampleSize, createDBOnSave, selector)
       context.sparkContext.addSparkListener(new SparkListener(){
         override def onApplicationEnd(applicationEnd: SparkListenerApplicationEnd) {
             config.shutdown()
@@ -201,11 +202,13 @@ import org.apache.spark.SparkConf
     val host = getString( sparkConf, parameters, CLOUDANT_HOST_CONFIG)
     val user = getString(sparkConf, parameters,CLOUDANT_USERNAME_CONFIG)
     val passwd = getString(sparkConf, parameters, CLOUDANT_PASSWORD_CONFIG)
+    val selector = getString(sparkConf, parameters, "selector")
+
 
     if (host != null) {
       new CloudantConfig(protocol, host, dbName)(user, passwd,
         total, max, min, requestTimeout, bulkSize,
-        schemaSampleSize, createDBOnSave)
+        schemaSampleSize, createDBOnSave, selector)
     } else {
       throw new RuntimeException("Cloudant parameters are invalid!" +
           "Please make sure to supply required values for cloudant.host.")

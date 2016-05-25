@@ -1,20 +1,25 @@
-Spark SQL Cloudant External Datasource
+Spark Cloudant Connector
 ================
 
-Cloudant integration with Spark as Spark SQL external datasource. 
+Cloudant integration with Spark as Spark SQL external datasource, and Spark Streaming as a custom receiver. 
 
 ##  Contents:
-- [Implementation of RelationProvider](#id-section1)
-- [Implementation of Receiver](#id-section2)
-- [Binary download](#id-section3)
-- [Build from source](#id-section4)
-- [Sample application ](#id-section5)
-- [Job Submission](#id-section6)
-- [Configuration Overview](#id-section7)
-- [Troubleshooting](#id-section8)
-- [Known limitations and areas for improvement] (#id-section9)
+1. [Implementation of RelationProvider](#implementation-of-relationProvider)
+2. [Implementation of Receiver](#implementation-of-Receiver)
+3. [Binary download](#Binary-download)
+4. [Build from source](#Build-from-source)
+5. [Sample applications](#Sample-application)
+    1. [Using SQL In Python](#Using-SQL-In-Python)
+    2. [Using SQL In Scala](#Using-SQL-In-Scala)
+    3. [Using DataFrame In Python](#Using-DataFrame-In-Python)
+    4. [Using DataFrame In Scala](#Using-DataFrame-In-Scala)
+    5. [Using Streams In Scala](#Using-Streams-In-Scala)
+6. [Job Submission](#Job-Submission)
+7. [Configuration Overview](#Configuration-Overview)
+8. [Troubleshooting](#Troubleshooting)
+9. [Known limitations and areas for improvement] (#Known-limitations)
 
-<div id='id-section1'/>
+<div id='implementation-of-relationProvider'/>
 ### Implementation of RelationProvider
 
 [DefaultSource.scala](cloudant-spark-sql/src/main/scala/com/cloudant/spark/DefaultSource.scala) is a RelationProvider for loading data from Cloudant to Spark, and saving it back from Cloudant to Spark.  It has the following functionalities:
@@ -29,28 +34,28 @@ Parallel Loading | yes, except with search index
  Insertable | yes
  
 
-<div id='id-section2'/>
+<div id='implementation-of-Receiver'/>
 ### Implementation of Receiver
 
-Spark Input DStreams can also be created out of custom data sources. All we have to do is implement a user-defined receiver. [CloudantReceiver.scala](cloudant-spark-sql/src/main/scala/com/cloudant/spark/CloudantReceiver.scala) is a Custom Receiver that gets the Cloudant data continuously by `Cloudant _changes feed` and pushs it into Spark. We can easily [use DataFrames and SQL operations on these data](examples/scala/src/main/scala/mytest/spark/CloudantStreaming.scala).
+Spark Cloudant connector creates a discretized stream in Spark (Spark input DStream) out of Cloudant data sources. [CloudantReceiver.scala](cloudant-spark-sql/src/main/scala/com/cloudant/spark/CloudantReceiver.scala) is a custom Receiver that converts `_changes` feed from a Cloudant database to DStream in Spark. This allows all sorts of processing on this streamed data including [using DataFrames and SQL operations on it](examples/scala/src/main/scala/mytest/spark/CloudantStreaming.scala).
 
 
-<div id='id-section3'/>
+<div id='Binary-download'/>
 ### Binary download:
 
 The latest release 1.6.3 is available [here] (https://github.com/cloudant-labs/spark-cloudant/releases/download/v1.6.3/cloudant-spark-v1.6.3-125.jar). It is tested to work with versions of Spark 1.4, 1.5 and 1.6.
 
 
 
-<div id='id-section4'/>
+<div id='Build-from-source'/>
 ### Build from source:
 
 [Instructions](README_build.md)
 	
 
-<div id='id-section5'/>
-## Sample application 
-
+<div id='Sample-application'/>
+## Sample applications
+<div id='Using-SQL-In-Python'/>
 ### Using SQL In Python 
 	
 [python code](examples/python/CloudantApp.py)
@@ -84,7 +89,9 @@ for code in data.collect():
 		
 ```	
 
+<div id='Using-SQL-In-Scala'/>
 ### Using SQL In Scala 
+
 
 [Scala code](examples/scala/src/main/scala/mytest/spark/CloudantApp.scala)
 
@@ -118,56 +125,7 @@ data.map(t => "airportCode: " + t(0) +"airportName: " + t(1)).collect().foreach(
 ```	
 
 
-### Using StreamingContext In Scala 
-
-[Scala code](examples/scala/src/main/scala/mytest/spark/CloudantStreaming.scala)
-
-```scala
-val sparkConf = new SparkConf().setAppName("Cloudant Spark SQL External Datasource in Scala")
-
-// Create the context with a 10 seconds batch size
-
-val duration = new Duration(10000)
-val ssc = new StreamingContext(sparkConf, duration)
-    
-val changes = ssc.receiverStream(new CloudantReceiver(Map(
-"cloudant.host" -> "ACCOUNT.cloudant.com",
-"cloudant.username" -> "USERNAME",
-"cloudant.password" -> "PASSWORD",
-"database" -> "n_airportcodemapping"), duration.milliseconds / 2))
-    
-changes.foreachRDD((rdd: RDD[String], time: Time) => {
-
-// Get the singleton instance of SQLContext
-val sqlContext = SQLContextSingleton.getInstance(rdd.sparkContext)
-
-println(s"========= $time =========")
-
-// Convert RDD[String] to DataFrame
-
-val changesDataFrame = sqlContext.read.json(rdd)
-
-if (!changesDataFrame.schema.isEmpty) {
-
-changesDataFrame.filter(changesDataFrame("airportName") >= "Paris").select("*").show()
-
-changesDataFrame.registerTempTable("airportcodemapping")
-
-val airportCountsDataFrame = sqlContext.sql("select airportName, count(*) as total from airportcodemapping group by airportName")
-
-airportCountsDataFrame.show()
-
-}
-
-changesDataFrame.printSchema()
-
-changesDataFrame.select("*").show()
-
-})
-	
-```	
-
-
+<div id='Using-DataFrame-In-Python'/>	
 ### Using DataFrame In Python 
 
 [python code](examples/python/CloudantDF.py). 
@@ -205,7 +163,8 @@ df.persist(storageLevel = StorageLevel(True, True, False, True, 1))
 ```	
 
 [Sample code on using DataFrame option to define cloudant configuration](examples/python/CloudantDFOption.py)
-	
+
+<div id='Using-DataFrame-In-Scala'/>	
 ### Using DataFrame In Scala 
 
 [Scala code](examples/scala/src/main/scala/mytest/spark/CloudantDF.scala)
@@ -237,9 +196,50 @@ df.filter(df("airportCode") >= "CAA").select("airportCode","airportName").write.
 ```	
     
  [Sample code on using DataFrame option to define cloudant configuration](examples/scala/src/main/scala/mytest/spark/CloudantDFOption.scala)
+ 
+ 
+ <div id='Using-Streams-In-Scala'/>
+### Using Streams In Scala 
+[Scala code](examples/scala/src/main/scala/mytest/spark/CloudantStreaming.scala)
 
+```scala
+// Create the context with a 10 seconds batch size
+val duration = new Duration(10000)
+val ssc = new StreamingContext(sparkConf, duration)
+    
+val changes = ssc.receiverStream(new CloudantReceiver(Map(
+"cloudant.host" -> "ACCOUNT.cloudant.com",
+"cloudant.username" -> "USERNAME",
+"cloudant.password" -> "PASSWORD",
+"database" -> "n_airportcodemapping")))
+    
+changes.foreachRDD((rdd: RDD[String], time: Time) => {
+	// Get the singleton instance of SQLContext
+	val sqlContext = SQLContextSingleton.getInstance(rdd.sparkContext)
 
-<div id='id-section6'/>
+	// Convert RDD[String] to DataFrame
+	val changesDataFrame = sqlContext.read.json(rdd)
+	if (!changesDataFrame.schema.isEmpty) {
+		changesDataFrame.printSchema()
+   		changesDataFrame.select("*").show()
+       ...
+   }    
+})
+	
+```	
+
+By default, Spark Streaming will load all documents from a database. If you want to limit the loading to specific documents, use `selector` option of `CloudantReceiver` and specify your conditions ([Scala code](examples/scala/src/main/scala/mytest/spark/CloudantStreamingSelector.scala)):
+
+```scala
+val changes = ssc.receiverStream(new CloudantReceiver(Map(
+  "cloudant.host" -> "ACCOUNT.cloudant.com",
+  "cloudant.username" -> "USERNAME",
+  "cloudant.password" -> "PASSWORD",
+  "database" -> "sales",
+  "selector" -> "{\"month\":\"May\", \"rep\":\"John\"}")))
+```
+
+<div id='Job-Submission'/>
 	
 ## Job Submission
 
@@ -256,9 +256,8 @@ df.filter(df("airportCode") >= "CAA").select("airportCode","airportName").write.
 	spark-submit --class "<your class>" --master local[4] --jars <path to cloudant-spark.jar> <path to your app jar>
 		
 		
-<div id='id-section7'/>
 
-
+<div id='Configuration-Overview'/>
 ## Configuration Overview	
 The configuration is obtained in the following sequence:
 
@@ -314,14 +313,25 @@ sqlContext.sql(" CREATE TEMPORARY TABLE flightTable1 USING com.cloudant.spark OP
 
 ```
 
+###  Configuration on Cloudant Receiver for Spark Streaming
+
+Name | Default | Meaning
+--- |:---:| ---
+cloudant.host||cloudant host url
+cloudant.username||cloudant userid
+cloudant.password||cloudant passwor
+database||cloudant database name
+selector| all documents| a selector written in Cloudant Query syntax, specifying conditions for selecting documents. Only documents satisfying the selector's conditions will be retrieved from Cloudant and loaded into Spark.
+
+
+
+
 ###  Configuration in spark-submit using --conf option
 
 The above stated configuration keys can also be set using `spark-submit --conf` option. When passing configuration in spark-submit, make sure adding "spark." as prefix to the keys.
 
 
-<div id='id-section8'/>
-
-
+<div id='Troubleshooting'/>
 ## Troubleshooting
 
 ### Schema variance
@@ -398,7 +408,7 @@ sys.setdefaultencoding('utf-8')
 See [https://issues.apache.org/jira/browse/SPARK-11772](https://issues.apache.org/jira/browse/SPARK-11772) for details.
 
 
-<div id='id-section9'/>
+<div id='Known-limitations'/>
 
 ## Known limitations and areas for improvement
 
