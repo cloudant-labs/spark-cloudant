@@ -66,6 +66,7 @@ class JsonStoreDataAccess (config: CloudantConfig)  {
       r = this.getQueryResult[Seq[String]](config.getOneUrlExcludeDDoc2(), processAll)
     }
     if (r.size == 0) {
+      config.shutdown()
       throw new RuntimeException("Database " + config.getDbname() +
         " doesn't have any non-design documents!")
     }else {
@@ -75,10 +76,12 @@ class JsonStoreDataAccess (config: CloudantConfig)  {
 
   def getMany(limit: Int)(implicit columns: Array[String] = null) = {
     if(limit == 0){
+      config.shutdown()
       throw new RuntimeException("Database " + config.getDbname() +
         " schema sample size is 0!")
     }
     if(limit < -1){
+      config.shutdown()
       throw new RuntimeException("Database " + config.getDbname() +
         " schema sample size is " + limit + "!")
     }
@@ -87,6 +90,7 @@ class JsonStoreDataAccess (config: CloudantConfig)  {
       r = this.getQueryResult[Seq[String]](config.getAllDocsUrlExcludeDDoc(limit), processAll)
     }
     if (r.size == 0) {
+      config.shutdown()
       throw new RuntimeException("Database " + config.getDbname() +
         " doesn't have any non-design documents!")
     }else {
@@ -173,6 +177,7 @@ class JsonStoreDataAccess (config: CloudantConfig)  {
       (IO(Http) ? request).mapTo[HttpResponse]
     val result = Await.result(response, timeout.duration)
     if (result.status.isFailure){
+      config.shutdown()
       throw new RuntimeException("Database " + config.getDbname() +
         " request error: " + result.entity.asString)
     }
@@ -196,6 +201,7 @@ class JsonStoreDataAccess (config: CloudantConfig)  {
     val dbName = config.getDbname()
 
     if (result.status.isFailure){
+      config.shutdown()
       throw new RuntimeException("Database " + dbName +
         " create error: " + result.entity.asString)
     } else {
@@ -206,8 +212,7 @@ class JsonStoreDataAccess (config: CloudantConfig)  {
 
   def saveAll(rows: List[String]): Unit = {
     if (rows.size == 0) {
-      throw new RuntimeException("Database " + config.getDbname() +
-        ": nothing was saved because the number of records was 0!")
+      return;
     }
     val useBulk = (config.getBulkPostUrl() != null && config.bulkSize>1)
     val bulkSize = if (useBulk) config.bulkSize else 1
@@ -250,7 +255,8 @@ class JsonStoreDataAccess (config: CloudantConfig)  {
     logger.info(s"Save total ${rows.length} with bulkSize $bulkSize in ${end_ts-start_ts}s")
     if (reason.size>0)
     {
-         throw new RuntimeException(s"Save to Database ${config.getDbname()} failed with $reason")
+        config.shutdown()
+        throw new RuntimeException(s"Save to Database ${config.getDbname()} failed with $reason")
     }
   }
 }

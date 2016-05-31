@@ -30,47 +30,44 @@ object CloudantDF{
       def main(args: Array[String]) {
 
         val conf = new SparkConf().setAppName("Cloudant Spark SQL External Datasource with DataFrame")
-        // set protocol to http if needed, default value=https
-        // conf.set("cloudant.protocol","http")
         conf.set("cloudant.host","ACCOUNT.cloudant.com")
         conf.set("cloudant.username", "USERNAME")
         conf.set("cloudant.password","PASSWORD")
-        // to create a db on save
-        conf.set("createDBOnSave","true")
+        conf.set("createDBOnSave","true") // to create a db on save
+        conf.set("jsonstore.rdd.partitions", "20") // using 20 partitions
         val sc = new SparkContext(conf)
         
         val sqlContext = new SQLContext(sc)
         import sqlContext._
         
 
-        val df = sqlContext.read.format("com.cloudant.spark").load("n_airportcodemapping")
-        // In case of doing multiple operations on a dataframe (select, filter etc.)
-        // you should persist the dataframe.
-        // Othewise, every operation on the dataframe will load the same data from Cloudant again.
-        // Persisting will also speed up computation.
-        df.cache() //persisting in memory
-        //  alternatively for large dbs to persist in memory & disk:
-        // df.persist(StorageLevel.MEMORY_AND_DISK)
-        
+        // 1. Loading data from database
+        val df = sqlContext.read.format("com.cloudant.spark")
+          .load("n_flight")
+        // Caching df in memory to speed computations
+        // and not to retrieve data from cloudant again
+        df.cache() 
         df.printSchema()
 
-        df.filter(df("airportName") >= "Moscow").select("_id","airportName").show()
-        df.filter(df("_id") >= "CAA").select("_id","airportName").show()
-        df.filter(df("_id") >= "CAA").select("_id","airportName").write.format("com.cloudant.spark").save("airportcodemapping_df")
+        // 2. Saving dataframe to database
+        val df2 = df.filter(df("flightSegmentId") === "AA106")
+          .select("flightSegmentId","economyClassBaseCost")
+        df2.show()
+        df2.write.format("com.cloudant.spark").save("n_flight2")
+        
+        // 3. Loading data from search index
+        val df3 = sqlContext.read.format("com.cloudant.spark")
+          .option("index", "_design/view/_search/n_flights").load("n_flight")
+        val total = df3.filter(df3("flightSegmentId") >"AA9")
+          .select("flightSegmentId", "scheduledDepartureTime")
+          .orderBy(df3("flightSegmentId")).count()
+        println(s"Total $total flights from index")
 
-        val df2 = sqlContext.read.format("com.cloudant.spark").load("n_flight")
-        val total = df2.filter(df2("flightSegmentId") >"AA9").select("flightSegmentId", "scheduledDepartureTime").orderBy(df2("flightSegmentId")).count()
-        println(s"Total $total flights from table scan")
-
-        val df3 = sqlContext.read.format("com.cloudant.spark").option("index", "_design/view/_search/n_flights").load("n_flight")
-        val total2 = df3.filter(df3("flightSegmentId") >"AA9").select("flightSegmentId", "scheduledDepartureTime").orderBy(df3("flightSegmentId")).count()
-        println(s"Total $total2 flights from index")
-
-        // Loading data from views
-        val df4 = sqlContext.read.format("com.cloudant.spark").option("view", "_design/view1/_view/titleyear2").load("movies-glynn")
+        // 4. Loading data from view
+        val df4 = sqlContext.read.format("com.cloudant.spark")
+          .option("view", "_design/view/_view/AA0").load("n_flight")
         df4.printSchema()
-        import sqlContext.implicits._
-        df4.filter($"value.year" >= 1930).select($"value.title", $"value.year").show()
+        df4.show()
         sc.stop()
 }
 }
