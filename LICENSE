@@ -1,19 +1,3 @@
-Skip to content
-This repository  
-Search
-Pull requests
-Issues
-Gist
- @mayya-sharipova
- Unwatch 80
-  Star 0
- Fork 0 cloudant/clouseau PRIVATE
- Code  Issues 0  Pull requests 5  Wiki  Pulse  Graphs
-Branch: master Find file Copy pathclouseau/LICENSE.txt
-dbfb784  on Jul 13
-@robertkowalski robertkowalski add license file
-1 contributor
-RawBlameHistory     203 lines (169 sloc)  11.1 KB
 
                                  Apache License
                            Version 2.0, January 2004
@@ -216,5 +200,3 @@ RawBlameHistory     203 lines (169 sloc)  11.1 KB
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
-Status API Training Shop Blog About Pricing
-© 2015 GitHub, Inc. Terms Privacy Security Contact Help
