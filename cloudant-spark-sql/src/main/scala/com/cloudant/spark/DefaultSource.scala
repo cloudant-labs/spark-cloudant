@@ -26,6 +26,8 @@ import org.apache.spark.SparkEnv
 import akka.event.Logging
 import com.cloudant.spark.common._
 
+
+
 /**
  * @author yanglei
  */
@@ -34,6 +36,9 @@ case class CloudantReadWriteRelation (config:CloudantConfig, schema: StructType,
   extends BaseRelation with PrunedFilteredScan  with InsertableRelation 
 {
    @transient lazy val dataAccess = {new JsonStoreDataAccess(config)}
+
+    implicit lazy val system = config.getSystem()
+    lazy val logger = {Logging(system, getClass)}
 
     def buildScan(requiredColumns: Array[String], 
                 filters: Array[Filter]): RDD[Row] = {
@@ -73,14 +78,20 @@ case class CloudantReadWriteRelation (config:CloudantConfig, schema: StructType,
       }
     }
 
-    def  insert( data:DataFrame, overwrite: Boolean) ={
+
+  def insert( data:DataFrame, overwrite: Boolean) ={
       // Create a database if an option createDbOnSave is true
       if (config.getCreateDBonSave()) {
         dataAccess.createDB()
       }
-      val result = data.toJSON.foreachPartition { x =>
-        val list = x.toList // Has to pass as List, Iterator results in 0 data
-        dataAccess.saveAll(list)
+      if (data.count() == 0){
+        logger.warning(("Database " + config.getDbname() +
+          ": nothing was saved because the number of records was 0!"))
+      } else {
+        val result = data.toJSON.foreachPartition { x =>
+          val list = x.toList // Has to pass as List, Iterator results in 0 data
+          dataAccess.saveAll(list)
+        }
       }
     }
 }
@@ -127,7 +138,6 @@ class DefaultSource extends RelationProvider with CreatableRelationProvider with
           df.schema
         }
       }
-
       CloudantReadWriteRelation(config, schema, allDocsDF)(sqlContext)
     }
   

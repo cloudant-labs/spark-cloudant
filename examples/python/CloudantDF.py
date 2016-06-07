@@ -24,7 +24,8 @@ conf = SparkConf().setAppName("Cloudant Spark SQL External Datasource in Python"
 conf.set("cloudant.host","ACCOUNT.cloudant.com")
 conf.set("cloudant.username", "USERNAME")
 conf.set("cloudant.password","PASSWORD")
-conf.set("jsonstore.rdd.maxInPartition",1000)
+conf.set("jsonstore.rdd.partitions", 20)  # using 20 partitions
+
 
 sc = SparkContext(conf=conf)
 sqlContext = SQLContext(sc)
@@ -45,11 +46,15 @@ df.printSchema()
 
 df.filter(df.airportName >= 'Moscow').select("_id",'airportName').show()
 df.filter(df._id >= 'CAA').select("_id",'airportName').show()
-df.filter(df._id >= 'CAA').select("_id",'airportName').save("airportcodemapping_df",
-        "com.cloudant.spark", bulkSize = "100")
 
 df = sqlContext.load(source="com.cloudant.spark", database="n_flight")
 df.printSchema()
+
+df2 = df.filter(df.flightSegmentId=='AA106').select("flightSegmentId", 
+        "economyClassBaseCost") #df2 contains only 5 docs
+# not every partition will have at least 1 doc
+df2.write.save("n_flight2",  "com.cloudant.spark",
+        bulkSize = "100", createDBOnSave="true") 
 
 total = df.filter(df.flightSegmentId >'AA9').select("flightSegmentId", 
         "scheduledDepartureTime").orderBy(df.flightSegmentId).count()
@@ -65,11 +70,12 @@ total = df.filter(df.flightSegmentId >'AA9').select("flightSegmentId",
 print "Total", total, "flights from index"
 
 # Loading data from a view
-df = sqlContext.load(source="com.cloudant.spark", path="movies-glynn", 
-        view="_design/view1/_view/titleyear2", schemaSampleSize="20")
+df = sqlContext.load(source="com.cloudant.spark", path="n_flight", 
+        view="_design/view/_view/AA0", schemaSampleSize="20")
+# schema for view will always be: _id, key,
+# value can be a complex field
 df.printSchema()
 
-df.filter(df.value.year >= 1950).select(df.value.title.alias("title"),
-        df.value.year.alias("year")).show()
+df.show()
 
 sc.stop()
