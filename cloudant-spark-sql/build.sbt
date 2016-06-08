@@ -14,16 +14,18 @@ resolvers ++= Seq(
 )
 
 libraryDependencies ++= {
-  val sparkV =  "1.5.1"
+  val sparkV =  "1.6.0"
   val sprayV = "1.3.2"
   val playJsonV = "2.2.3"
+  val httpcomponentsV = "4.5.2"
   Seq(
     "org.apache.spark"    %%  "spark-core"	  %  sparkV % "provided",
     "org.apache.spark"    %%  "spark-sql"	  %  sparkV % "provided",
     "org.apache.spark"    %%  "spark-streaming"   %  sparkV % "provided",
     "io.spray"            %%  "spray-client"  %  sprayV,
     "io.spray"            %%  "spray-can"  %  sprayV,
-    "com.typesafe.play"   %%  "play-json"     %  playJsonV
+    "com.typesafe.play"   %%  "play-json"     %  playJsonV,
+    "org.apache.httpcomponents" % "httpclient" % httpcomponentsV
   )
 }
 
@@ -44,7 +46,7 @@ spAppendScalaVersion := true
 
 spName := "cloudant-labs/spark-cloudant"
 
-sparkVersion  := "1.5.1"
+sparkVersion  := "1.6.0"
 
 sparkComponents := Seq("sql")
 

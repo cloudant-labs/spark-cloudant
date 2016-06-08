@@ -34,7 +34,7 @@ as the filter today does not tell how to link the filters out And v.s. Or
     (implicit val username: String, val password: String,
     val partitions:Int, val maxInPartition: Int, val minInPartition: Int,
     val requestTimeout:Long,val bulkSize: Int, val schemaSampleSize: Int,
-    val createDBOnSave: Boolean) {
+    val createDBOnSave: Boolean, val selector: String) {
   
   private val SCHEMA_FOR_ALL_DOCS_NUM = -1
   private lazy val dbUrl = {protocol + "://"+ host+"/"+dbName}
@@ -45,6 +45,18 @@ as the filter today does not tell how to link the filters out And v.s. Or
 
   def getChangesUrl(): String = {
     dbUrl + "/_changes?include_docs=true&feed=normal"
+  }
+
+  def getContinuousChangesUrl(): String = {
+    var url = dbUrl + "/_changes?include_docs=true&feed=continuous&heartbeat=3000"
+    if (selector != null){
+      url = url + "&filter=_selector"
+    }
+    url
+  }
+
+  def getSelector() : String = {
+    selector
   }
 
   def getSystem(): ActorSystem  = {
