@@ -44,6 +44,7 @@ class CloudantReceiver(cloudantParams: Map[String, String])
 
     val req: HttpPost = new HttpPost(url)
     req.setHeader("Content-Type", "application/json")
+    req.setHeader("User-Agent", "spark-cloudant")
     val selector = config.getSelector()
     if (selector != null) {
       val strEntity = "{\"selector\":" + selector + "}"
