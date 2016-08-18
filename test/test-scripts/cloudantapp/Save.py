@@ -20,6 +20,7 @@ from os.path import dirname as dirname
 # add /test to pythonpath so utils can be imported when running from spark
 sys.path.append(dirname(dirname(dirname(__file__))))
 import helpers.utils as utils
+import time
 
 conf = utils.createSparkConf()
 sc = SparkContext(conf=conf)
@@ -30,7 +31,9 @@ def verifySave():
     airportData.write.format("com.cloudant.spark") \
             .option("createDBOnSave", "false") \
             .save("n_airportcodemapping2")
-
+	
+		
+    time.sleep(5)
     sqlContext.sql("CREATE TEMPORARY TABLE airportTable2 USING com.cloudant.spark OPTIONS ( database 'n_airportcodemapping2')")
 
     # verify that database was created, save and have the same count of data
