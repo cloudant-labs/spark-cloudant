@@ -34,7 +34,7 @@ as the filter today does not tell how to link the filters out And v.s. Or
     (implicit val username: String, val password: String,
     val partitions:Int, val maxInPartition: Int, val minInPartition: Int,
     val requestTimeout:Long,val bulkSize: Int, val schemaSampleSize: Int,
-    val createDBOnSave: Boolean, val selector: String) {
+    val saveMode: String, val selector: String) {
   
   private val SCHEMA_FOR_ALL_DOCS_NUM = -1
   private lazy val dbUrl = {protocol + "://"+ host+"/"+dbName}
@@ -67,9 +67,7 @@ as the filter today does not tell how to link the filters out And v.s. Or
     JsonStoreConfigManager.shutdown()
   }
 
-  def getPostUrl(): String = {dbUrl}
-
-  def getPutUrl(): String = {dbUrl}
+  def getDbUrl(): String = {dbUrl}
 
   def getLastUrl(skip: Int): String = {
     if (skip ==0 ) null
@@ -80,8 +78,8 @@ as the filter today does not tell how to link the filters out And v.s. Or
     schemaSampleSize
   }
 
-  def getCreateDBonSave(): Boolean = {
-    createDBOnSave
+  def getSaveMode(): String = {
+    saveMode
   }
   
   def getLastNum(result: JsValue): JsValue = {result \ "last_seq"}

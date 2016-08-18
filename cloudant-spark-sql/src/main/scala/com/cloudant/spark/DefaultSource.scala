@@ -79,21 +79,21 @@ case class CloudantReadWriteRelation (config:CloudantConfig, schema: StructType,
     }
 
 
-  def insert( data:DataFrame, overwrite: Boolean) ={
-      // Create a database if an option createDbOnSave is true
-      if (config.getCreateDBonSave()) {
-        dataAccess.createDB()
-      }
-      if (data.count() == 0){
-        logger.warning(("Database " + config.getDbname() +
-          ": nothing was saved because the number of records was 0!"))
-      } else {
-        val result = data.toJSON.foreachPartition { x =>
-          val list = x.toList // Has to pass as List, Iterator results in 0 data
-          dataAccess.saveAll(list)
-        }
+  def insert(data:DataFrame, overwrite: Boolean) = {
+    val ifIgnore = dataAccess.maybeCreateDB();
+    if (ifIgnore){
+      logger.warning(("Database " + config.getDbname() +
+        "exists, and saveMode=Ignore; nothing was saved."))
+    } else if (data.count() == 0){
+      logger.warning(("Database " + config.getDbname() +
+        ": nothing was saved because the number of records was 0!"))
+    } else {
+      val result = data.toJSON.foreachPartition { x =>
+        val list = x.toList // Has to pass as List, Iterator results in 0 data
+        dataAccess.saveAll(list)
       }
     }
+  }
 }
 
 /**

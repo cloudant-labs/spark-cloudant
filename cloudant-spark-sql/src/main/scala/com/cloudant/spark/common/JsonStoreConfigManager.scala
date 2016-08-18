@@ -41,7 +41,7 @@ import org.apache.spark.SparkConf
   private val REQUEST_TIMEOUT_CONFIG = "jsonstore.rdd.requestTimeout"
   private val BULK_SIZE_CONFIG = "bulkSize"
   private val SCHEMA_SAMPLE_SIZE_CONFIG = "schemaSampleSize"
-  private val CREATE_DB_ON_SAVE = "createDBOnSave"
+  private val SAVE_MODE = "saveMode"
 
 
   private val configFactory = ConfigFactory.load()
@@ -147,7 +147,8 @@ import org.apache.spark.SparkConf
     implicit val requestTimeout = getLong(sparkConf,parameters, REQUEST_TIMEOUT_CONFIG)
     implicit val bulkSize = getInt(sparkConf,parameters,BULK_SIZE_CONFIG)
     implicit val schemaSampleSize = getInt(sparkConf, parameters, SCHEMA_SAMPLE_SIZE_CONFIG)
-    implicit val createDBOnSave = getBool(sparkConf, parameters, CREATE_DB_ON_SAVE)
+    implicit val saveMode = getString(sparkConf, parameters, SAVE_MODE)
+
 
     val dbName = parameters.getOrElse("database", parameters.getOrElse("path",null))
     val indexName = parameters.getOrElse("index",null)
@@ -168,7 +169,7 @@ import org.apache.spark.SparkConf
     if (host != null) {
       val config = new CloudantConfig(protocol, host, dbName, indexName,
         viewName) (user, passwd, total, max, min, requestTimeout, bulkSize,
-        schemaSampleSize, createDBOnSave, selector)
+        schemaSampleSize, saveMode, selector)
       context.sparkContext.addSparkListener(new SparkListener(){
         override def onApplicationEnd(applicationEnd: SparkListenerApplicationEnd) {
             config.shutdown()
@@ -191,7 +192,7 @@ import org.apache.spark.SparkConf
     implicit val requestTimeout = getLong(sparkConf, parameters, REQUEST_TIMEOUT_CONFIG)
     implicit val bulkSize = getInt(sparkConf, parameters, BULK_SIZE_CONFIG)
     implicit val schemaSampleSize = getInt(sparkConf, parameters, SCHEMA_SAMPLE_SIZE_CONFIG)
-    implicit val createDBOnSave = getBool(sparkConf, parameters, CREATE_DB_ON_SAVE)
+    implicit val saveMode = getString(sparkConf, parameters, SAVE_MODE)
 
     val dbName = parameters.getOrElse("database", null)
 
@@ -208,7 +209,7 @@ import org.apache.spark.SparkConf
     if (host != null) {
       new CloudantConfig(protocol, host, dbName)(user, passwd,
         total, max, min, requestTimeout, bulkSize,
-        schemaSampleSize, createDBOnSave, selector)
+        schemaSampleSize, saveMode, selector)
     } else {
       throw new RuntimeException("Cloudant parameters are invalid!" +
           "Please make sure to supply required values for cloudant.host.")

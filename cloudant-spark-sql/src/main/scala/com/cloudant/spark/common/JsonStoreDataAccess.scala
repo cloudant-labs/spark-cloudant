@@ -187,25 +187,77 @@ class JsonStoreDataAccess (config: CloudantConfig)  {
   }
 
 
-  def createDB() = {
-    val url = config.getPutUrl()
-    val request: HttpRequest = if (validCredentials != null) {
-      Put(url) ~> addCredentials(validCredentials)
-    } else {
-      HttpRequest(PUT, Uri(url))
-    }
 
-    val response: Future[HttpResponse] =
-      (IO(Http) ? request).mapTo[HttpResponse]
-    val result = Await.result(response, timeout.duration)
+
+  /** Check if db exists, and if not take action depending on saveMode
+    *
+    * @return False if db exists and saveMode == Ignore, True - in other cases except Errors
+    *
+    */
+  def maybeCreateDB():Boolean = {
+    val url = config.getDbUrl()
     val dbName = config.getDbname()
+    val saveMode = config.getSaveMode()
 
-    if (result.status.isFailure){
-      config.shutdown()
-      throw new RuntimeException("Database " + dbName +
-        " create error: " + result.entity.asString)
+    // check if db exists
+    val request0: HttpRequest = if (validCredentials != null) {
+      Get(url) ~> addCredentials(validCredentials)
     } else {
-      logger.info(s"Database ${config.getDbname()} was created.")
+      HttpRequest(GET, Uri(url))
+    }
+    val response0: Future[HttpResponse] =
+      (IO(Http) ? request0).mapTo[HttpResponse]
+    val result0 = Await.result(response0, timeout.duration)
+
+    if (result0.status.isFailure){
+      // db doesn't exist; create a db
+      val request: HttpRequest = if (validCredentials != null) {
+        Put(url) ~> addCredentials(validCredentials)
+      } else {
+        HttpRequest(PUT, Uri(url))
+      }
+      val response: Future[HttpResponse] =
+        (IO(Http) ? request).mapTo[HttpResponse]
+      val result = Await.result(response, timeout.duration)
+      if (result.status.isFailure){
+        config.shutdown()
+        throw new RuntimeException("Database " + dbName +
+          " create error: " + result.entity.asString)
+      } else {
+        logger.info(s"Database ${dbName} was created.")
+        return true
+      }
+
+    } else if (saveMode == "ErrorIfExists") {
+      throw new RuntimeException("Database " + dbName + " already exists")
+
+    } else if (saveMode == "Append"){
+      return true
+
+    } else if (saveMode == "Overwrite"){
+      // delete db
+      val request2: HttpRequest = if (validCredentials != null) {
+        Get(url) ~> addCredentials(validCredentials)
+      } else {
+        HttpRequest(DELETE, Uri(url))
+      }
+      val response2: Future[HttpResponse] =
+        (IO(Http) ? request2).mapTo[HttpResponse]
+      val result2 = Await.result(response2, timeout.duration)
+      if (result2.status.isFailure){
+        config.shutdown()
+        throw new RuntimeException("Database " + dbName + " delete error: ")
+      } else {
+        logger.info(s"Database ${dbName} was deleted.")
+        return true
+      }
+
+    } else if (saveMode == "Ignore"){
+      return false
+
+    } else {
+      throw new RuntimeException("Wrong saveMode: " + saveMode +
+        " for saving db: " + dbName)
     }
   }
 
@@ -220,7 +272,7 @@ class JsonStoreDataAccess (config: CloudantConfig)  {
     val totalBulks = bulks.size
     logger.debug(s"total records:${rows.size}=bulkSize:$bulkSize * totalBulks:$totalBulks, execute in parallel $totalBulks")
     
-    val url = if (bulkSize>1) config.getBulkPostUrl() else config.getPostUrl()
+    val url = if (bulkSize>1) config.getBulkPostUrl() else config.getDbUrl()
     logger.debug(s"Post:$url")
     
     if (url == null) return
