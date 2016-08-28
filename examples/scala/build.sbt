@@ -4,7 +4,7 @@ name :=  "spark_test"
 
 version       := "0.1-SNAPSHOT"
 
-scalaVersion  := "2.10.4"
+scalaVersion  := "2.10.5"
 
 fork in run := true
 
@@ -14,7 +14,7 @@ resolvers ++= Seq(
 )
 
 libraryDependencies ++= {
-  val sparkV =  "1.5.1"
+  val sparkV =  "1.6.0"
   Seq(
     "org.apache.spark"    %%  "spark-core"	  %  sparkV % "provided",
     "org.apache.spark"    %%  "spark-sql"	  %  sparkV % "provided",
@@ -22,4 +22,4 @@ libraryDependencies ++= {
   )
 }
 
-sparkVersion  := "1.5.1"
+sparkVersion  := "1.6.0"

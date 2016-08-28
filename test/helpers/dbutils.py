@@ -15,6 +15,7 @@
 #******************************************************************************/
 import requests
 import os
+import time
 
 class CloudantDbUtils:
 	"""
@@ -94,7 +95,8 @@ class CloudantDbUtils:
 		for db in self.test_dbs:
 			if self.db_exists(db):
 				self.drop_database(db)
-		
+	                # leave some time for synchonization between nodes
+			time.sleep(3)
 			self.create_database(db)
 			self.create_index(db)
 	
@@ -122,7 +124,6 @@ class CloudantDbUtils:
 		"""
 		Wait for the given database to reach the target doc count or until the timeout setting is reached
 		"""
-		import time
 		timeout = time.time() + timeoutInMin * 60
 		
 		while (time.time() < timeout):

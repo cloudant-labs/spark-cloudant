@@ -26,7 +26,7 @@ import org.apache.spark.SparkConf
 
  object JsonStoreConfigManager
 {
-  val CLOUDANT_CONNECTOR_VERSION = "1.6.3"
+  val CLOUDANT_CONNECTOR_VERSION = "1.6.4"
   val SCHEMA_FOR_ALL_DOCS_NUM = -1
 
   private val CLOUDANT_HOST_CONFIG = "cloudant.host"
