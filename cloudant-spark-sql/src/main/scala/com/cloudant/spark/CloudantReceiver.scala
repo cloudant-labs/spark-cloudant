@@ -66,7 +66,7 @@ class CloudantReceiver(cloudantParams: Map[String, String])
         while (!isStopped() && line != null) {
           if (line.length() > 0) {
             val json = Json.parse(line)
-            val jsonDoc = json \ "doc"
+            val jsonDoc = (json \ "doc").get
             val doc = Json.stringify(jsonDoc)
             store(doc)
           }

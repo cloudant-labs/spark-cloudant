@@ -10,10 +10,10 @@ object JsonUtil{
     var finalValue: Option[JsValue] = None
     breakable {
       for (i <- path.indices){
-        val f = currentValue \ path(i)
+        val f: Option[JsValue] = (currentValue \ path(i)).toOption
         f match {
-          case s : JsUndefined => break
-          case _ =>  currentValue = f
+          case Some(f2) =>  currentValue = f2
+          case None => break
         }
         if (i == path.length -1) //The leaf node
           finalValue = Some(currentValue)

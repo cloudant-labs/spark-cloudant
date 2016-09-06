@@ -2,9 +2,9 @@ organization  := "cloudant-labs"
 
 name := "spark-cloudant"
 
-version       := "1.6.3"
+version       := "1.6.4"
 
-scalaVersion  := "2.10.4"
+scalaVersion  := "2.10.5"
 
 fork in run := true
 
@@ -16,7 +16,7 @@ resolvers ++= Seq(
 libraryDependencies ++= {
   val sparkV =  "1.6.0"
   val sprayV = "1.3.2"
-  val playJsonV = "2.2.3"
+  val playJsonV = "2.4.8"
   val httpcomponentsV = "4.5.2"
   Seq(
     "org.apache.spark"    %%  "spark-core"	  %  sparkV % "provided",
@@ -48,7 +48,7 @@ spName := "cloudant-labs/spark-cloudant"
 
 sparkVersion  := "1.6.0"
 
-sparkComponents := Seq("sql")
+sparkComponents := Seq("sql", "streaming")
 
 spShortDescription := "Spark SQL Cloudant External Datasource"
 
@@ -58,8 +58,6 @@ spDescription := """Spark SQL Cloudant External Datasource.
                    | - Allows to save resulting data from Spark to existing Cloudant databases.
                    | - Supports predicates push down (only based on _id field in databases, but varios fields for indexes).
                    | - Support column pruning for indexes.""".stripMargin
-
-spAppendScalaVersion := true
 
 licenses += "Apache-2.0" -> url("http://opensource.org/licenses/Apache-2.0")
 

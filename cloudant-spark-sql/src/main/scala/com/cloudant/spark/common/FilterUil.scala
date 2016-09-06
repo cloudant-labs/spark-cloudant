@@ -20,12 +20,6 @@ package com.cloudant.spark.common
 import com.cloudant.spark.JsonUtil
 import org.apache.spark.sql.sources._
 import play.api.libs.json.JsValue
-import play.api.libs.json.Json
-import play.api.libs.json.JsSuccess
-import play.api.libs.json.JsError
-import scala.collection.immutable.StringOps
-import play.api.libs.json.JsNumber
-import play.api.libs.json.JsBoolean
 import play.api.libs.json.JsString
 import org.apache.spark.SparkEnv
 import akka.event.Logging

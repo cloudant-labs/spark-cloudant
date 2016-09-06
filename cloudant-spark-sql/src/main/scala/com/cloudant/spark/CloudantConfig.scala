@@ -18,14 +18,12 @@ package com.cloudant.spark
 import play.api.libs.json.JsValue
 import play.api.libs.json.JsArray
 import play.api.libs.json.Json
-import play.api.libs.json.JsUndefined
 import java.net.URLEncoder
 import com.cloudant.spark.common._
-import play.api.libs.json.JsNumber
 import akka.actor.ActorSystem
 
 /*
-@author yanglei
+@author yanglei*
 Only allow one field pushdown now
 as the filter today does not tell how to link the filters out And v.s. Or
 */
@@ -84,7 +82,7 @@ as the filter today does not tell how to link the filters out And v.s. Or
     createDBOnSave
   }
   
-  def getLastNum(result: JsValue): JsValue = {result \ "last_seq"}
+  def getLastNum(result: JsValue): JsValue = (result \ "last_seq").get
   
   def getTotalUrl(url: String) = {
     if (url.contains('?')) url+"&limit=1"
@@ -210,19 +208,20 @@ as the filter today does not tell how to link the filters out And v.s. Or
   }
     
   def getTotalRows(result: JsValue): Int = {
-    val value = result \ "total_rows"
-    value match {
-      case s : JsUndefined => 
-        (result \ "pending").as[JsNumber].value.intValue() + 1
-      case _ =>  value.as[JsNumber].value.intValue()
+    val tr = (result \ "total_rows").asOpt[Int]
+    tr match {
+      case None => 
+        (result \ "pending").as[Int] + 1
+      case Some(tr2) =>  
+        tr2
     }
   }
     
   def getRows(result: JsValue): Seq[JsValue] = {
     if (viewName == null) {
-      ((result \ "rows").asInstanceOf[JsArray]).value.map(row => row \ "doc")
+      ((result \ "rows").as[JsArray]).value.map(row => (row \ "doc").get)
     } else {
-      ((result \ "rows").asInstanceOf[JsArray]).value.map(row => row)
+      ((result \ "rows").as[JsArray]).value.map(row => row)
     }
   }
     
