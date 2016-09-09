@@ -45,7 +45,8 @@ Spark Cloudant connector creates a discretized stream in Spark (Spark input DStr
 <div id='Binary-download'/>
 ### Binary download:
 
-The latest release 1.6.3 is available [here] (https://github.com/cloudant-labs/spark-cloudant/releases/download/v1.6.3/cloudant-spark-v1.6.3-125.jar). It is tested to work with versions of Spark 1.4, 1.5 and 1.6.
+The latest release 1.6.4 is available [here]
+(https://github.com/cloudant-labs/spark-cloudant/releases/download/v1.6.4/cloudant-spark-v1.6.4-167.jar). It is tested to work with Spark 1.6.
 
 
 
