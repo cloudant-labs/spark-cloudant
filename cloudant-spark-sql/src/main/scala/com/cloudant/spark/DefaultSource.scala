@@ -23,8 +23,8 @@ import org.apache.spark.sql.sources._
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.SaveMode
 import org.apache.spark.SparkEnv
-import akka.event.Logging
 import com.cloudant.spark.common._
+import org.slf4j.LoggerFactory
 
 
 
@@ -37,10 +37,9 @@ case class CloudantReadWriteRelation (config:CloudantConfig, schema: StructType,
 {
    @transient lazy val dataAccess = {new JsonStoreDataAccess(config)}
 
-    implicit lazy val system = config.getSystem()
-    lazy val logger = {Logging(system, getClass)}
+    implicit lazy val logger = LoggerFactory.getLogger(getClass)
 
-    def buildScan(requiredColumns: Array[String], 
+    def buildScan(requiredColumns: Array[String],
                 filters: Array[Filter]): RDD[Row] = {
       val colsLength = requiredColumns.length
 
@@ -80,12 +79,11 @@ case class CloudantReadWriteRelation (config:CloudantConfig, schema: StructType,
 
 
   def insert( data:DataFrame, overwrite: Boolean) ={
-      // Create a database if an option createDbOnSave is true
       if (config.getCreateDBonSave()) {
         dataAccess.createDB()
       }
       if (data.count() == 0){
-        logger.warning(("Database " + config.getDbname() +
+        logger.warn(("Database " + config.getDbname() +
           ": nothing was saved because the number of records was 0!"))
       } else {
         val result = data.toJSON.foreachPartition { x =>
@@ -101,10 +99,9 @@ case class CloudantReadWriteRelation (config:CloudantConfig, schema: StructType,
  */
 class DefaultSource extends RelationProvider with CreatableRelationProvider with SchemaRelationProvider{
 
-      implicit val system = SparkEnv.get.actorSystem
-      val logger = Logging(system, getClass)
+  val logger = LoggerFactory.getLogger(getClass)
 
-    def createRelation(sqlContext: SQLContext, parameters: Map[String, String]) = {
+  def createRelation(sqlContext: SQLContext, parameters: Map[String, String]) = {
       create(sqlContext, parameters, null)
     }
       

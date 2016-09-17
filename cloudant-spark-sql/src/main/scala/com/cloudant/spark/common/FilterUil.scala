@@ -22,7 +22,7 @@ import org.apache.spark.sql.sources._
 import play.api.libs.json.JsValue
 import play.api.libs.json.JsString
 import org.apache.spark.SparkEnv
-import akka.event.Logging
+import org.slf4j.LoggerFactory
 
 
 /**
@@ -34,8 +34,7 @@ import akka.event.Logging
  */
 class FilterInterpreter(origFilters: Array[Filter]) {
 
-  implicit val system = SparkEnv.get.actorSystem
-  private val logger = Logging(system, getClass)
+  private val logger = LoggerFactory.getLogger(getClass)
 
   lazy val firstField = {
     if (origFilters.length > 0) getFilterAttribute(origFilters(0))
@@ -118,9 +117,7 @@ class FilterInterpreter(origFilters: Array[Filter]) {
  * @author yanglei
  */
 class FilterUtil(filters: Map[String, Array[Filter]]) {
-
-  implicit val system = SparkEnv.get.actorSystem
-  private val logger = Logging(system, getClass)
+  private val logger = LoggerFactory.getLogger(getClass)
   def apply(implicit r: JsValue = null): Boolean = {
     if (r == null) return true
     val satisfied = filters.forall({

@@ -2,9 +2,9 @@ organization  := "cloudant-labs"
 
 name := "spark-cloudant"
 
-version       := "1.6.4"
+version       := "2.0.0"
 
-scalaVersion  := "2.10.5"
+scalaVersion  := "2.11.8"
 
 fork in run := true
 
@@ -14,18 +14,14 @@ resolvers ++= Seq(
 )
 
 libraryDependencies ++= {
-  val sparkV =  "1.6.0"
-  val sprayV = "1.3.2"
-  val playJsonV = "2.4.8"
-  val httpcomponentsV = "4.5.2"
+  val sparkV =  "2.0.0"
   Seq(
     "org.apache.spark"    %%  "spark-core"	  %  sparkV % "provided",
     "org.apache.spark"    %%  "spark-sql"	  %  sparkV % "provided",
     "org.apache.spark"    %%  "spark-streaming"   %  sparkV % "provided",
-    "io.spray"            %%  "spray-client"  %  sprayV,
-    "io.spray"            %%  "spray-can"  %  sprayV,
-    "com.typesafe.play"   %%  "play-json"     %  playJsonV,
-    "org.apache.httpcomponents" % "httpclient" % httpcomponentsV
+    "com.typesafe.play"   %%  "play-json"     %  "2.4.8",
+    "org.scalaj" %% "scalaj-http" % "2.3.0",
+    "org.slf4j" % "slf4j-api" % "1.7.21"
   )
 }
 
@@ -46,7 +42,7 @@ spAppendScalaVersion := true
 
 spName := "cloudant-labs/spark-cloudant"
 
-sparkVersion  := "1.6.0"
+sparkVersion  := "2.0.0"
 
 sparkComponents := Seq("sql", "streaming")
 

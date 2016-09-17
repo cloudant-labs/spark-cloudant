@@ -14,71 +14,58 @@
 # limitations under the License.
 #******************************************************************************/
 import pprint
-from pyspark.sql import SQLContext
-from pyspark import SparkContext, SparkConf
+from pyspark.sql import SparkSession
 
-conf = SparkConf().setAppName("Cloudant Spark SQL External Datasource in Python")
-# define coudant related configuration
-conf.set("jsonstore.rdd.maxInPartition",1000)
-conf.set("jsonstore.rdd.bulkSize",10)
-
-sc = SparkContext(conf=conf)
-sqlContext = SQLContext(sc)
+spark = SparkSession\
+    .builder\
+    .appName("Cloudant Spark SQL Example in Python using dataframes with options")\
+    .getOrCreate()
 
 cloudant_host = "ACCOUNT.cloudant.com"
 cloudant_username = "USERNAME"
 cloudant_password = "PASSWORD"
 
-df = sqlContext.read.format("com.cloudant.spark") \
+# ***1. Loading dataframe from Cloudant db
+df = spark.read.format("com.cloudant.spark") \
     .option("cloudant.host", cloudant_host) \
     .option("cloudant.username", cloudant_username) \
-    .option("cloudant.password",cloudant_password) \
+    .option("cloudant.password", cloudant_password) \
     .load("n_airportcodemapping")
-
-# In case of doing multiple operations on a dataframe (select, filter etc.)
-# you should persist the dataframe.
-# Othewise, every operation on the dataframe will load the same data from Cloudant again.
-# Persisting will also speed up computation.
 df.cache() # persisting in memory
-# alternatively for large dbs to persist in memory & disk:
-# from pyspark import StorageLevel
-# df.persist(storageLevel = StorageLevel(True, True, False, True, 1)) 
-
 df.printSchema()
 df.filter(df._id >= 'CAA').select("_id",'airportName').show()
 
-# To create a db during save, set createDBOnSave=true
+
+# ***2.Saving dataframe to Cloudant db
 df.filter(df._id >= 'CAA').select("_id",'airportName') \
-        .write.format("com.cloudant.spark") \
-        .option("cloudant.host", cloudant_host) \
-        .option("cloudant.username", cloudant_username) \
-        .option("cloudant.password",cloudant_password) \
-        .option("bulkSize","100") \
-        .option("createDBOnSave", "true") \
-        .save("airportcodemapping_df")
-
-df = sqlContext.read.format("com.cloudant.spark") \
-        .option("cloudant.host", cloudant_host) \
-        .option("cloudant.username", cloudant_username) \
-        .option("cloudant.password", cloudant_password) \
-        .load("n_flight")
+    .write.format("com.cloudant.spark") \
+    .option("cloudant.host", cloudant_host) \
+    .option("cloudant.username", cloudant_username) \
+    .option("cloudant.password",cloudant_password) \
+    .option("bulkSize","100") \
+    .option("createDBOnSave", "true") \
+    .save("airportcodemapping_df")
+df = spark.read.format("com.cloudant.spark") \
+    .option("cloudant.host", cloudant_host) \
+    .option("cloudant.username", cloudant_username) \
+    .option("cloudant.password", cloudant_password) \
+    .load("n_flight")
 df.printSchema()
-
 total = df.filter(df.flightSegmentId >'AA9') \
-        .select("flightSegmentId", "scheduledDepartureTime") \
-        .orderBy(df.flightSegmentId).count()
+    .select("flightSegmentId", "scheduledDepartureTime") \
+    .orderBy(df.flightSegmentId).count()
 print "Total", total, "flights from table"
 
-df = sqlContext.read.format("com.cloudant.spark") \
-        .option("cloudant.host",cloudant_host) \
-        .option("cloudant.username",cloudant_username) \
-        .option("cloudant.password",cloudant_password) \
-        .option("index","_design/view/_search/n_flights").load("n_flight")
+
+# ***3. Loading dataframe from Cloudant search index
+df = spark.read.format("com.cloudant.spark") \
+    .option("cloudant.host",cloudant_host) \
+    .option("cloudant.username",cloudant_username) \
+    .option("cloudant.password",cloudant_password) \
+    .option("index","_design/view/_search/n_flights").load("n_flight")
 df.printSchema()
 
 total = df.filter(df.flightSegmentId >'AA9') \
-        .select("flightSegmentId", "scheduledDepartureTime") \
-        .orderBy(df.flightSegmentId).count()
+    .select("flightSegmentId", "scheduledDepartureTime") \
+    .orderBy(df.flightSegmentId).count()
 print "Total", total, "flights from index"
-
-sc.stop()

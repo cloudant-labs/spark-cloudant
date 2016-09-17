@@ -13,8 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #******************************************************************************/
-from pyspark.sql import SQLContext
-from pyspark import SparkContext, SparkConf
+from pyspark.sql import SparkSession
 from os.path import dirname as dirname
 import sys
 # add /test to pythonpath so utils can be imported when running from spark
@@ -22,15 +21,16 @@ sys.path.append(dirname(dirname(dirname(__file__))))
 import helpers.utils as utils
 
 conf = utils.createSparkConf()
-sc = SparkContext(conf=conf)
-sqlContext = SQLContext(sc)
+spark = SparkSession\
+    .builder\
+    .appName("Cloudant Spark SQL Example in Python using dataframes")\
+    .config(conf=conf)\
+    .getOrCreate()
 
 print ('About to test com.cloudant.spark for n_customer with setting schemaSampleSize to 0')
-sqlContext.sql(" CREATE TEMPORARY TABLE customerTable USING com.cloudant.spark OPTIONS ( schemaSampleSize '0',database 'n_customer')")
-customerData = sqlContext.sql("SELECT * FROM customerTable")
+spark.sql(" CREATE TEMPORARY TABLE customerTable USING com.cloudant.spark OPTIONS ( schemaSampleSize '0',database 'n_customer')")
+customerData = spark.sql("SELECT * FROM customerTable")
 customerData.printSchema()
-      
-sc.stop()
 
 	
 

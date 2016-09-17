@@ -34,9 +34,10 @@ submission with flavors
 
 ##### with local slave
 		
-	spark-submit --class "mytest.spark.CloudantApp" --master local[4] --jars cloudant-spark.jar examples/scala/target/scala-2.10/spark_test_2.10-0.1-SNAPSHOT.jar
-	spark-submit --class "mytest.spark.CloudantDF" --master local[4] --jars cloudant-spark.jar examples/scala/target/scala-2.10/spark_test_2.10-0.1-SNAPSHOT.jar
-	spark-submit --class "mytest.spark.CloudantDFOption" --master local[4] --jars cloudant-spark.jar examples/scala/target/scala-2.10/spark_test_2.10-0.1-SNAPSHOT.jar
+	spark-submit --class "mytest.spark.CloudantApp" --master local[4] --jars cloudant-spark.jar examples/scala/target/scala-2.11/spark_test_2.11-2.0.0.jar
+	spark-submit --class "mytest.spark.CloudantDF" --master local[4] --jars cloudant-spark.jar examples/scala/target/scala-2.11/spark_test_2.11-2.0.0.jar
+	spark-submit --class "mytest.spark.CloudantDFOption" --master local[4] --jars cloudant-spark.jar examples/scala/target/scala-2.11/spark_test_2.11-2.0.0.jar
+	spark-submit --class "mytest.spark.CloudantStreaming" --master local[4] --jars cloudant-spark.jar examples/scala/target/scala-2.11/spark_test_2.11-2.0.0.jar
 	
 	
 ##### with mesos master
@@ -68,5 +69,5 @@ submission with flavors
 #### Dashboard
 
 * Spark cluster dashboard at: http://<spark master host ip>:8080
-* Spark worker dashboard at: http://<worker host ip>:<worker returned port>
+* Spark worker dashboard at: http://`worker_host_ip`:`worker_returned_port`
 		    

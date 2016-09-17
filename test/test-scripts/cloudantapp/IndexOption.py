@@ -13,8 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #******************************************************************************/
-from pyspark.sql import SQLContext
-from pyspark import SparkContext, SparkConf
+from pyspark.sql import SparkSession
+import pprint
 import requests
 import sys
 from os.path import dirname as dirname
@@ -23,11 +23,15 @@ sys.path.append(dirname(dirname(dirname(__file__))))
 import helpers.utils as utils
 
 conf = utils.createSparkConf()
-sc = SparkContext(conf=conf)
-sqlContext = SQLContext(sc)
+spark = SparkSession\
+    .builder\
+    .appName("Cloudant Spark SQL Example in Python using dataframes")\
+    .config(conf=conf)\
+    .getOrCreate()
+    
 
 def verifyIndexOption():
-	flightData = sqlContext.sql("SELECT flightSegmentId, scheduledDepartureTime FROM flightTable1 WHERE flightSegmentId >'AA9' AND flightSegmentId < 'AA95'")
+	flightData = spark.sql("SELECT flightSegmentId, scheduledDepartureTime FROM flightTable1 WHERE flightSegmentId >'AA9' AND flightSegmentId < 'AA95'")
 	flightData.printSchema()
 
 	# verify expected count
@@ -49,7 +53,5 @@ total_rows = response.json().get("total_rows")
 
 
 print ('About to test com.cloudant.spark for n_flight with index')
-sqlContext.sql(" CREATE TEMPORARY TABLE flightTable1 USING com.cloudant.spark OPTIONS ( database 'n_flight', index '_design/view/_search/n_flights')")
+spark.sql(" CREATE TEMPORARY TABLE flightTable1 USING com.cloudant.spark OPTIONS ( database 'n_flight', index '_design/view/_search/n_flights')")
 verifyIndexOption()
-
-sc.stop()

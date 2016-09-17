@@ -13,8 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #******************************************************************************/
-from pyspark.sql import SQLContext
-from pyspark import SparkContext, SparkConf
+from pyspark.sql import SparkSession
 import sys
 from os.path import dirname as dirname
 # add /test to pythonpath so utils can be imported when running from spark
@@ -22,11 +21,14 @@ sys.path.append(dirname(dirname(dirname(__file__))))
 import helpers.utils as utils
 
 conf = utils.createSparkConf()
-sc = SparkContext(conf=conf)
-sqlContext = SQLContext(sc)
+spark = SparkSession\
+    .builder\
+    .appName("Cloudant Spark SQL Example in Python using dataframes")\
+    .config(conf=conf)\
+    .getOrCreate()
 
 def verifyRangePredicate():
-	airportData = sqlContext.sql("SELECT _id, airportName FROM airportTable WHERE _id >= 'CAA' AND _id <= 'GAA' ORDER BY _id")
+	airportData = spark.sql("SELECT _id, airportName FROM airportTable WHERE _id >= 'CAA' AND _id <= 'GAA' ORDER BY _id")
 	airportData.printSchema()
 	print ('Total # of rows in airportData: ' + str(airportData.count()))
 
@@ -43,7 +45,5 @@ def verifyRangePredicate():
 			
 			
 print ('About to range test com.cloudant.spark for n_airportcodemapping')
-sqlContext.sql("CREATE TEMPORARY TABLE airportTable USING com.cloudant.spark OPTIONS ( database 'n_airportcodemapping')")
+spark.sql("CREATE TEMPORARY TABLE airportTable USING com.cloudant.spark OPTIONS ( database 'n_airportcodemapping')")
 verifyRangePredicate()
-
-sc.stop()

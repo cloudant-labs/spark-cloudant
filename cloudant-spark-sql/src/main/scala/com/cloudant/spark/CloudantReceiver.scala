@@ -3,20 +3,13 @@ package com.cloudant.spark
 import org.apache.spark.streaming.receiver.Receiver
 import org.apache.spark.storage.StorageLevel
 import com.cloudant.spark.common._
-import java.io.{BufferedReader, InputStreamReader}
-
 import play.api.libs.json.Json
-import org.apache.http.client.methods.{CloseableHttpResponse, HttpGet, HttpPost}
-import org.apache.http.impl.client.{BasicCredentialsProvider, CloseableHttpClient, HttpClients}
-import org.apache.http.HttpEntity
-import org.apache.http.client.CredentialsProvider
-import org.apache.http.auth.{AuthScope, UsernamePasswordCredentials}
-import org.apache.http.entity.StringEntity
+import scalaj.http._
+
 
 
 class CloudantReceiver(cloudantParams: Map[String, String])
     extends Receiver[String](StorageLevel.MEMORY_AND_DISK) {
-
   lazy val config: CloudantConfig = {
     JsonStoreConfigManager.getConfig(cloudantParams: Map[String, String]).asInstanceOf[CloudantConfig]
   }
@@ -29,57 +22,47 @@ class CloudantReceiver(cloudantParams: Map[String, String])
   }
 
   private def receive(): Unit = {
-    var url = config.getContinuousChangesUrl()
-    val httpclient:CloseableHttpClient =  if (config.username == null) {
-      HttpClients.createDefault()
-    }else {
-      val credsProvider:CredentialsProvider  = new BasicCredentialsProvider()
-      credsProvider.setCredentials(
-        new AuthScope(null, -1),
-        new UsernamePasswordCredentials(config.username, config.password))
-      HttpClients.custom()
-        .setDefaultCredentialsProvider(credsProvider)
-        .build()
+    val url = config.getContinuousChangesUrl()
+    val selector:String = if (config.getSelector() != null) {
+      "{\"selector\":" + config.getSelector() + "}"
+    } else {
+      "{}"
     }
 
-    val req: HttpPost = new HttpPost(url)
-    req.setHeader("Content-Type", "application/json")
-    req.setHeader("User-Agent", "spark-cloudant")
-    val selector = config.getSelector()
-    if (selector != null) {
-      val strEntity = "{\"selector\":" + selector + "}"
-      val entity: StringEntity = new StringEntity(strEntity)
-      req.setEntity(entity)
+    val clRequest: HttpRequest = config.username match {
+      case null =>
+        Http(url)
+          .postData(selector)
+          .timeout(connTimeoutMs = 1000, readTimeoutMs = 0)
+          .header("Content-Type", "application/json")
+          .header("User-Agent", "spark-cloudant")
+      case _ =>
+        Http(url)
+          .postData(selector)
+          .timeout(connTimeoutMs = 1000, readTimeoutMs = 0)
+          .header("Content-Type", "application/json")
+          .header("User-Agent", "spark-cloudant")
+          .auth(config.username, config.password)
     }
 
-    val response: CloseableHttpResponse = httpclient.execute(req)
-    try {
-      val sl = response.getStatusLine()
-      if (sl.getStatusCode != 200){
-        val errorMsg = "Error retrieving _changes: " + sl.getStatusCode + " " + sl.getReasonPhrase()
-        stop(errorMsg)
-      } else {
-        val entity: HttpEntity = response.getEntity()
-        val reader: BufferedReader = new BufferedReader(new InputStreamReader(
-          entity.getContent(), "UTF-8"))
-        var line: String = reader.readLine()
-        while (!isStopped() && line != null) {
+    clRequest.exec((code, headers, is) => {
+      if (code == 200) {
+        scala.io.Source.fromInputStream(is, "utf-8").getLines().foreach(line => {
           if (line.length() > 0) {
             val json = Json.parse(line)
             val jsonDoc = (json \ "doc").get
             val doc = Json.stringify(jsonDoc)
             store(doc)
           }
-          line = reader.readLine()
-        }
+        })
+      } else {
+        val status = headers.getOrElse("Status", IndexedSeq.empty)
+        val errorMsg = "Error retrieving _changes feed for a database " + config.getDbname() + ": " + status(0)
+        reportError(errorMsg, new RuntimeException(errorMsg))
       }
-    } finally {
-      response.close()
-    }
+    })
   }
 
-
   def onStop() = {
-    config.shutdown()
   }
 }

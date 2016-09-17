@@ -18,15 +18,11 @@ package com.cloudant.spark.common
 import org.apache.spark.sql.SQLContext
 import com.typesafe.config.ConfigFactory
 import com.cloudant.spark.CloudantConfig
-import org.apache.spark.scheduler.SparkListener
-import org.apache.spark.scheduler.SparkListenerApplicationEnd
-import akka.actor.ActorSystem
-import scala.concurrent.duration.Duration
 import org.apache.spark.SparkConf
 
  object JsonStoreConfigManager
 {
-  val CLOUDANT_CONNECTOR_VERSION = "1.6.4"
+  val CLOUDANT_CONNECTOR_VERSION = "2.0.0"
   val SCHEMA_FOR_ALL_DOCS_NUM = -1
 
   private val CLOUDANT_HOST_CONFIG = "cloudant.host"
@@ -49,30 +45,7 @@ import org.apache.spark.SparkConf
   private val ROOT_CONFIG_NAME = "spark-sql"
   private val rootConfig = configFactory.getConfig(ROOT_CONFIG_NAME) 
      
-  private lazy val actorSystem: ActorSystem  = {
-      val classLoader = this.getClass.getClassLoader
-      val myconfig = ConfigFactory.load(classLoader)// force config from my classloader
-      val uuid = java.util.UUID.randomUUID.toString
-      ActorSystem("CloudantSpark-"+uuid, myconfig,classLoader)
-  }
-  
-  def getActorSystem(): ActorSystem = {
-    actorSystem
-  }
-  
-  private var alreadyShutdown = false
-  
-  def shutdown() =  {
-    if (!alreadyShutdown) {
-      this.synchronized {
-        alreadyShutdown = true
-        actorSystem.shutdown
-        actorSystem.awaitTermination(Duration(10000, "millis"))
-      }
-    }
-  }
 
-  
   /**
    * The sequence of getting configuration
    * 1. "spark."+key in the SparkConf (as they are treated as the one passed in through spark-submit)
@@ -166,16 +139,9 @@ import org.apache.spark.SparkConf
     val selector = getString(sparkConf, parameters, "selector")
 
     if (host != null) {
-      val config = new CloudantConfig(protocol, host, dbName, indexName,
+      new CloudantConfig(protocol, host, dbName, indexName,
         viewName) (user, passwd, total, max, min, requestTimeout, bulkSize,
         schemaSampleSize, createDBOnSave, selector)
-      context.sparkContext.addSparkListener(new SparkListener(){
-        override def onApplicationEnd(applicationEnd: SparkListenerApplicationEnd) {
-            config.shutdown()
-            println("Finish shutdown at application end")
-        }
-      })
-      config
     } else {
       throw new RuntimeException("Spark configuration is invalid! Please make sure to supply required values for cloudant.host.")
       }

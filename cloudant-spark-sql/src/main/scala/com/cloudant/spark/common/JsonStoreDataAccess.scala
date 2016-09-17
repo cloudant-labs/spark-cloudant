@@ -15,50 +15,29 @@
 *******************************************************************************/
 package com.cloudant.spark.common
 
-
-import com.cloudant.spark.{JsonUtil, CloudantConfig}
-import spray.client.pipelining._
-import scala.concurrent._
-import akka.event.Logging
+import com.cloudant.spark.{CloudantConfig, JsonUtil}
 import play.api.libs.json.Json
 import play.api.libs.json.JsValue
+
 import scala.collection.mutable.HashMap
 import play.api.libs.json.JsNull
 import org.apache.spark.sql.sources._
-import org.apache.spark.SparkEnv
-import spray.httpx.marshalling.Marshaller
 import play.api.libs.json.JsString
-import com.typesafe.config.ConfigFactory
-import scala.util.Random
-import scala.concurrent.Future
-import java.util.concurrent.TimeUnit
+
+import scalaj.http._
+import org.slf4j.LoggerFactory
+
+import scala.concurrent._
+import ExecutionContext.Implicits.global
+import scala.util.{Success, Failure}
 import scala.concurrent.duration._
+import java.util.concurrent.atomic.AtomicInteger
 
-import akka.actor.ActorSystem
-import akka.util.Timeout
-import akka.pattern.ask
-import akka.io.IO
 
-import spray.can.Http
-import spray.http._
-import HttpMethods._
 
-/**
- * @author yanglei
- */
 class JsonStoreDataAccess (config: CloudantConfig)  {
-  implicit lazy val timeout = {Timeout(config.requestTimeout)}
-  implicit lazy val system = config.getSystem()
-  
-  implicit lazy val executionContext = system.dispatchers.lookup("thread-pool-dispatcher")
-    
-  lazy val logger = {Logging(system, getClass)}
-
-  private lazy val validCredentials: BasicHttpCredentials = {
-    if (config.username !=null) BasicHttpCredentials(config.username, 
-      config.password)
-    else null
-  }
+  lazy val logger = LoggerFactory.getLogger(getClass)
+  implicit lazy val timeout = config.requestTimeout
 
   def getOne()( implicit columns: Array[String] = null) = {
     var r = this.getQueryResult[Seq[String]](config.getOneUrlExcludeDDoc1(), processAll)
@@ -66,7 +45,6 @@ class JsonStoreDataAccess (config: CloudantConfig)  {
       r = this.getQueryResult[Seq[String]](config.getOneUrlExcludeDDoc2(), processAll)
     }
     if (r.size == 0) {
-      config.shutdown()
       throw new RuntimeException("Database " + config.getDbname() +
         " doesn't have any non-design documents!")
     }else {
@@ -76,12 +54,10 @@ class JsonStoreDataAccess (config: CloudantConfig)  {
 
   def getMany(limit: Int)(implicit columns: Array[String] = null) = {
     if(limit == 0){
-      config.shutdown()
       throw new RuntimeException("Database " + config.getDbname() +
         " schema sample size is 0!")
     }
     if(limit < -1){
-      config.shutdown()
       throw new RuntimeException("Database " + config.getDbname() +
         " schema sample size is " + limit + "!")
     }
@@ -90,7 +66,6 @@ class JsonStoreDataAccess (config: CloudantConfig)  {
       r = this.getQueryResult[Seq[String]](config.getAllDocsUrlExcludeDDoc(limit), processAll)
     }
     if (r.size == 0) {
-      config.shutdown()
       throw new RuntimeException("Database " + config.getDbname() +
         " doesn't have any non-design documents!")
     }else {
@@ -157,107 +132,142 @@ class JsonStoreDataAccess (config: CloudantConfig)  {
   }
 
 
-  
   def getChanges(url: String, processResults: (String) => String): String = {
     getQueryResult(url, processResults)
   }
 
-  private def getQueryResult[T](url: String, postProcessor:(String) => T)
-      (implicit columns: Array[String] = null, 
-      attrToFilters: Map[String, Array[Filter]] =null) : T={
-    logger.warning("Loading data from Cloudant using query: "+ url)
 
-    val request: HttpRequest = if (validCredentials != null) {
-      Get(url) ~> addCredentials(validCredentials)
-    } else {
-      HttpRequest(GET, Uri(url))
+  private def getQueryResult[T]
+      (url: String, postProcessor:(String) => T)
+      (implicit columns: Array[String] = null,
+      attrToFilters: Map[String, Array[Filter]] =null) : T= {
+    logger.warn("Loading data from Cloudant using query: "+ url)
+    val requestTimeout = config.requestTimeout.toInt
+    val clRequest: HttpRequest = config.username match {
+      case null =>
+        Http(url)
+            .timeout(connTimeoutMs = 1000, readTimeoutMs = requestTimeout)
+            .header("User-Agent", "spark-cloudant")
+      case _ =>
+        Http(url)
+            .timeout(connTimeoutMs = 1000, readTimeoutMs = requestTimeout)
+            .header("User-Agent", "spark-cloudant")
+            .auth(config.username, config.password)
     }
 
-    val response: Future[HttpResponse] =
-      (IO(Http) ? request).mapTo[HttpResponse]
-    val result = Await.result(response, timeout.duration)
-    if (result.status.isFailure){
-      config.shutdown()
+    val clResponse: HttpResponse[String] = clRequest.execute()
+    if (! clResponse.isSuccess){
       throw new RuntimeException("Database " + config.getDbname() +
-        " request error: " + result.entity.asString)
+          " request error: " + clResponse.body)
     }
-    val data = postProcessor(result.entity.asString)
+    val data = postProcessor(clResponse.body)
     logger.debug(s"got result:$data")
     data
   }
 
 
   def createDB() = {
-    val url = config.getPutUrl()
-    val request: HttpRequest = if (validCredentials != null) {
-      Put(url) ~> addCredentials(validCredentials)
-    } else {
-      HttpRequest(PUT, Uri(url))
+    val url = config.getDbUrl()
+    val requestTimeout = config.requestTimeout.toInt
+    val clRequest: HttpRequest = config.username match {
+      case null =>
+        Http(url)
+          .method("put")
+          .timeout(connTimeoutMs = 1000, readTimeoutMs = requestTimeout)
+          .header("User-Agent", "spark-cloudant")
+      case _ =>
+        Http(url)
+          .method("put")
+          .timeout(connTimeoutMs = 1000, readTimeoutMs = requestTimeout)
+          .header("User-Agent", "spark-cloudant")
+          .auth(config.username, config.password)
     }
 
-    val response: Future[HttpResponse] =
-      (IO(Http) ? request).mapTo[HttpResponse]
-    val result = Await.result(response, timeout.duration)
-    val dbName = config.getDbname()
-
-    if (result.status.isFailure){
-      config.shutdown()
-      throw new RuntimeException("Database " + dbName +
-        " create error: " + result.entity.asString)
+    val clResponse: HttpResponse[String] = clRequest.execute()
+    if (! clResponse.isSuccess){
+      throw new RuntimeException("Database " + config.getDbname() +
+        " create error: " + clResponse.body)
     } else {
-      logger.info(s"Database ${config.getDbname()} was created.")
+      logger.warn(s"Database ${config.getDbname()} was created.")
+    }
+  }
+
+
+  def getClPostRequest(data: String) = {
+    val url = config.getBulkPostUrl()
+    val requestTimeout = config.requestTimeout.toInt
+    config.username match {
+      case null =>
+        Http(url)
+          .postData(data)
+          .timeout(connTimeoutMs = 1000, readTimeoutMs = requestTimeout)
+          .header("Content-Type", "application/json")
+          .header("User-Agent", "spark-cloudant")
+      case _ =>
+        Http(url)
+          .postData(data)
+          .timeout(connTimeoutMs = 1000, readTimeoutMs = requestTimeout)
+          .header("Content-Type", "application/json")
+          .header("User-Agent", "spark-cloudant")
+          .auth(config.username, config.password)
     }
   }
 
 
   def saveAll(rows: List[String]): Unit = {
-    if (rows.size == 0) {
-      return;
-    }
-    val useBulk = (config.getBulkPostUrl() != null && config.bulkSize>1)
-    val bulkSize = if (useBulk) config.bulkSize else 1
+    if (rows.size == 0) return
+    val bulkSize = config.bulkSize
     val bulks = rows.grouped(bulkSize).toList
     val totalBulks = bulks.size
-    logger.debug(s"total records:${rows.size}=bulkSize:$bulkSize * totalBulks:$totalBulks, execute in parallel $totalBulks")
-    
-    val url = if (bulkSize>1) config.getBulkPostUrl() else config.getPostUrl()
-    logger.debug(s"Post:$url")
-    
-    if (url == null) return
-    import ContentTypes._
-    implicit val stringMarshaller = Marshaller.of[String](`application/json`) {
-      (value, ct, ctx) => ctx.marshalTo(HttpEntity(ct, value))
+    logger.debug(s"total records:${rows.size}=bulkSize:$bulkSize * totalBulks:$totalBulks")
+
+    val futures = bulks.map( bulk => {
+        val data = config.getBulkRows(bulk)
+        val clRequest: HttpRequest = getClPostRequest(data)
+        Future {
+          clRequest.execute()
+        }
+      }
+    )
+    // remaining - number of requests remained to succeed
+    val remaining = new AtomicInteger(futures.length)
+    val p = Promise[HttpResponse[String]]
+    futures foreach {
+      _ onComplete {
+        case Success(clResponse: HttpResponse[String]) => {
+          // find if there was error in saving at least one of docs
+          val resBody:String = clResponse.body
+          val isErr = (resBody contains config.getConflictErrStr()) ||
+            (resBody contains config.getForbiddenErrStr())
+          if (!(clResponse.isSuccess) || isErr){
+            val e = new RuntimeException("Save to database:" + config.getDbname() +
+                " failed with reason: " + clResponse.body)
+            p.tryFailure(e)
+          } else if (remaining.decrementAndGet() == 0) {
+            // succeed the whole save operation if all requests success
+            p.trySuccess(clResponse)
+          }
+        }
+        // if a least one save request fails - fail the whole save operation
+        case Failure(e) =>{
+          p.tryFailure(e)
+        }
+      }
     }
-    // Better parallelism 
-    val start_ts: Long = System.currentTimeMillis / 1000
-    // Share the pipeline . TODO use connector?
-    val pipeline: HttpRequest => Future[HttpResponse] = 
-            if (validCredentials!=null)
-            {
-              ( 
-              addCredentials(validCredentials) 
-              ~> sendReceive
-              )
-            }else
-            {
-              sendReceive
-            }
-    val allFutures =  Future.traverse(bulks){ bulk=>
-            val  x: String = if (bulkSize >1) config.getBulkRows(bulk) else bulk(0)
-            logger.debug(s"content:$x")
-            val request = Post(url,x)
-            val response: Future[HttpResponse] = pipeline(request)
-            response
+
+    val mainFtr = p.future
+    mainFtr onSuccess {
+      case clResponsesList =>
+        logger.warn(s"Saved total ${rows.length} with bulkSize $bulkSize for database: ${config.getDbname()}")
     }
-    val failureFuture = allFutures.map { x => x.filter {  y => (! y.status.isSuccess) }.map { z => z.status.reason }}
-    val reason= Await.result(failureFuture, (config.requestTimeout * totalBulks).millis).toSet
-    val end_ts: Long = System.currentTimeMillis / 1000
-    logger.info(s"Save total ${rows.length} with bulkSize $bulkSize in ${end_ts-start_ts}s")
-    if (reason.size>0)
-    {
-        config.shutdown()
-        throw new RuntimeException(s"Save to Database ${config.getDbname()} failed with $reason")
+    mainFtr onFailure  {
+      case e => {
+        throw new RuntimeException("Save to database:" + config.getDbname() +
+          " failed with reason: " + e.getMessage)
+      }
     }
+    Await.result(mainFtr, (config.requestTimeout * totalBulks).millis)
   }
+
 }
 

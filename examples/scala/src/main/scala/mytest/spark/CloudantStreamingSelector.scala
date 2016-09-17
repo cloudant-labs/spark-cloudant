@@ -1,11 +1,12 @@
 package mytest.spark
 
-import org.apache.spark.sql.SQLContext
-import org.apache.spark.{ SparkContext, SparkConf }
-import org.apache.spark.streaming.{ Duration, StreamingContext, Time }
+import org.apache.spark.sql.SparkSession
+import org.apache.spark.SparkConf
+import org.apache.spark.streaming.{ Seconds, StreamingContext, Time }
 import org.apache.spark.rdd.RDD
 import com.cloudant.spark.CloudantReceiver
 import java.util.concurrent.atomic.AtomicLong
+
 
 /***
  * An example of continuous stream from sales db
@@ -18,8 +19,7 @@ object CloudantStreamingSelector {
     val sparkConf = new SparkConf().setAppName("Cloudant Spark SQL External Datasource in Scala")
 
     // Create the context with a 10 seconds batch size
-    val duration = new Duration(10000)
-    val ssc = new StreamingContext(sparkConf, duration)
+    val ssc = new StreamingContext(sparkConf, Seconds(10))
     val curTotalAmount = new AtomicLong(0)
     val curSalesCount = new AtomicLong(0)
     var batchAmount = 0L
@@ -33,15 +33,14 @@ object CloudantStreamingSelector {
 
     changes.foreachRDD((rdd: RDD[String], time: Time) => {
       // Get the singleton instance of SQLContext
-      val sqlContext = SQLContextSingleton.getInstance(rdd.sparkContext)
+      val spark = SparkSessionSingleton.getInstance(rdd.sparkContext.getConf)
       println(s"========= $time =========")
-      val changesDataFrame = sqlContext.read.json(rdd)
+      val changesDataFrame = spark.read.json(rdd)
       if (!changesDataFrame.schema.isEmpty) {
         changesDataFrame.select("*").show()
         batchAmount = changesDataFrame.groupBy().sum("amount").collect()(0).getLong(0)
         curSalesCount.getAndAdd(changesDataFrame.count())
         curTotalAmount.getAndAdd(batchAmount)
-
         println("Current sales count:" + curSalesCount)
         println("Current total amount:" + curTotalAmount)
         }

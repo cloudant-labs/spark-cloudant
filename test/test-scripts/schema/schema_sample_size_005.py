@@ -13,8 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #******************************************************************************/
-from pyspark.sql import SQLContext
-from pyspark import SparkContext, SparkConf
+from pyspark.sql import SparkSession
 from os.path import dirname as dirname
 import sys
 import requests
@@ -23,11 +22,14 @@ sys.path.append(dirname(dirname(dirname(__file__))))
 import helpers.utils as utils
 
 conf = utils.createSparkConf()
-sc = SparkContext(conf=conf)
-sqlContext = SQLContext(sc)
+spark = SparkSession\
+    .builder\
+    .appName("Cloudant Spark SQL Example in Python using dataframes")\
+    .config(conf=conf)\
+    .getOrCreate()
 
 def verify():
-	customerData = sqlContext.sql("SELECT miles_ytd, total_miles FROM customerTable")
+	customerData = spark.sql("SELECT miles_ytd, total_miles FROM customerTable")
 	customerData.printSchema()
 	customerData.show(5)
 	assert customerData.count() == doc_count
@@ -42,11 +44,8 @@ assert response.status_code == 200
 doc_count = response.json().get("doc_count")
 
 print ('About to test com.cloudant.spark for n_customer with setting schemaSampleSize to 1')
-sqlContext.sql(" CREATE TEMPORARY TABLE customerTable USING com.cloudant.spark OPTIONS ( database 'n_customer', schemaSampleSize '1')")
+spark.sql(" CREATE TEMPORARY TABLE customerTable USING com.cloudant.spark OPTIONS ( database 'n_customer', schemaSampleSize '1')")
 verify()
-  
-sc.stop()    
-
 	
 
 
