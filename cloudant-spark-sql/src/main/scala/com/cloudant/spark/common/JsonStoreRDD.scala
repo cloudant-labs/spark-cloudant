@@ -23,8 +23,7 @@ import org.apache.spark.rdd.RDD
 import play.api.libs.json.JsValue
 import org.apache.spark.sql.sources.Filter
 import org.apache.spark.SparkEnv
-import akka.event.Logging
-
+import org.slf4j.LoggerFactory
 
 /**
  * @author yanglei
@@ -48,7 +47,7 @@ private[spark] class JsonStoreRDDPartition(val skip: Int, val limit: Int,
  *  and minInPartition / maxInPartition )
  *  maxRowsInPartition: -1 means unlimited
  */
-class JsonStoreRDD(@transient sc: SparkContext, config: CloudantConfig,
+class JsonStoreRDD(sc: SparkContext, config: CloudantConfig,
     url: String)(implicit requiredcolumns: Array[String] = null,
     attrToFilters: Map[String, Array[Filter]]=null)
   extends RDD[String](sc, Nil) {
@@ -78,9 +77,7 @@ class JsonStoreRDD(@transient sc: SparkContext, config: CloudantConfig,
   }
   
   override def getPartitions: Array[Partition] = {
-    implicit val system = SparkEnv.get.actorSystem
-    val logger = Logging(system, getClass)
-
+    val logger = LoggerFactory.getLogger(getClass)
     logger.info(s"Partition config - total=$totalPartition, " +
         s"limit=$limitPerPartition for totalRows of $totalRows")
     

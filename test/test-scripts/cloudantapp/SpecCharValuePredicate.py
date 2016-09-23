@@ -13,8 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #******************************************************************************/
-from pyspark.sql import SQLContext
-from pyspark import SparkContext, SparkConf
+from pyspark.sql import SparkSession
 import requests
 import warnings
 import sys
@@ -23,13 +22,15 @@ from os.path import dirname as dirname
 sys.path.append(dirname(dirname(dirname(__file__))))
 import helpers.utils as utils
 
-
 conf = utils.createSparkConf()
-sc = SparkContext(conf=conf)
-sqlContext = SQLContext(sc)
+spark = SparkSession\
+    .builder\
+    .appName("Cloudant Spark SQL Example in Python using dataframes")\
+    .config(conf=conf)\
+    .getOrCreate()
 
 def verifySpecCharValuePredicate():
-	bookingData = sqlContext.sql("SELECT customerId, dateOfBooking FROM bookingTable1 WHERE customerId = 'uid0@email.com'")
+	bookingData = spark.sql("SELECT customerId, dateOfBooking FROM bookingTable1 WHERE customerId = 'uid0@email.com'")
 	bookingData.printSchema()
 
 	# verify expected count
@@ -54,7 +55,5 @@ if total_rows == 0:
 
 
 print ('About to test com.cloudant.spark for n_booking')
-sqlContext.sql(" CREATE TEMPORARY TABLE bookingTable1 USING com.cloudant.spark OPTIONS ( database 'n_booking')")
+spark.sql(" CREATE TEMPORARY TABLE bookingTable1 USING com.cloudant.spark OPTIONS ( database 'n_booking')")
 verifySpecCharValuePredicate()
-
-sc.stop()

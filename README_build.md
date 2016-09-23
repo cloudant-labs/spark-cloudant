@@ -1,8 +1,8 @@
 ## Project for Spark SQL Cloudant External Datasource -- Build
 
-### The folder structure:
+## The folder structure:
 
-#### Scala projects:
+### Scala projects:
 
 	./cloudant-spark-sql folder
 
@@ -19,7 +19,7 @@ contains various test cases for exploring spark api:
 * mytest.spark.CloudantStreaming: cloudant as spark-sql external datastore application using StreamingContext
 
 
-#### Python project:
+### Python project:
 
 	./python folder
 		
@@ -30,12 +30,13 @@ Contains various test cases for exploring spark api:
 * CloudantDFOption.py : Cloudant as spark-sql external datastore DataFrame application using DataFrame with option
 		
 
-### To work with Scala projects
+## To work with Scala projects
 
 #### Things enabled
 
-* spark, hadoop, spray, play-json under build.sbt
-* plugin for eclipse and assembly under project/plugins.sbt
+* Spark 2.0.0
+* Scala 11.x
+* sbt 0.13
 
 
 #### To import into eclipse:
@@ -47,23 +48,23 @@ assume at root folder
 
 
 
-### To build 
+## To make a build 
 
-#### Project cloudant-spark-sql
+### Project cloudant-spark-sql
 
 assume at cloudant-spark-sql folder
 	
 	sbt assembly
 
-create all-inclusive cloudant-spark.jar (except spark and hadoop) under target/scala-2.10 and be used for job submission
+create one all-inclusive cloudant-spark.jar under target/scala-2.11 to be used for job submission. All-inclusive jar will contain all dependencies except spark and hadoop that should be installed separately.
 	
 	
-#### Project /examples/scala
+### Project /examples/scala
 	
 assume at root folder
 		
 	sbt package
 			
-create application jar: /examples/scala/target/scala-2.10/spark_test_2.10-0.1-SNAPSHOT.jar and be used for job submission together with cloudant-spark.jar
+will create application jar: `/examples/scala/target/scala-2.11/spark_test_2.11-2.0.0.jar` needed for job submission together with cloudant-spark.jar 
 			
 

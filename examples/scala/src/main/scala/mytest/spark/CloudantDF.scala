@@ -15,59 +15,48 @@
 *******************************************************************************/
 package mytest.spark
 
-import org.apache.spark.SparkContext
-import org.apache.spark.SparkContext._
+import org.apache.spark.sql.SparkSession
 import org.apache.spark.SparkConf
 import org.apache.spark.sql.SQLContext
 import org.apache.spark.storage.StorageLevel
 
-
-/**
- * @author yanglei
- */
 object CloudantDF{
-  
-      def main(args: Array[String]) {
+  def main(args: Array[String]) {
+    val spark = SparkSession
+      .builder()
+      .appName("Cloudant Spark SQL Example with Dataframe")
+      .config("cloudant.host","ACCOUNT.cloudant.com")
+      .config("cloudant.username", "USERNAME")
+      .config("cloudant.password","PASSWORD")
+      .config("createDBOnSave","true") // to create a db on save
+      .config("jsonstore.rdd.partitions", "20") // using 20 partitions
+      .getOrCreate()
+          
+    // 1. Loading data from Cloudant db
+    val df = spark.read.format("com.cloudant.spark").load("n_flight")
+    // Caching df in memory to speed computations
+    // and not to retrieve data from cloudant again
+    df.cache() 
+    df.printSchema()
 
-        val conf = new SparkConf().setAppName("Cloudant Spark SQL External Datasource with DataFrame")
-        conf.set("cloudant.host","ACCOUNT.cloudant.com")
-        conf.set("cloudant.username", "USERNAME")
-        conf.set("cloudant.password","PASSWORD")
-        conf.set("createDBOnSave","true") // to create a db on save
-        conf.set("jsonstore.rdd.partitions", "20") // using 20 partitions
-        val sc = new SparkContext(conf)
-        
-        val sqlContext = new SQLContext(sc)
-        import sqlContext._
-        
+    // 2. Saving dataframe to Cloudant db
+    val df2 = df.filter(df("flightSegmentId") === "AA106")
+        .select("flightSegmentId","economyClassBaseCost")
+    df2.show()
+    df2.write.format("com.cloudant.spark").save("n_flight2")
+    
+    // 3. Loading data from Cloudant search index
+    val df3 = spark.read.format("com.cloudant.spark")
+      .option("index", "_design/view/_search/n_flights").load("n_flight")
+    val total = df3.filter(df3("flightSegmentId") >"AA9")
+      .select("flightSegmentId", "scheduledDepartureTime")
+      .orderBy(df3("flightSegmentId")).count()
+    println(s"Total $total flights from index")
 
-        // 1. Loading data from database
-        val df = sqlContext.read.format("com.cloudant.spark")
-          .load("n_flight")
-        // Caching df in memory to speed computations
-        // and not to retrieve data from cloudant again
-        df.cache() 
-        df.printSchema()
-
-        // 2. Saving dataframe to database
-        val df2 = df.filter(df("flightSegmentId") === "AA106")
-          .select("flightSegmentId","economyClassBaseCost")
-        df2.show()
-        df2.write.format("com.cloudant.spark").save("n_flight2")
-        
-        // 3. Loading data from search index
-        val df3 = sqlContext.read.format("com.cloudant.spark")
-          .option("index", "_design/view/_search/n_flights").load("n_flight")
-        val total = df3.filter(df3("flightSegmentId") >"AA9")
-          .select("flightSegmentId", "scheduledDepartureTime")
-          .orderBy(df3("flightSegmentId")).count()
-        println(s"Total $total flights from index")
-
-        // 4. Loading data from view
-        val df4 = sqlContext.read.format("com.cloudant.spark")
-          .option("view", "_design/view/_view/AA0").load("n_flight")
-        df4.printSchema()
-        df4.show()
-        sc.stop()
-}
+    // 4. Loading data from view
+    val df4 = spark.read.format("com.cloudant.spark")
+      .option("view", "_design/view/_view/AA0").load("n_flight")
+    df4.printSchema()
+    df4.show()
+  }
 }

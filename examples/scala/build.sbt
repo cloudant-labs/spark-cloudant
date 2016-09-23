@@ -2,19 +2,18 @@ organization  := "examples"
 
 name :=  "spark_test"
 
-version       := "0.1-SNAPSHOT"
+version       := "2.0.0"
 
-scalaVersion  := "2.10.5"
+scalaVersion  := "2.11.8"
 
 fork in run := true
 
 resolvers ++= Seq(
-  "spray repo" at "http://repo.spray.io/",
   "typesafe repo" at "http://repo.typesafe.com/typesafe/releases/"
 )
 
 libraryDependencies ++= {
-  val sparkV =  "1.6.0"
+  val sparkV =  "2.0.0"
   Seq(
     "org.apache.spark"    %%  "spark-core"	  %  sparkV % "provided",
     "org.apache.spark"    %%  "spark-sql"	  %  sparkV % "provided",
@@ -22,4 +21,4 @@ libraryDependencies ++= {
   )
 }
 
-sparkVersion  := "1.6.0"
+sparkVersion  := "2.0.0"

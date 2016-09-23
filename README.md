@@ -43,9 +43,10 @@ Spark Cloudant connector creates a discretized stream in Spark (Spark input DStr
 
 
 <div id='Binary-download'/>
-### Binary download:
+### Binary downloads:
+The current release is 2.0.0 for Spark 2.0 and Scala 11.
 
-The latest release 1.6.4 is available [here]
+The latest release for Spark 1.6 is 1.6.4 is available [here]
 (https://github.com/cloudant-labs/spark-cloudant/releases/download/v1.6.4/cloudant-spark-v1.6.4-167.jar). It is tested to work with Spark 1.6.
 
 
@@ -61,69 +62,58 @@ The latest release 1.6.4 is available [here]
 <div id='Using-SQL-In-Python'/>
 ### Using SQL In Python 
 	
-[python code](examples/python/CloudantApp.py)
+[CloudantApp.py](examples/python/CloudantApp.py)
 
 ```python
-conf = SparkConf().setAppName("Cloudant Spark SQL External Datasource in Python")
-	
-# define cloudant related configuration:
-# set protocol to http if needed, default value=https
-# conf.set("cloudant.protocol","http")
-conf.set("cloudant.host","ACCOUNT.cloudant.com")
-conf.set("cloudant.username", "USERNAME")
-conf.set("cloudant.password","PASSWORD")
-	
-# create Spark context and SQL context
-sc = SparkContext(conf=conf)
-sqlContext = SQLContext(sc)
-	
-# create temp table
-sqlContext.sql("CREATE TEMPORARY TABLE airportTable USING com.cloudant.spark OPTIONS ( database 'airportcodemapping')")
-      
-# create Schema RDD
-data = sqlContext.sql("SELECT airportCode, airportName FROM airportTable WHERE airportCode >= 'CAA' ORDER BY airportCode")
-	
-# print schema
-data.printSchema()
-	
-# print data
-for code in data.collect():
-	print code.airportCode
-		
+spark = SparkSession\
+    .builder\
+    .appName("Cloudant Spark SQL Example in Python using temp tables")\
+    .config("cloudant.host","ACCOUNT.cloudant.com")\
+    .config("cloudant.username", "USERNAME")\
+    .config("cloudant.password","PASSWORD")\
+    .getOrCreate()
+
+
+# ***1. Loading temp table from Cloudant db
+spark.sql(" CREATE TEMPORARY TABLE airportTable USING com.cloudant.spark OPTIONS ( database 'n_airportcodemapping')")
+airportData = spark.sql("SELECT _id, airportName FROM airportTable WHERE _id >= 'CAA' AND _id <= 'GAA' ORDER BY _id")
+airportData.printSchema()
+print 'Total # of rows in airportData: ' + str(airportData.count())
+for code in airportData.collect():
+    print code._id
 ```	
 
 <div id='Using-SQL-In-Scala'/>
 ### Using SQL In Scala 
 
 
-[Scala code](examples/scala/src/main/scala/mytest/spark/CloudantApp.scala)
+[CloudantApp.scala](examples/scala/src/main/scala/mytest/spark/CloudantApp.scala)
 
 ```scala
-val conf = new SparkConf().setAppName("Cloudant Spark SQL External Datasource in Scala")
-	
-// define cloudant related configuration
-// set protocol to http if needed, default value=https
-// conf.set("cloudant.protocol","http")	
-conf.set("cloudant.host","ACCOUNT.cloudant.com")
-conf.set("cloudant.username", "USERNAME")
-conf.set("cloudant.password","PASSWORD")
-    
-// create Spark context and SQL context
-val sc = new SparkContext(conf)
-val sqlContext = new SQLContext(sc)
-import sqlContext._
-    
-// Create a temp table 
-sqlContext.sql("CREATE TEMPORARY TABLE airportTable USING com.cloudant.spark OPTIONS ( database 'airportcodemapping'")
-  
-// create Schema RDD
-val data = sqlContext.sql("SELECT airportCode, airportName FROM airportTable WHERE airportCode >= 'CAA' ORDER BY airportCode"")
-    
-// print schema
-data.printSchema()
+val spark = SparkSession
+      .builder()
+      .appName("Cloudant Spark SQL Example")
+      .config("cloudant.host","ACCOUNT.cloudant.com")
+      .config("cloudant.username", "USERNAME")
+      .config("cloudant.password","PASSWORD")
+      .getOrCreate()
 
-// print data
-data.map(t => "airportCode: " + t(0) +"airportName: " + t(1)).collect().foreach(println) 
+// For implicit conversions of Dataframe to RDDs
+import spark.implicits._
+    
+// create a temp table from Cloudant db and query it using sql syntax
+spark.sql(
+    s"""
+    |CREATE TEMPORARY TABLE airportTable
+    |USING com.cloudant.spark
+    |OPTIONS ( database 'n_airportcodemapping')
+    """.stripMargin)
+// create a dataframe
+val airportData = spark.sql("SELECT _id, airportName FROM airportTable WHERE _id >= 'CAA' AND _id <= 'GAA' ORDER BY _id")
+airportData.printSchema()
+println(s"Total # of rows in airportData: " + airportData.count())
+// convert dataframe to array of Rows, and process each row
+airportData.map(t => "code: " + t(0) + ",name:" + t(1)).collect().foreach(println)
 	
 ```	
 
@@ -131,33 +121,28 @@ data.map(t => "airportCode: " + t(0) +"airportName: " + t(1)).collect().foreach(
 <div id='Using-DataFrame-In-Python'/>	
 ### Using DataFrame In Python 
 
-[python code](examples/python/CloudantDF.py). 
+[CloudantDF.py](examples/python/CloudantDF.py). 
 
 ```python	    
-conf = SparkConf().setAppName("Cloudant Spark SQL External Datasource in Python")
-# define coudant related configuration
-conf.set("cloudant.host","ACCOUNT.cloudant.com")
-conf.set("cloudant.username", "USERNAME")
-conf.set("cloudant.password","PASSWORD")
-	
-sc = SparkContext(conf=conf)
-sqlContext = SQLContext(sc)
-	
-df = sqlContext.load("airportcodemapping", "com.cloudant.spark")
+spark = SparkSession\
+    .builder\
+    .appName("Cloudant Spark SQL Example in Python using dataframes")\
+    .config("cloudant.host","ACCOUNT.cloudant.com")\
+    .config("cloudant.username", "USERNAME")\
+    .config("cloudant.password","PASSWORD")\
+    .config("jsonstore.rdd.partitions", 8)\
+    .getOrCreate()
 
-# cache RDD in memory
-df.cache()
-# to cache RDD on disk:
-# df.persist(storageLevel = StorageLevel(True, True, False, True, 1))
-
+# ***1. Loading dataframe from Cloudant db
+df = spark.read.load("n_airportcodemapping", "com.cloudant.spark")
+df.cache() 
 df.printSchema()
-	
-df.filter(df.airportCode >= 'CAA').select("airportCode",'airportName').save("airportcodemapping_df", "com.cloudant.spark")	
-	    
+df.filter(df.airportName >= 'Moscow').select("_id",'airportName').show()
+df.filter(df._id >= 'CAA').select("_id",'airportName').show()	    
 ```
 	
 In case of doing multiple operations on a dataframe (select, filter etc.),
-you should persist a dataframe. Othewise, every operation on a dataframe will load the same data from Cloudant again.
+you should persist a dataframe. Otherwise, every operation on a dataframe will load the same data from Cloudant again.
 Persisting will also speed up computation. This statement will persist an RDD in memory: `df.cache()`.  Alternatively for large dbs to persist in memory & disk, use: 
 
 ```python
@@ -170,32 +155,31 @@ df.persist(storageLevel = StorageLevel(True, True, False, True, 1))
 <div id='Using-DataFrame-In-Scala'/>	
 ### Using DataFrame In Scala 
 
-[Scala code](examples/scala/src/main/scala/mytest/spark/CloudantDF.scala)
+[CloudantDF.scala](examples/scala/src/main/scala/mytest/spark/CloudantDF.scala)
 
 ```	scala
-val conf = new SparkConf().setAppName("Cloudant Spark SQL External Datasource in Scala")
-	
-// define cloudant related configuration	
-conf.set("cloudant.host","ACCOUNT.cloudant.com")
-conf.set("cloudant.username", "USERNAME")
-conf.set("cloudant.password","PASSWORD")
-    
-// create Spark context and SQL context
-val sc = new SparkContext(conf)
-val sqlContext = new SQLContext(sc)
-import sqlContext._
-    
-val df = sqlContext.read.format("com.cloudant.spark").load("airportcodemapping")
-
-// cache RDD in memory
-df.cache()
-// to cache RDD on disk:
-// df.persist(StorageLevel.MEMORY_AND_DISK) 
-
+val spark = SparkSession
+      .builder()
+      .appName("Cloudant Spark SQL Example with Dataframe")
+      .config("cloudant.host","ACCOUNT.cloudant.com")
+      .config("cloudant.username", "USERNAME")
+      .config("cloudant.password","PASSWORD")
+      .config("createDBOnSave","true") // to create a db on save
+      .config("jsonstore.rdd.partitions", "20") // using 20 partitions
+      .getOrCreate()
+          
+// 1. Loading data from Cloudant db
+val df = spark.read.format("com.cloudant.spark").load("n_flight")
+// Caching df in memory to speed computations
+// and not to retrieve data from cloudant again
+df.cache() 
 df.printSchema()
-df.filter(df("airportCode") >= "CAA").select("airportCode","airportName").show()
-df.filter(df("airportCode") >= "CAA").select("airportCode","airportName").write.format("com.cloudant.spark").save("airportcodemapping_df")
 
+// 2. Saving dataframe to Cloudant db
+val df2 = df.filter(df("flightSegmentId") === "AA106")
+    .select("flightSegmentId","economyClassBaseCost")
+df2.show()
+df2.write.format("com.cloudant.spark").save("n_flight2")
 ```	
     
  [Sample code on using DataFrame option to define cloudant configuration](examples/scala/src/main/scala/mytest/spark/CloudantDFOption.scala)
@@ -203,35 +187,37 @@ df.filter(df("airportCode") >= "CAA").select("airportCode","airportName").write.
  
  <div id='Using-Streams-In-Scala'/>
 ### Using Streams In Scala 
-[Scala code](examples/scala/src/main/scala/mytest/spark/CloudantStreaming.scala)
+[CloudantStreaming.scala](examples/scala/src/main/scala/mytest/spark/CloudantStreaming.scala)
 
 ```scala
-// Create the context with a 10 seconds batch size
-val duration = new Duration(10000)
-val ssc = new StreamingContext(sparkConf, duration)
-    
+val ssc = new StreamingContext(sparkConf, Seconds(10))
 val changes = ssc.receiverStream(new CloudantReceiver(Map(
-"cloudant.host" -> "ACCOUNT.cloudant.com",
-"cloudant.username" -> "USERNAME",
-"cloudant.password" -> "PASSWORD",
-"database" -> "n_airportcodemapping")))
-    
-changes.foreachRDD((rdd: RDD[String], time: Time) => {
-	// Get the singleton instance of SQLContext
-	val sqlContext = SQLContextSingleton.getInstance(rdd.sparkContext)
+  "cloudant.host" -> "ACCOUNT.cloudant.com",
+  "cloudant.username" -> "USERNAME",
+  "cloudant.password" -> "PASSWORD",
+  "database" -> "n_airportcodemapping")))
 
-	// Convert RDD[String] to DataFrame
-	val changesDataFrame = sqlContext.read.json(rdd)
-	if (!changesDataFrame.schema.isEmpty) {
-		changesDataFrame.printSchema()
-   		changesDataFrame.select("*").show()
-       ...
-   }    
+changes.foreachRDD((rdd: RDD[String], time: Time) => {
+  // Get the singleton instance of SparkSession
+  val spark = SparkSessionSingleton.getInstance(rdd.sparkContext.getConf)
+
+  println(s"========= $time =========")
+  // Convert RDD[String] to DataFrame
+  val changesDataFrame = spark.read.json(rdd)
+  if (!changesDataFrame.schema.isEmpty) {
+    changesDataFrame.printSchema()
+    changesDataFrame.select("*").show()
+    ....
+  }
 })
+ssc.start()
+// run streaming for 120 secs
+Thread.sleep(120000L)
+ssc.stop(true)
 	
 ```	
 
-By default, Spark Streaming will load all documents from a database. If you want to limit the loading to specific documents, use `selector` option of `CloudantReceiver` and specify your conditions ([Scala code](examples/scala/src/main/scala/mytest/spark/CloudantStreamingSelector.scala)):
+By default, Spark Streaming will load all documents from a database. If you want to limit the loading to specific documents, use `selector` option of `CloudantReceiver` and specify your conditions ([CloudantStreamingSelector.scala](examples/scala/src/main/scala/mytest/spark/CloudantStreamingSelector.scala)):
 
 ```scala
 val changes = ssc.receiverStream(new CloudantReceiver(Map(
@@ -283,11 +269,11 @@ cloudant.protocol|https|protocol to use to transfer data: http or https
 cloudant.host||cloudant host url
 cloudant.username||cloudant userid
 cloudant.password||cloudant password
-jsonstore.rdd.partitions|5|the number of partitions intent used to drive JsonStoreRDD loading query result in parallel. The actual number is calculated based on total rows returned and satisfying maxInPartition and minInPartition
+jsonstore.rdd.partitions|10|the number of partitions intent used to drive JsonStoreRDD loading query result in parallel. The actual number is calculated based on total rows returned and satisfying maxInPartition and minInPartition
 jsonstore.rdd.maxInPartition|-1|the max rows in a partition. -1 means unlimited
 jsonstore.rdd.minInPartition|10|the min rows in a partition.
-jsonstore.rdd.requestTimeout|100000| the request timeout in milli-second
-bulkSize|20| the bulk save size
+jsonstore.rdd.requestTimeout|900000| the request timeout in milliseconds
+bulkSize|200| the bulk save size
 schemaSampleSize| "-1" | the sample size for RDD schema discovery. 1 means we are using only first document for schema discovery; -1 means all documents; 0 will be treated as 1; any number N means min(N, total) docs 
 createDBOnSave|"false"| whether to create a new database during save operation. If false, a database should already exist. If true, a new database will be created. If true, and a database with a provided name already exists, an error will be raised. 
 
@@ -304,7 +290,7 @@ view||cloudant view w/o the database name. only used for load.
 index||cloudant search index w/o the database name. only used for load data with less than or equal to 200 results.
 path||cloudant: as database name if database is not present
 schemaSampleSize|"-1"| the sample size used to discover the schema for this temp table. -1 scans all documents
-bulkSize|20| the bulk save size
+bulkSize|200| the bulk save size
 createDBOnSave|"false"| whether to create a new database during save operation. If false, a database should already exist. If true, a new database will be created. If true, and a database with a provided name already exists, an error will be raised. 
 
 
@@ -312,7 +298,7 @@ createDBOnSave|"false"| whether to create a new database during save operation. 
 For fast loading, views are loaded without include_docs. Thus, a derived schema will always be: `{id, key, value}`, where `value `can be a compount field. An example of loading data from a view: 
 
 ```python
-sqlContext.sql(" CREATE TEMPORARY TABLE flightTable1 USING com.cloudant.spark OPTIONS ( database 'n_flight', view '_design/view/_view/AA0')")
+spark.sql(" CREATE TEMPORARY TABLE flightTable1 USING com.cloudant.spark OPTIONS ( database 'n_flight', view '_design/view/_view/AA0')")
 
 ```
 
@@ -363,21 +349,20 @@ This error indicates that a field has been found in a document but it is not pre
  To add the global settting directly to your Spark Context use:
  
 ```python
-conf = SparkConf().setAppName("Multiple schema test")
-
-conf.set("cloudant.host","<ACCOUNT>.cloudant.com")
-conf.set("cloudant.username", "<USERNAME>")
-conf.set("cloudant.password","<PASSWORD>")
-conf.set("jsonstore.rdd.schemaSampleSize", -1)
-
-sc = SparkContext(conf=conf)
-sqlContext = SQLContext(sc)
+spark = SparkSession\
+    .builder\
+    .appName("Multiple schema test")\
+    .config("cloudant.host","ACCOUNT.cloudant.com")\
+    .config("cloudant.username", "USERNAME")\
+    .config("cloudant.password","PASSWORD")\
+    .config("jsonstore.rdd.schemaSampleSize", -1)\
+    .getOrCreate()
 ```
 For a local setting applied to a single RDD only, use:
 
 ``` python
-sqlContext.sql("CREATE TEMPORARY TABLE schema-test USING com.cloudant.spark OPTIONS ( schemaSampleSize '10',database 'schema-test')")
-schemaTestTable = sqlContext.sql("SELECT * FROM schema-test")
+spark.sql("CREATE TEMPORARY TABLE schema-test USING com.cloudant.spark OPTIONS ( schemaSampleSize '10',database 'schema-test')")
+schemaTestTable = spark.sql("SELECT * FROM schema-test")
 ```
 
 Acceptable values for either setting are:
