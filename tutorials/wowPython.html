@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head><meta charset="utf-8" />
-<title>Hands on Spark and Cloudan</title>
+<title>wowPython</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
@@ -52,8 +52,10 @@
 .highlight .err { border: 1px solid #FF0000 } /* Error */
 .highlight .k { color: #008000; font-weight: bold } /* Keyword */
 .highlight .o { color: #666666 } /* Operator */
+.highlight .ch { color: #408080; font-style: italic } /* Comment.Hashbang */
 .highlight .cm { color: #408080; font-style: italic } /* Comment.Multiline */
 .highlight .cp { color: #BC7A00 } /* Comment.Preproc */
+.highlight .cpf { color: #408080; font-style: italic } /* Comment.PreprocFile */
 .highlight .c1 { color: #408080; font-style: italic } /* Comment.Single */
 .highlight .cs { color: #408080; font-style: italic } /* Comment.Special */
 .highlight .gd { color: #A00000 } /* Generic.Deleted */
@@ -109,309 +111,6 @@
 .highlight .vg { color: #19177C } /* Name.Variable.Global */
 .highlight .vi { color: #19177C } /* Name.Variable.Instance */
 .highlight .il { color: #666666 } /* Literal.Number.Integer.Long */
-    </style>
-<style type="text/css">
-    /*
-# Licensed Materials - Property of IBM
-# 5725-Y50
-# (C) Copyright IBM Corp. 2015    All Rights Reserved.
-# US Government Users Restricted Rights - Use, duplication or disclosure 
-# restricted by GSA ADP Schedule Contract with IBM Corp. 
-*/
-
-/*.notebook_app only adresses stuff on the notebook ui not the tree*/
-
-/*GENERAL NOTEBOOK SITE*/
-
-html {
-  /*Return the root to 16px for safe usage of rem unit*/
-  font-size: 100%;
-}
-
-.notebook_app {
-  color: #626d72;
-  background-color: #F3F6FB;
-  font-size: 0.875rem;
-}
-
-.notebook_app .container {
-  width: 100% !important;
-}
-
-.notebook_app #notebook {
-  padding-top: 0;
-}
-
-/*HEADER AND NAVBAR*/
-
-.notebook_app div#header-container {
-  display: none;
-}
-
-.notebook_app div#header {
-  background-color: #F3F6FB;
-  box-shadow: none;
-}
-
-.notebook_app #menubar {
-  margin: 0;
-}
-
-.notebook_app .header-bar {
-  display: none;
-}
-
-.notebook_app .navbar-default {
-  background-color: #F3F6FB;
-  border: none;
-}
-
-.notebook_app .navbar-default .navbar-nav>li>a {
-  color: #626d72;
-  padding-left: 0;
-  padding-right: 1.5rem;
-  padding-top: 0;
-}
-
-.notebook_app .navbar-default .navbar-nav>li>a:hover {
-  color: #2e404b;
-}
-
-.notebook_app .navbar-default .navbar-nav>.open>a {
-  background-color: #F3F6FB;
-  color: #2e404b;
-}
-
-.notebook_app .navbar-default .btn-default {
-  color: #ECF0F2;
-}
-
-.notebook_app .navbar-default .btn-default:hover {
-  color: #2e404b;
-  background-color: transparent;
-}
-
-.notebook_app #kernel_indicator {
-  color: #626d72;
-  text-align: right;
-  margin-right: 3em;
-  line-height: normal;
-}
-
-.notebook_app .navbar-btn.btn-xs {
-  margin-top: 0;
-}
-
-/*BUTTONS AND TOOLBAR*/
-
-.notebook_app #maintoolbar {
-  padding: 0;
-  margin: 0;
-}
-
-.notebook_app .toolbar {
-  margin:0;
-  width: 100% !important;
-  /* line-height: 4.5em; */
-}
-
-.notebook_app .btn-group {
-  margin: 0;
-  border-right: solid thin #DFE6EB;
-  /* height: 3em; */
-  display: inline-flex;
-  display: -webkit-inline-box;  /* OLD - iOS 6-, Safari 3.1-6, BB7 */
-  display: -ms-inline-flexbox;  /* TWEENER - IE 10 */
-  display: -webkit-inline-flex; /* NEW - Safari 6.1+. iOS 7.1+, BB10 */
-  align-items: center;
-  line-height: 1.4rem;
-  padding-left: 0.675rem;
-  padding-top: .25rem;
-  padding-bottom: .25rem;
-}
-
-.notebook_app .btn-group:first-child {
-  padding-left: 0;
-}
-
-.notebook_app .btn-group button {
-  margin-right: 0.675rem;
-  border: none;
-  border-radius: 0;
-  background-color: transparent;
-  padding: 0;
-  border-width: 0;
-  fill: #626d72;
-}
-
-.notebook_app .btn-group button:hover {
-  fill: #2e404b;
-}
-
-/*ICONS*/
-
-.notebook_app .icon {
-  height: 1.25rem;
-  width: 1.25rem;
-  vertical-align: middle;
-}
-
-.icon_symbol {
-  fill: inherit;
-}
-
-/*SELECT MENUS*/
-
-.notebook_app .toolbar_select {
-  border: none;
-  display: inline-block;
-  margin-left: .375rem;
-  margin-bottom: .375rem;
-}
-
-.notebook_app .toolbar_select select {
-  border: solid thin #DFE6EB;
-  border-radius: 0;
-  box-shadow: none;
-  background: white;
-  color: #626d72;
-  padding: 0rem 0.375rem;
-  margin: 0;
-  height: 2.25rem
-}
-
-/*SELECT LABELS*/
-.notebook_app .toolbar_select span {
-  display: block;
-  font-size: .75rem;
-  font-weight: bold;
-  height: 1.675rem;
-  text-align: left;
-  margin: 0;
-}
-
-@media all and (min-width: 1024px) {
-  .notebook_app .toolbar_select span {
-    display:inline;
-    margin-right: .5rem;
-  }
-}
-
-/*MENUS*/
-.notebook_app .dropdown-menu {
-  background-color: #F3F6FB;
-  border-color: #DFE6EB;
-  box-sizing: border-box;
-}
-
-.notebook_app .dropdown-menu li a {
-  color: #626d72;
-  padding-left: 1rem;
-}
-
-.notebook_app .dropdown-menu li a:hover {
-  background-color: #DFE6EB;
-  color: #2e404b;
-}
-
-.notebook_app .dropdown-menu li.disabled a {
-  background-color: transparent;
-  color: #94A3AB;
-}
-
-.notebook_app .dropdown-submenu > a::after {
-  color: #626d72;
-}
-
-.notebook_app .dropdown-menu .divider {
-  background-color: #DFE6EB;
-}
-
-.notebook_app .dropdown-submenu > .dropdown-menu {
-  margin-left: 0;
-}
-
-/*NOTEBOOK CONTAINER*/
-.notebook_app #notebook-container {
-  color: #6D7777;
-  box-shadow: none;
-  border: solid thin #DFE6EB;
-}
-
-/*DIALOGS*/
-.notebook_app .modal-dialog {
-  color: #6D7777;
-}
-
-.notebook_app .modal-backdrop {
-  opacity: 0;
-  visibility: hidden;
-}
-
-.notebook_app .modal-dialog .btn {
-  min-height: 2.75rem;
-  min-width: 9.375rem;
-  box-sizing: border-box;
-  padding: 0 1rem;
-  border-radius: 0;
-  cursor: pointer;
-  font-weight: 700;
-  text-transform: uppercase;
-  overflow: visible;
-  text-align: center;
-  vertical-align: middle;
-}
-
-.notebook_app .modal-dialog .btn-default {
-  transition: background-color 0.15s ease-out 0s, color 0.15s ease-out 0s;
-  background-color: transparent;
-  color: #6D7777;
-  border: thin solid #DFE6EB;
-}
-
-.notebook_app .modal-dialog .btn-default:hover,
-.notebook_app .modal-dialog .btn-default:active,
-.notebook_app .modal-dialog .btn-default:focus {
-  background-color: #6D7777;
-  color: white;
-}
-
-.notebook_app .modal-dialog .btn-primary {
-  transition: background-color 0.15s ease-out 0s;
-  background-color: #00A391;
-  color: white;
-  border: none;
-}
-
-.notebook_app .modal-dialog .btn-primary:hover,
-.notebook_app .modal-dialog .btn-primary:active,
-.notebook_app .modal-dialog .btn-primary:focus {
-  background-color: #41D6C3;
-}
-
-.notification_widget.ax_notebook_saved {
-    background-color: #F3F6FB;
-    padding: 0px;
-    margin-right: 0px;
-    margin-bottom: 5px;
-    border-color: #F3F6FB;
-    color: #6ab200;
-    border: 0px;
-}
-
-.notification_widget.ax_notebook_saved:active:hover, .notification_widget.ax_notebook_saved.active:hover,
-.open > .dropdown-toggle.notification_widget.ax_notebook_saved:hover, .notification_widget.ax_notebook_saved:active:focus,
-.notification_widget.ax_notebook_saved.active:focus, .open > .dropdown-toggle.notification_widget.ax_notebook_saved:focus,
-.notification_widget.ax_notebook_saved.focus:active, .notification_widget.ax_notebook_saved.active.focus, .open >
-.dropdown-toggle.notification_widget.ax_notebook_saved.focus {
-  background-color: #F3F6FB;
-  margin-right: 0px;
-  margin-bottom: 5px;
-  padding: 0px;
-  border-color: #F3F6FB;
-  color: #6ab200;
-  border: 0px;
-}
     </style>
 
 
@@ -538,7 +237,7 @@ div#notebook {
     <div class="input_area">
 <div class=" highlight hl-ipython2"><pre><span class="kn">import</span> <span class="nn">sys</span>
 <span class="nb">reload</span><span class="p">(</span><span class="n">sys</span><span class="p">)</span>
-<span class="n">sys</span><span class="o">.</span><span class="n">setdefaultencoding</span><span class="p">(</span><span class="s">&#39;utf-8&#39;</span><span class="p">)</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">setdefaultencoding</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -563,7 +262,7 @@ div#notebook {
     <div class="input_area">
 <div class=" highlight hl-ipython2"><pre><span class="kn">from</span> <span class="nn">pixiedust.packageManager</span> <span class="kn">import</span> <span class="n">PackageManager</span>
 <span class="n">pkg</span><span class="o">=</span><span class="n">PackageManager</span><span class="p">()</span>
-<span class="n">pkg</span><span class="o">.</span><span class="n">installPackage</span><span class="p">(</span><span class="s">&quot;graphframes:graphframes:0&quot;</span><span class="p">)</span>
+<span class="n">pkg</span><span class="o">.</span><span class="n">installPackage</span><span class="p">(</span><span class="s2">&quot;graphframes:graphframes:0&quot;</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -641,16 +340,16 @@ div#notebook {
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython2"><pre><span class="n">properties</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s">&#39;twitter&#39;</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s">&#39;restAPI&#39;</span><span class="p">:</span> <span class="s">&#39;https://xxx:xxx@cdeservice.mybluemix.net/api/v1/messages/search&#39;</span><span class="p">,</span>
-                <span class="s">&#39;username&#39;</span><span class="p">:</span> <span class="s">&#39;xxxx&#39;</span><span class="p">,</span>
-                <span class="s">&#39;password&#39;</span><span class="p">:</span> <span class="s">&#39;xxx&#39;</span>
+            <span class="s1">&#39;twitter&#39;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s1">&#39;restAPI&#39;</span><span class="p">:</span> <span class="s1">&#39;https://xxx:xxx@cdeservice.mybluemix.net/api/v1/messages/search&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;username&#39;</span><span class="p">:</span> <span class="s1">&#39;xxxx&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;password&#39;</span><span class="p">:</span> <span class="s1">&#39;xxx&#39;</span>
                 <span class="p">},</span>
-            <span class="s">&#39;cloudant&#39;</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s">&#39;account&#39;</span><span class="p">:</span><span class="s">&#39;https://xxx.cloudant.com&#39;</span><span class="p">,</span> 
-                <span class="s">&#39;username&#39;</span><span class="p">:</span><span class="s">&#39;xxx&#39;</span><span class="p">,</span> 
-                <span class="s">&#39;password&#39;</span><span class="p">:</span><span class="s">&#39;xxx&#39;</span><span class="p">,</span>
-                <span class="s">&#39;database&#39;</span><span class="p">:</span><span class="s">&#39;xxx&#39;</span>
+            <span class="s1">&#39;cloudant&#39;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s1">&#39;account&#39;</span><span class="p">:</span><span class="s1">&#39;https://xxx.cloudant.com&#39;</span><span class="p">,</span> 
+                <span class="s1">&#39;username&#39;</span><span class="p">:</span><span class="s1">&#39;xxx&#39;</span><span class="p">,</span> 
+                <span class="s1">&#39;password&#39;</span><span class="p">:</span><span class="s1">&#39;xxx&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;database&#39;</span><span class="p">:</span><span class="s1">&#39;xxx&#39;</span>
                 <span class="p">}</span>
             <span class="p">}</span>
 </pre></div>
@@ -713,9 +412,9 @@ div#notebook {
         <span class="k">if</span> <span class="n">loop</span> <span class="o">&gt;</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">count</span><span class="p">)</span> <span class="o">/</span> <span class="mi">100</span><span class="p">):</span>
             <span class="k">return</span>
 
-        <span class="c"># QUERY TWITTER</span>
+        <span class="c1"># QUERY TWITTER</span>
         <span class="k">if</span> <span class="n">url</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="n">url</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s">&quot;twitter&quot;</span><span class="p">][</span><span class="s">&quot;restAPI&quot;</span><span class="p">]</span>
+            <span class="n">url</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;twitter&quot;</span><span class="p">][</span><span class="s2">&quot;restAPI&quot;</span><span class="p">]</span>
             <span class="k">print</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">query</span><span class="p">)</span>
             <span class="n">tweets</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_tweets</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">query</span><span class="p">)</span>
    
@@ -723,32 +422,32 @@ div#notebook {
             <span class="k">print</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
             <span class="n">tweets</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_tweets</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">query</span><span class="p">)</span>
  
-        <span class="c"># LOAD TO CLOUDANT</span>
+        <span class="c1"># LOAD TO CLOUDANT</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">load_cloudant</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">tweets</span><span class="p">)</span>
 
-        <span class="c"># CONTINUE TO PAGE THROUGH RESULTS ....</span>
-        <span class="k">if</span> <span class="s">&quot;related&quot;</span> <span class="ow">in</span> <span class="n">tweets</span><span class="p">:</span>
-            <span class="n">url</span> <span class="o">=</span> <span class="n">tweets</span><span class="p">[</span><span class="s">&quot;related&quot;</span><span class="p">][</span><span class="s">&quot;next&quot;</span><span class="p">][</span><span class="s">&quot;href&quot;</span><span class="p">]</span>
+        <span class="c1"># CONTINUE TO PAGE THROUGH RESULTS ....</span>
+        <span class="k">if</span> <span class="s2">&quot;related&quot;</span> <span class="ow">in</span> <span class="n">tweets</span><span class="p">:</span>
+            <span class="n">url</span> <span class="o">=</span> <span class="n">tweets</span><span class="p">[</span><span class="s2">&quot;related&quot;</span><span class="p">][</span><span class="s2">&quot;next&quot;</span><span class="p">][</span><span class="s2">&quot;href&quot;</span><span class="p">]</span>
 
-            <span class="c">#!! recursive call</span>
+            <span class="c1">#!! recursive call</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">query_twitter</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="n">loop</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">get_tweets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">query</span><span class="p">):</span>
 
-        <span class="c"># GET tweets from twitter endpoint</span>
-        <span class="n">user</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s">&quot;twitter&quot;</span><span class="p">][</span><span class="s">&quot;username&quot;</span><span class="p">]</span>
-        <span class="n">password</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s">&quot;twitter&quot;</span><span class="p">][</span><span class="s">&quot;password&quot;</span><span class="p">]</span>
+        <span class="c1"># GET tweets from twitter endpoint</span>
+        <span class="n">user</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;twitter&quot;</span><span class="p">][</span><span class="s2">&quot;username&quot;</span><span class="p">]</span>
+        <span class="n">password</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;twitter&quot;</span><span class="p">][</span><span class="s2">&quot;password&quot;</span><span class="p">]</span>
     
-        <span class="k">print</span> <span class="p">(</span><span class="s">&quot;GET: Tweets from {} &quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">url</span><span class="p">))</span>
+        <span class="k">print</span> <span class="p">(</span><span class="s2">&quot;GET: Tweets from {} &quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">url</span><span class="p">))</span>
        
         <span class="k">if</span> <span class="n">query</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="n">payload</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;country_code&#39;</span> <span class="p">:</span><span class="s">&#39; us&#39;</span><span class="p">,</span> <span class="s">&#39;lang&#39;</span> <span class="p">:</span> <span class="s">&#39;en&#39;</span><span class="p">}</span>
+            <span class="n">payload</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;country_code&#39;</span> <span class="p">:</span><span class="s1">&#39; us&#39;</span><span class="p">,</span> <span class="s1">&#39;lang&#39;</span> <span class="p">:</span> <span class="s1">&#39;en&#39;</span><span class="p">}</span>
             <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">auth</span><span class="o">=</span><span class="n">HTTPBasicAuth</span><span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="n">password</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">payload</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;q&#39;</span><span class="p">:</span> <span class="n">query</span><span class="p">,</span> <span class="s">&#39;country_code&#39;</span> <span class="p">:</span><span class="s">&#39; us&#39;</span><span class="p">,</span> <span class="s">&#39;lang&#39;</span> <span class="p">:</span> <span class="s">&#39;en&#39;</span><span class="p">}</span>
+            <span class="n">payload</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;q&#39;</span><span class="p">:</span> <span class="n">query</span><span class="p">,</span> <span class="s1">&#39;country_code&#39;</span> <span class="p">:</span><span class="s1">&#39; us&#39;</span><span class="p">,</span> <span class="s1">&#39;lang&#39;</span> <span class="p">:</span> <span class="s1">&#39;en&#39;</span><span class="p">}</span>
             <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">payload</span><span class="p">,</span> <span class="n">auth</span><span class="o">=</span><span class="n">HTTPBasicAuth</span><span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="n">password</span><span class="p">))</span>
 
-        <span class="k">print</span> <span class="p">(</span><span class="s">&quot;Got {} response &quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">))</span>
+        <span class="k">print</span> <span class="p">(</span><span class="s2">&quot;Got {} response &quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">))</span>
         
         <span class="n">tweets</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
 
@@ -756,21 +455,21 @@ div#notebook {
 
     <span class="k">def</span> <span class="nf">load_cloudant</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">tweets</span><span class="p">):</span>
      
-        <span class="c"># POST tweets to Cloudant database</span>
-        <span class="n">url</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s">&quot;cloudant&quot;</span><span class="p">][</span><span class="s">&quot;account&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="s">&quot;/&quot;</span> <span class="o">+</span> <span class="n">config</span><span class="p">[</span><span class="s">&quot;cloudant&quot;</span><span class="p">][</span><span class="s">&quot;database&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="s">&quot;/_bulk_docs&quot;</span>
-        <span class="n">user</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s">&quot;cloudant&quot;</span><span class="p">][</span><span class="s">&quot;username&quot;</span><span class="p">]</span>
-        <span class="n">password</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s">&quot;cloudant&quot;</span><span class="p">][</span><span class="s">&quot;password&quot;</span><span class="p">]</span>
-        <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span><span class="s">&quot;Content-Type&quot;</span><span class="p">:</span> <span class="s">&quot;application/json&quot;</span><span class="p">}</span>
+        <span class="c1"># POST tweets to Cloudant database</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;cloudant&quot;</span><span class="p">][</span><span class="s2">&quot;account&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;cloudant&quot;</span><span class="p">][</span><span class="s2">&quot;database&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;/_bulk_docs&quot;</span>
+        <span class="n">user</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;cloudant&quot;</span><span class="p">][</span><span class="s2">&quot;username&quot;</span><span class="p">]</span>
+        <span class="n">password</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;cloudant&quot;</span><span class="p">][</span><span class="s2">&quot;password&quot;</span><span class="p">]</span>
+        <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;Content-Type&quot;</span><span class="p">:</span> <span class="s2">&quot;application/json&quot;</span><span class="p">}</span>
 
-        <span class="k">if</span> <span class="s">&quot;tweets&quot;</span> <span class="ow">in</span> <span class="n">tweets</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s2">&quot;tweets&quot;</span> <span class="ow">in</span> <span class="n">tweets</span><span class="p">:</span>
             <span class="n">docs</span> <span class="o">=</span> <span class="p">{}</span>
-            <span class="n">docs</span><span class="p">[</span><span class="s">&quot;docs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tweets</span><span class="p">[</span><span class="s">&quot;tweets&quot;</span><span class="p">]</span>
+            <span class="n">docs</span><span class="p">[</span><span class="s2">&quot;docs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tweets</span><span class="p">[</span><span class="s2">&quot;tweets&quot;</span><span class="p">]</span>
 
-            <span class="k">print</span> <span class="p">(</span><span class="s">&quot;POST: Docs to {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">url</span><span class="p">))</span>
+            <span class="k">print</span> <span class="p">(</span><span class="s2">&quot;POST: Docs to {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">url</span><span class="p">))</span>
      
             <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">docs</span><span class="p">),</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span> <span class="n">auth</span><span class="o">=</span><span class="n">HTTPBasicAuth</span><span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="n">password</span><span class="p">))</span>
   
-            <span class="k">print</span> <span class="p">(</span><span class="s">&quot;Got {} response &quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">))</span>
+            <span class="k">print</span> <span class="p">(</span><span class="s2">&quot;Got {} response &quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">))</span>
 </pre></div>
 
 </div>
@@ -797,7 +496,7 @@ div#notebook {
 <div class="prompt input_prompt">In&nbsp;[9]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython2"><pre><span class="n">query</span> <span class="o">=</span> <span class="s">&quot;#election2016&quot;</span>
+<div class=" highlight hl-ipython2"><pre><span class="n">query</span> <span class="o">=</span> <span class="s2">&quot;#election2016&quot;</span>
 <span class="n">count</span> <span class="o">=</span> <span class="mi">3000</span>
 </pre></div>
 
@@ -980,13 +679,13 @@ div#notebook {
 <div class="prompt input_prompt">In&nbsp;[3]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython2"><pre><span class="n">tweetsDF</span> <span class="o">=</span> <span class="n">sqlContext</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s">&quot;com.cloudant.spark&quot;</span><span class="p">)</span><span class="o">.</span>\
-    <span class="n">option</span><span class="p">(</span><span class="s">&quot;cloudant.host&quot;</span><span class="p">,</span><span class="n">properties</span><span class="p">[</span><span class="s">&#39;cloudant&#39;</span><span class="p">][</span><span class="s">&#39;account&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;https://&#39;</span><span class="p">,</span><span class="s">&#39;&#39;</span><span class="p">))</span><span class="o">.</span>\
-    <span class="n">option</span><span class="p">(</span><span class="s">&quot;cloudant.username&quot;</span><span class="p">,</span> <span class="n">properties</span><span class="p">[</span><span class="s">&#39;cloudant&#39;</span><span class="p">][</span><span class="s">&#39;username&#39;</span><span class="p">])</span><span class="o">.</span>\
-    <span class="n">option</span><span class="p">(</span><span class="s">&quot;cloudant.password&quot;</span><span class="p">,</span> <span class="n">properties</span><span class="p">[</span><span class="s">&#39;cloudant&#39;</span><span class="p">][</span><span class="s">&#39;password&#39;</span><span class="p">])</span><span class="o">.</span>\
-    <span class="n">option</span><span class="p">(</span><span class="s">&quot;schemaSampleSize&quot;</span><span class="p">,</span> <span class="s">&quot;-1&quot;</span><span class="p">)</span><span class="o">.</span>\
-    <span class="n">option</span><span class="p">(</span><span class="s">&quot;jsonstore.rdd.partitions&quot;</span><span class="p">,</span> <span class="s">&quot;5&quot;</span><span class="p">)</span><span class="o">.</span>\
-    <span class="n">load</span><span class="p">(</span><span class="n">properties</span><span class="p">[</span><span class="s">&#39;cloudant&#39;</span><span class="p">][</span><span class="s">&#39;database&#39;</span><span class="p">])</span>
+<div class=" highlight hl-ipython2"><pre><span class="n">tweetsDF</span> <span class="o">=</span> <span class="n">sqlContext</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;com.cloudant.spark&quot;</span><span class="p">)</span><span class="o">.</span>\
+    <span class="n">option</span><span class="p">(</span><span class="s2">&quot;cloudant.host&quot;</span><span class="p">,</span><span class="n">properties</span><span class="p">[</span><span class="s1">&#39;cloudant&#39;</span><span class="p">][</span><span class="s1">&#39;account&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;https://&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">))</span><span class="o">.</span>\
+    <span class="n">option</span><span class="p">(</span><span class="s2">&quot;cloudant.username&quot;</span><span class="p">,</span> <span class="n">properties</span><span class="p">[</span><span class="s1">&#39;cloudant&#39;</span><span class="p">][</span><span class="s1">&#39;username&#39;</span><span class="p">])</span><span class="o">.</span>\
+    <span class="n">option</span><span class="p">(</span><span class="s2">&quot;cloudant.password&quot;</span><span class="p">,</span> <span class="n">properties</span><span class="p">[</span><span class="s1">&#39;cloudant&#39;</span><span class="p">][</span><span class="s1">&#39;password&#39;</span><span class="p">])</span><span class="o">.</span>\
+    <span class="n">option</span><span class="p">(</span><span class="s2">&quot;schemaSampleSize&quot;</span><span class="p">,</span> <span class="s2">&quot;-1&quot;</span><span class="p">)</span><span class="o">.</span>\
+    <span class="n">option</span><span class="p">(</span><span class="s2">&quot;jsonstore.rdd.partitions&quot;</span><span class="p">,</span> <span class="s2">&quot;5&quot;</span><span class="p">)</span><span class="o">.</span>\
+    <span class="n">load</span><span class="p">(</span><span class="n">properties</span><span class="p">[</span><span class="s1">&#39;cloudant&#39;</span><span class="p">][</span><span class="s1">&#39;database&#39;</span><span class="p">])</span>
 </pre></div>
 
 </div>
@@ -1789,9 +1488,9 @@ only showing top 5 rows
 <div class="prompt input_prompt">In&nbsp;[268]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython2"><pre><span class="n">tweetsDF2</span> <span class="o">=</span> <span class="n">tweetsDF</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">tweetsDF</span><span class="o">.</span><span class="n">cde</span><span class="o">.</span><span class="n">author</span><span class="o">.</span><span class="n">gender</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s">&quot;gender&quot;</span><span class="p">),</span> 
-                 <span class="n">tweetsDF</span><span class="o">.</span><span class="n">cde</span><span class="o">.</span><span class="n">author</span><span class="o">.</span><span class="n">location</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s">&quot;state&quot;</span><span class="p">),</span>
-                 <span class="n">tweetsDF</span><span class="o">.</span><span class="n">cde</span><span class="o">.</span><span class="n">content</span><span class="o">.</span><span class="n">sentiment</span><span class="o">.</span><span class="n">polarity</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s">&quot;polarity&quot;</span><span class="p">))</span>
+<div class=" highlight hl-ipython2"><pre><span class="n">tweetsDF2</span> <span class="o">=</span> <span class="n">tweetsDF</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">tweetsDF</span><span class="o">.</span><span class="n">cde</span><span class="o">.</span><span class="n">author</span><span class="o">.</span><span class="n">gender</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;gender&quot;</span><span class="p">),</span> 
+                 <span class="n">tweetsDF</span><span class="o">.</span><span class="n">cde</span><span class="o">.</span><span class="n">author</span><span class="o">.</span><span class="n">location</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;state&quot;</span><span class="p">),</span>
+                 <span class="n">tweetsDF</span><span class="o">.</span><span class="n">cde</span><span class="o">.</span><span class="n">content</span><span class="o">.</span><span class="n">sentiment</span><span class="o">.</span><span class="n">polarity</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;polarity&quot;</span><span class="p">))</span>
 </pre></div>
 
 </div>
@@ -1866,15 +1565,15 @@ only showing top 5 rows
 <div class="prompt input_prompt">In&nbsp;[220]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython2"><pre><span class="c"># count tweets by state</span>
+<div class=" highlight hl-ipython2"><pre><span class="c1"># count tweets by state</span>
 <span class="n">tweets_state</span> <span class="o">=</span> <span class="n">tweetsDF2</span><span class="o">.</span><span class="n">groupBy</span><span class="p">(</span><span class="n">tweetsDF2</span><span class="o">.</span><span class="n">state</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
 <span class="n">tweets_state</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
 
-<span class="c"># count by gender &amp; polarity</span>
+<span class="c1"># count by gender &amp; polarity</span>
 <span class="n">tweets_gp0</span> <span class="o">=</span> <span class="n">tweetsDF2</span><span class="o">.</span><span class="n">groupBy</span><span class="p">(</span><span class="n">tweetsDF2</span><span class="o">.</span><span class="n">gender</span><span class="p">,</span> <span class="n">tweetsDF2</span><span class="o">.</span><span class="n">polarity</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
 <span class="n">tweets_gp0</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
 
-<span class="n">tweets_gp</span><span class="o">=</span> <span class="n">tweetsDF2</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">tweetsDF2</span><span class="o">.</span><span class="n">polarity</span><span class="o">.</span><span class="n">isNotNull</span><span class="p">())</span><span class="o">.</span><span class="n">groupBy</span><span class="p">(</span><span class="s">&quot;polarity&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">pivot</span><span class="p">(</span><span class="s">&quot;gender&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+<span class="n">tweets_gp</span><span class="o">=</span> <span class="n">tweetsDF2</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">tweetsDF2</span><span class="o">.</span><span class="n">polarity</span><span class="o">.</span><span class="n">isNotNull</span><span class="p">())</span><span class="o">.</span><span class="n">groupBy</span><span class="p">(</span><span class="s2">&quot;polarity&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">pivot</span><span class="p">(</span><span class="s2">&quot;gender&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
 <span class="n">tweets_gp</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
 </pre></div>
 
@@ -1926,11 +1625,11 @@ only showing top 5 rows
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython2"><pre><span class="n">tweets_state_pd</span> <span class="o">=</span> <span class="n">tweets_state</span><span class="o">.</span><span class="n">toPandas</span><span class="p">()</span>
-<span class="n">values</span> <span class="o">=</span> <span class="n">tweets_state_pd</span><span class="p">[</span><span class="s">&#39;count&#39;</span><span class="p">]</span>
-<span class="n">labels</span> <span class="o">=</span> <span class="n">tweets_state_pd</span><span class="p">[</span><span class="s">&#39;state&#39;</span><span class="p">]</span>
+<span class="n">values</span> <span class="o">=</span> <span class="n">tweets_state_pd</span><span class="p">[</span><span class="s1">&#39;count&#39;</span><span class="p">]</span>
+<span class="n">labels</span> <span class="o">=</span> <span class="n">tweets_state_pd</span><span class="p">[</span><span class="s1">&#39;state&#39;</span><span class="p">]</span>
 
 <span class="n">plt</span><span class="o">.</span><span class="n">gcf</span><span class="p">()</span><span class="o">.</span><span class="n">set_size_inches</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="n">forward</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s">&#39;Number of tweets by state&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Number of tweets by state&#39;</span><span class="p">)</span>
 
 <span class="n">plt</span><span class="o">.</span><span class="n">barh</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">)),</span> <span class="n">values</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">yticks</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">)),</span> <span class="n">labels</span><span class="p">)</span>
@@ -3128,25 +2827,25 @@ lcGIiIiIiIiIiFioMhgREREREREREQtVBiMiIiIiIiIiYqH6/zkoiKkAlyD9AAAAAElFTkSuQmCC
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython2"><pre><span class="n">tweets_gp_pd</span> <span class="o">=</span> <span class="n">tweets_gp</span><span class="o">.</span><span class="n">toPandas</span><span class="p">()</span>
-<span class="n">labels</span> <span class="o">=</span> <span class="n">tweets_gp_pd</span><span class="p">[</span><span class="s">&#39;polarity&#39;</span><span class="p">]</span>
+<span class="n">labels</span> <span class="o">=</span> <span class="n">tweets_gp_pd</span><span class="p">[</span><span class="s1">&#39;polarity&#39;</span><span class="p">]</span>
 
 <span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span>
-<span class="n">male</span> <span class="o">=</span> <span class="n">tweets_gp_pd</span><span class="p">[</span><span class="s">&#39;male&#39;</span><span class="p">]</span>
-<span class="n">female</span> <span class="o">=</span> <span class="n">tweets_gp_pd</span><span class="p">[</span><span class="s">&#39;female&#39;</span><span class="p">]</span>
-<span class="n">unknown</span> <span class="o">=</span> <span class="n">tweets_gp_pd</span><span class="p">[</span><span class="s">&#39;unknown&#39;</span><span class="p">]</span>
-<span class="n">ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>  <span class="c"># the x locations for the groups</span>
-<span class="n">width</span> <span class="o">=</span> <span class="mf">0.2</span>      <span class="c"># the width of the bars</span>
+<span class="n">male</span> <span class="o">=</span> <span class="n">tweets_gp_pd</span><span class="p">[</span><span class="s1">&#39;male&#39;</span><span class="p">]</span>
+<span class="n">female</span> <span class="o">=</span> <span class="n">tweets_gp_pd</span><span class="p">[</span><span class="s1">&#39;female&#39;</span><span class="p">]</span>
+<span class="n">unknown</span> <span class="o">=</span> <span class="n">tweets_gp_pd</span><span class="p">[</span><span class="s1">&#39;unknown&#39;</span><span class="p">]</span>
+<span class="n">ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>  <span class="c1"># the x locations for the groups</span>
+<span class="n">width</span> <span class="o">=</span> <span class="mf">0.2</span>      <span class="c1"># the width of the bars</span>
 
 <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
-<span class="n">rects1</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="n">ind</span><span class="o">-</span><span class="n">width</span><span class="p">,</span> <span class="n">male</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s">&#39;b&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s">&#39;male&#39;</span><span class="p">)</span>
-<span class="n">rects2</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="n">female</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s">&#39;r&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s">&#39;female&#39;</span><span class="p">)</span>
-<span class="n">rects3</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="n">width</span><span class="p">,</span> <span class="n">unknown</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s">&#39;y&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s">&#39;unknown&#39;</span><span class="p">)</span>
+<span class="n">rects1</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="n">ind</span><span class="o">-</span><span class="n">width</span><span class="p">,</span> <span class="n">male</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;male&#39;</span><span class="p">)</span>
+<span class="n">rects2</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="n">female</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;female&#39;</span><span class="p">)</span>
+<span class="n">rects3</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="n">width</span><span class="p">,</span> <span class="n">unknown</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;unknown&#39;</span><span class="p">)</span>
 
-<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s">&#39;Count&#39;</span><span class="p">)</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s">&#39;Tweets by polarity and gender&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Count&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Tweets by polarity and gender&#39;</span><span class="p">)</span>
 <span class="n">ax</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">(</span><span class="n">ind</span> <span class="o">+</span> <span class="n">width</span><span class="p">)</span>
 <span class="n">ax</span><span class="o">.</span><span class="n">set_xticklabels</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">((</span><span class="n">rects1</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">rects2</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">rects3</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="p">(</span><span class="s">&#39;male&#39;</span><span class="p">,</span> <span class="s">&#39;female&#39;</span><span class="p">,</span> <span class="s">&#39;unknown&#39;</span><span class="p">))</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">((</span><span class="n">rects1</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">rects2</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">rects3</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="p">(</span><span class="s1">&#39;male&#39;</span><span class="p">,</span> <span class="s1">&#39;female&#39;</span><span class="p">,</span> <span class="s1">&#39;unknown&#39;</span><span class="p">))</span>
 
 
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
@@ -3374,7 +3073,7 @@ kjAzs0xOEmZmlslJwszMMjlJmJlZJicJMzPL9P8BBa1HDToHXLsAAAAASUVORK5CYII=
 <div class="prompt input_prompt">In&nbsp;[6]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython2"><pre><span class="n">tweetsDF</span><span class="o">.</span><span class="n">registerTempTable</span><span class="p">(</span><span class="s">&quot;tweets_DF&quot;</span><span class="p">)</span>
+<div class=" highlight hl-ipython2"><pre><span class="n">tweetsDF</span><span class="o">.</span><span class="n">registerTempTable</span><span class="p">(</span><span class="s2">&quot;tweets_DF&quot;</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -3397,7 +3096,7 @@ kjAzs0xOEmZmlslJwszMMjlJmJlZJicJMzPL9P8BBa1HDToHXLsAAAAASUVORK5CYII=
 <div class="prompt input_prompt">In&nbsp;[13]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython2"><pre><span class="n">sqlContext</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s">&quot;SELECT count(*) AS cnt FROM tweets_DF&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<div class=" highlight hl-ipython2"><pre><span class="n">sqlContext</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">&quot;SELECT count(*) AS cnt FROM tweets_DF&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 
 </div>
@@ -3429,7 +3128,7 @@ kjAzs0xOEmZmlslJwszMMjlJmJlZJicJMzPL9P8BBa1HDToHXLsAAAAASUVORK5CYII=
 <div class="prompt input_prompt">In&nbsp;[12]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython2"><pre><span class="n">sqlContext</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s">&quot;SELECT message.actor.displayName AS author, count(*) as cnt FROM tweets_DF GROUP BY message.actor.displayName ORDER BY cnt DESC&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+<div class=" highlight hl-ipython2"><pre><span class="n">sqlContext</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">&quot;SELECT message.actor.displayName AS author, count(*) as cnt FROM tweets_DF GROUP BY message.actor.displayName ORDER BY cnt DESC&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -3491,9 +3190,9 @@ only showing top 10 rows
 <div class="prompt input_prompt">In&nbsp;[129]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython2"><pre><span class="n">hashtags</span> <span class="o">=</span> <span class="n">sqlContext</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s">&quot;SELECT message.object.twitter_entities.hashtags.text as tags </span><span class="se">\</span>
-<span class="s">                FROM tweets_DF </span><span class="se">\</span>
-<span class="s">                WHERE message.object.twitter_entities.hashtags.text IS NOT NULL&quot;</span><span class="p">)</span>
+<div class=" highlight hl-ipython2"><pre><span class="n">hashtags</span> <span class="o">=</span> <span class="n">sqlContext</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">&quot;SELECT message.object.twitter_entities.hashtags.text as tags </span><span class="se">\</span>
+<span class="s2">                FROM tweets_DF </span><span class="se">\</span>
+<span class="s2">                WHERE message.object.twitter_entities.hashtags.text IS NOT NULL&quot;</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -3543,7 +3242,7 @@ only showing top 10 rows
 <div class=" highlight hl-ipython2"><pre><span class="kn">from</span> <span class="nn">pyspark.sql</span> <span class="kn">import</span> <span class="n">Row</span>
 
 <span class="n">tagCloudDF</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">parallelize</span><span class="p">(</span><span class="n">tagCloud</span><span class="p">)</span>
-<span class="n">row</span> <span class="o">=</span> <span class="n">Row</span><span class="p">(</span><span class="s">&quot;hashtag&quot;</span><span class="p">)</span>
+<span class="n">row</span> <span class="o">=</span> <span class="n">Row</span><span class="p">(</span><span class="s2">&quot;hashtag&quot;</span><span class="p">)</span>
 <span class="n">hashtagsDF</span> <span class="o">=</span> <span class="n">tagCloudDF</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">row</span><span class="p">)</span><span class="o">.</span><span class="n">toDF</span><span class="p">()</span>
 </pre></div>
 
@@ -3567,7 +3266,7 @@ only showing top 10 rows
 <div class="prompt input_prompt">In&nbsp;[166]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython2"><pre><span class="n">hashtagsDF</span><span class="o">.</span><span class="n">registerTempTable</span><span class="p">(</span><span class="s">&quot;hashtags_DF&quot;</span><span class="p">)</span>
+<div class=" highlight hl-ipython2"><pre><span class="n">hashtagsDF</span><span class="o">.</span><span class="n">registerTempTable</span><span class="p">(</span><span class="s2">&quot;hashtags_DF&quot;</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -3580,7 +3279,7 @@ only showing top 10 rows
 <div class="prompt input_prompt">In&nbsp;[190]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython2"><pre><span class="n">trending</span> <span class="o">=</span> <span class="n">sqlContext</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s">&quot;SELECT count(hashtag) as CNT, hashtag as TAG FROM hashtags_DF GROUP BY hashtag ORDER BY CNT DESC&quot;</span><span class="p">)</span>
+<div class=" highlight hl-ipython2"><pre><span class="n">trending</span> <span class="o">=</span> <span class="n">sqlContext</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">&quot;SELECT count(hashtag) as CNT, hashtag as TAG FROM hashtags_DF GROUP BY hashtag ORDER BY CNT DESC&quot;</span><span class="p">)</span>
 <span class="n">trending</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
 </pre></div>
 
@@ -3653,7 +3352,7 @@ only showing top 10 rows
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython2"><pre><span class="kn">import</span> <span class="nn">brunel</span>
-<span class="n">sys</span><span class="o">.</span><span class="n">setdefaultencoding</span><span class="p">(</span><span class="s">&#39;utf-8&#39;</span><span class="p">)</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">setdefaultencoding</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
 
 <span class="n">trending_pd</span> <span class="o">=</span> <span class="n">trending</span><span class="o">.</span><span class="n">toPandas</span><span class="p">()</span>
 </pre></div>
@@ -3678,9 +3377,9 @@ only showing top 10 rows
 <div class="prompt input_prompt">In&nbsp;[261]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython2"><pre><span class="n">trending_pd</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s">&#39;trending_pd.csv&#39;</span><span class="p">)</span>
-<span class="n">tweets_state_pd</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s">&#39;tweets_state_pd.csv&#39;</span><span class="p">)</span>
-<span class="n">tweets_gp_pd</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s">&#39;tweets_gp_pd.csv&#39;</span><span class="p">)</span>
+<div class=" highlight hl-ipython2"><pre><span class="n">trending_pd</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s1">&#39;trending_pd.csv&#39;</span><span class="p">)</span>
+<span class="n">tweets_state_pd</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s1">&#39;tweets_state_pd.csv&#39;</span><span class="p">)</span>
+<span class="n">tweets_gp_pd</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s1">&#39;tweets_gp_pd.csv&#39;</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -3825,10 +3524,10 @@ only showing top 10 rows
 
 
 
-<div id="240fae08-7bc4-4567-bc39-855e73c0aa6a"></div>
+<div id="167b6948-888d-46d2-b1b0-8289975cd9be"></div>
 <div class="output_subarea output_javascript output_execute_result">
 <script type="text/javascript">
-var element = $('#240fae08-7bc4-4567-bc39-855e73c0aa6a');
+var element = $('#167b6948-888d-46d2-b1b0-8289975cd9be');
 /*
  * Copyright (c) 2015 IBM Corporation and others.
  *
@@ -4294,10 +3993,10 @@ v.build(table1);
 
 
 
-<div id="6d6e8712-e5a4-419d-a15d-dc7b016d7569"></div>
+<div id="0a4ed2f6-e15b-49b5-a33a-c623ba4edd2f"></div>
 <div class="output_subarea output_javascript output_execute_result">
 <script type="text/javascript">
-var element = $('#6d6e8712-e5a4-419d-a15d-dc7b016d7569');
+var element = $('#0a4ed2f6-e15b-49b5-a33a-c623ba4edd2f');
 /*
  * Copyright (c) 2015 IBM Corporation and others.
  *
@@ -4664,10 +4363,10 @@ v.build(table1);
 
 
 
-<div id="8040a544-4478-4dd7-9160-f692cf421b47"></div>
+<div id="15ce4f3c-53f3-4c81-9960-d8e62f7533e7"></div>
 <div class="output_subarea output_javascript output_execute_result">
 <script type="text/javascript">
-var element = $('#8040a544-4478-4dd7-9160-f692cf421b47');
+var element = $('#15ce4f3c-53f3-4c81-9960-d8e62f7533e7');
 /*
  * Copyright (c) 2015 IBM Corporation and others.
  *
@@ -4968,12 +4667,12 @@ v.build(table1);
 <div class="prompt input_prompt">In&nbsp;[174]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython2"><pre><span class="n">hashtagsDF</span><span class="o">.</span><span class="n">write</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s">&quot;com.cloudant.spark&quot;</span><span class="p">)</span><span class="o">.</span>\
-    <span class="n">option</span><span class="p">(</span><span class="s">&quot;cloudant.host&quot;</span><span class="p">,</span><span class="n">properties</span><span class="p">[</span><span class="s">&#39;cloudant&#39;</span><span class="p">][</span><span class="s">&#39;account&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;https://&#39;</span><span class="p">,</span><span class="s">&#39;&#39;</span><span class="p">))</span><span class="o">.</span>\
-    <span class="n">option</span><span class="p">(</span><span class="s">&quot;cloudant.username&quot;</span><span class="p">,</span> <span class="n">properties</span><span class="p">[</span><span class="s">&#39;cloudant&#39;</span><span class="p">][</span><span class="s">&#39;username&#39;</span><span class="p">])</span><span class="o">.</span>\
-    <span class="n">option</span><span class="p">(</span><span class="s">&quot;cloudant.password&quot;</span><span class="p">,</span> <span class="n">properties</span><span class="p">[</span><span class="s">&#39;cloudant&#39;</span><span class="p">][</span><span class="s">&#39;password&#39;</span><span class="p">])</span><span class="o">.</span>\
-    <span class="n">option</span><span class="p">(</span><span class="s">&quot;createDBOnSave&quot;</span><span class="p">,</span> <span class="s">&quot;true&quot;</span><span class="p">)</span><span class="o">.</span>\
-<span class="n">save</span><span class="p">(</span><span class="s">&quot;hashtags&quot;</span><span class="p">)</span>
+<div class=" highlight hl-ipython2"><pre><span class="n">hashtagsDF</span><span class="o">.</span><span class="n">write</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;com.cloudant.spark&quot;</span><span class="p">)</span><span class="o">.</span>\
+    <span class="n">option</span><span class="p">(</span><span class="s2">&quot;cloudant.host&quot;</span><span class="p">,</span><span class="n">properties</span><span class="p">[</span><span class="s1">&#39;cloudant&#39;</span><span class="p">][</span><span class="s1">&#39;account&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;https://&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">))</span><span class="o">.</span>\
+    <span class="n">option</span><span class="p">(</span><span class="s2">&quot;cloudant.username&quot;</span><span class="p">,</span> <span class="n">properties</span><span class="p">[</span><span class="s1">&#39;cloudant&#39;</span><span class="p">][</span><span class="s1">&#39;username&#39;</span><span class="p">])</span><span class="o">.</span>\
+    <span class="n">option</span><span class="p">(</span><span class="s2">&quot;cloudant.password&quot;</span><span class="p">,</span> <span class="n">properties</span><span class="p">[</span><span class="s1">&#39;cloudant&#39;</span><span class="p">][</span><span class="s1">&#39;password&#39;</span><span class="p">])</span><span class="o">.</span>\
+    <span class="n">option</span><span class="p">(</span><span class="s2">&quot;createDBOnSave&quot;</span><span class="p">,</span> <span class="s2">&quot;true&quot;</span><span class="p">)</span><span class="o">.</span>\
+<span class="n">save</span><span class="p">(</span><span class="s2">&quot;hashtags&quot;</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -5042,15 +4741,15 @@ v.build(table1);
 <div class="prompt input_prompt">In&nbsp;[180]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython2"><pre><span class="n">tweets_state_us</span> <span class="o">=</span> <span class="n">tweets_state</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">tweets_state</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="s">&quot;Alabama&quot;</span><span class="p">,</span> <span class="s">&quot;Alaska&quot;</span><span class="p">,</span> <span class="s">&quot;Arizona&quot;</span><span class="p">,</span> 
-        <span class="s">&quot;Arkansas&quot;</span><span class="p">,</span> <span class="s">&quot;California&quot;</span><span class="p">,</span> <span class="s">&quot;Colorado&quot;</span><span class="p">,</span> <span class="s">&quot;Connecticut&quot;</span><span class="p">,</span> <span class="s">&quot;Delaware&quot;</span><span class="p">,</span> <span class="s">&quot;Florida&quot;</span><span class="p">,</span> 
-        <span class="s">&quot;Georgia&quot;</span><span class="p">,</span> <span class="s">&quot;Hawaii&quot;</span><span class="p">,</span> <span class="s">&quot;Idaho&quot;</span><span class="p">,</span> <span class="s">&quot;Illinois Indiana&quot;</span><span class="p">,</span> <span class="s">&quot;Iowa&quot;</span><span class="p">,</span> <span class="s">&quot;Kansas&quot;</span><span class="p">,</span> <span class="s">&quot;Kentucky&quot;</span><span class="p">,</span> 
-        <span class="s">&quot;Louisiana&quot;</span><span class="p">,</span> <span class="s">&quot;Maine&quot;</span><span class="p">,</span> <span class="s">&quot;Maryland&quot;</span><span class="p">,</span> <span class="s">&quot;Massachusetts&quot;</span><span class="p">,</span> <span class="s">&quot;Michigan&quot;</span><span class="p">,</span> <span class="s">&quot;Minnesota&quot;</span><span class="p">,</span> 
-        <span class="s">&quot;Mississippi&quot;</span><span class="p">,</span> <span class="s">&quot;Missouri&quot;</span><span class="p">,</span> <span class="s">&quot;Montana Nebraska&quot;</span><span class="p">,</span> <span class="s">&quot;Nevada&quot;</span><span class="p">,</span> <span class="s">&quot;New Hampshire&quot;</span><span class="p">,</span> 
-        <span class="s">&quot;New Jersey&quot;</span><span class="p">,</span> <span class="s">&quot;New Mexico&quot;</span><span class="p">,</span> <span class="s">&quot;New York&quot;</span><span class="p">,</span> <span class="s">&quot;North Carolina&quot;</span><span class="p">,</span> <span class="s">&quot;North Dakota&quot;</span><span class="p">,</span> 
-        <span class="s">&quot;Ohio&quot;</span><span class="p">,</span> <span class="s">&quot;Oklahoma&quot;</span><span class="p">,</span> <span class="s">&quot;Oregon&quot;</span><span class="p">,</span> <span class="s">&quot;Pennsylvania Rhode Island&quot;</span><span class="p">,</span> <span class="s">&quot;South Carolina&quot;</span><span class="p">,</span> 
-        <span class="s">&quot;South Dakota&quot;</span><span class="p">,</span> <span class="s">&quot;Tennessee&quot;</span><span class="p">,</span> <span class="s">&quot;Texas&quot;</span><span class="p">,</span><span class="s">&quot;Utah&quot;</span><span class="p">,</span> <span class="s">&quot;Vermont&quot;</span><span class="p">,</span> <span class="s">&quot;Virginia&quot;</span><span class="p">,</span> 
-        <span class="s">&quot;Washington&quot;</span><span class="p">,</span> <span class="s">&quot;West Virginia&quot;</span><span class="p">,</span> <span class="s">&quot;Wisconsin&quot;</span><span class="p">,</span> <span class="s">&quot;Wyoming&quot;</span><span class="p">))</span>
+<div class=" highlight hl-ipython2"><pre><span class="n">tweets_state_us</span> <span class="o">=</span> <span class="n">tweets_state</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">tweets_state</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="s2">&quot;Alabama&quot;</span><span class="p">,</span> <span class="s2">&quot;Alaska&quot;</span><span class="p">,</span> <span class="s2">&quot;Arizona&quot;</span><span class="p">,</span> 
+        <span class="s2">&quot;Arkansas&quot;</span><span class="p">,</span> <span class="s2">&quot;California&quot;</span><span class="p">,</span> <span class="s2">&quot;Colorado&quot;</span><span class="p">,</span> <span class="s2">&quot;Connecticut&quot;</span><span class="p">,</span> <span class="s2">&quot;Delaware&quot;</span><span class="p">,</span> <span class="s2">&quot;Florida&quot;</span><span class="p">,</span> 
+        <span class="s2">&quot;Georgia&quot;</span><span class="p">,</span> <span class="s2">&quot;Hawaii&quot;</span><span class="p">,</span> <span class="s2">&quot;Idaho&quot;</span><span class="p">,</span> <span class="s2">&quot;Illinois Indiana&quot;</span><span class="p">,</span> <span class="s2">&quot;Iowa&quot;</span><span class="p">,</span> <span class="s2">&quot;Kansas&quot;</span><span class="p">,</span> <span class="s2">&quot;Kentucky&quot;</span><span class="p">,</span> 
+        <span class="s2">&quot;Louisiana&quot;</span><span class="p">,</span> <span class="s2">&quot;Maine&quot;</span><span class="p">,</span> <span class="s2">&quot;Maryland&quot;</span><span class="p">,</span> <span class="s2">&quot;Massachusetts&quot;</span><span class="p">,</span> <span class="s2">&quot;Michigan&quot;</span><span class="p">,</span> <span class="s2">&quot;Minnesota&quot;</span><span class="p">,</span> 
+        <span class="s2">&quot;Mississippi&quot;</span><span class="p">,</span> <span class="s2">&quot;Missouri&quot;</span><span class="p">,</span> <span class="s2">&quot;Montana Nebraska&quot;</span><span class="p">,</span> <span class="s2">&quot;Nevada&quot;</span><span class="p">,</span> <span class="s2">&quot;New Hampshire&quot;</span><span class="p">,</span> 
+        <span class="s2">&quot;New Jersey&quot;</span><span class="p">,</span> <span class="s2">&quot;New Mexico&quot;</span><span class="p">,</span> <span class="s2">&quot;New York&quot;</span><span class="p">,</span> <span class="s2">&quot;North Carolina&quot;</span><span class="p">,</span> <span class="s2">&quot;North Dakota&quot;</span><span class="p">,</span> 
+        <span class="s2">&quot;Ohio&quot;</span><span class="p">,</span> <span class="s2">&quot;Oklahoma&quot;</span><span class="p">,</span> <span class="s2">&quot;Oregon&quot;</span><span class="p">,</span> <span class="s2">&quot;Pennsylvania Rhode Island&quot;</span><span class="p">,</span> <span class="s2">&quot;South Carolina&quot;</span><span class="p">,</span> 
+        <span class="s2">&quot;South Dakota&quot;</span><span class="p">,</span> <span class="s2">&quot;Tennessee&quot;</span><span class="p">,</span> <span class="s2">&quot;Texas&quot;</span><span class="p">,</span><span class="s2">&quot;Utah&quot;</span><span class="p">,</span> <span class="s2">&quot;Vermont&quot;</span><span class="p">,</span> <span class="s2">&quot;Virginia&quot;</span><span class="p">,</span> 
+        <span class="s2">&quot;Washington&quot;</span><span class="p">,</span> <span class="s2">&quot;West Virginia&quot;</span><span class="p">,</span> <span class="s2">&quot;Wisconsin&quot;</span><span class="p">,</span> <span class="s2">&quot;Wyoming&quot;</span><span class="p">))</span>
 </pre></div>
 
 </div>
@@ -7238,6 +6937,52 @@ $('#keyFields5465da0a, #valueFields5465da0a').droppable({
 
 </div>
 </div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="4.-Analysis-with-Spark-MLlib">4. Analysis with Spark MLlib<a class="anchor-link" href="#4.-Analysis-with-Spark-MLlib">&#182;</a></h1><p>Here we are going to use KMeans clustering algorithm from Spark MLlib.
+Clustering will let us cluster similar tweets together.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython2"><pre><span class="kn">from</span> <span class="nn">pyspark.mllib.feature</span> <span class="kn">import</span> <span class="n">HashingTF</span>
+<span class="kn">from</span> <span class="nn">pyspark.mllib.clustering</span> <span class="kn">import</span> <span class="n">KMeans</span><span class="p">,</span> <span class="n">KMeansModel</span>
+
+<span class="c1"># create an RDD of strings - tweets messages</span>
+<span class="n">tweetsRDD</span> <span class="o">=</span> <span class="n">tweetsDF</span><span class="o">.</span><span class="n">rdd</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">t</span><span class="p">:</span> <span class="n">t</span><span class="o">.</span><span class="n">message</span><span class="o">.</span><span class="n">body</span><span class="p">)</span>
+
+<span class="n">htf</span> <span class="o">=</span> <span class="n">HashingTF</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
+<span class="c1"># create Feature verctor for every tweet</span>
+<span class="c1"># each term represents feature</span>
+<span class="c1"># a function calculates how many time seach term is in a tweet</span>
+<span class="n">vectors</span> <span class="o">=</span> <span class="n">tweetsRDD</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">t</span><span class="p">:</span> <span class="n">htf</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)))</span><span class="o">.</span><span class="n">cache</span><span class="p">()</span>
+<span class="k">print</span><span class="p">(</span><span class="n">vectors</span><span class="o">.</span><span class="n">take</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+
+<span class="c1"># Build the model (cluster the data)</span>
+<span class="n">numClusters</span> <span class="o">=</span> <span class="mi">2</span> <span class="c1"># number of clusters</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">KMeans</span><span class="o">.</span><span class="n">train</span><span class="p">(</span><span class="n">vectors</span><span class="p">,</span> <span class="n">numClusters</span><span class="p">,</span> <span class="n">maxIterations</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">initializationMode</span><span class="o">=</span><span class="s2">&quot;random&quot;</span><span class="p">)</span>
+
+<span class="c1"># Use the model to predict what cluster each tweet will be in</span>
+<span class="n">testtweets</span> <span class="o">=</span> <span class="n">tweetsRDD</span><span class="o">.</span><span class="n">take</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">testtweets</span><span class="p">:</span>
+    <span class="n">vector</span> <span class="o">=</span> <span class="n">htf</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">))</span>
+    <span class="n">cluster</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">vector</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;cluster: {}, tweet:{}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">cluster</span><span class="p">,</span> <span class="n">t</span><span class="p">))</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
 </div>
 <div class="cell border-box-sizing text_cell rendered">
 <div class="prompt input_prompt">
