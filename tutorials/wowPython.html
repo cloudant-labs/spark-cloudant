@@ -3524,10 +3524,10 @@ only showing top 10 rows
 
 
 
-<div id="167b6948-888d-46d2-b1b0-8289975cd9be"></div>
+<div id="043961d4-3aba-41eb-b7e1-04db1bd4de5d"></div>
 <div class="output_subarea output_javascript output_execute_result">
 <script type="text/javascript">
-var element = $('#167b6948-888d-46d2-b1b0-8289975cd9be');
+var element = $('#043961d4-3aba-41eb-b7e1-04db1bd4de5d');
 /*
  * Copyright (c) 2015 IBM Corporation and others.
  *
@@ -3993,10 +3993,10 @@ v.build(table1);
 
 
 
-<div id="0a4ed2f6-e15b-49b5-a33a-c623ba4edd2f"></div>
+<div id="b84e94d1-601f-4cf1-8bea-b9813de49f4c"></div>
 <div class="output_subarea output_javascript output_execute_result">
 <script type="text/javascript">
-var element = $('#0a4ed2f6-e15b-49b5-a33a-c623ba4edd2f');
+var element = $('#b84e94d1-601f-4cf1-8bea-b9813de49f4c');
 /*
  * Copyright (c) 2015 IBM Corporation and others.
  *
@@ -4363,10 +4363,10 @@ v.build(table1);
 
 
 
-<div id="15ce4f3c-53f3-4c81-9960-d8e62f7533e7"></div>
+<div id="b4baed04-aec4-41f0-968c-9283575a5348"></div>
 <div class="output_subarea output_javascript output_execute_result">
 <script type="text/javascript">
-var element = $('#15ce4f3c-53f3-4c81-9960-d8e62f7533e7');
+var element = $('#b4baed04-aec4-41f0-968c-9283575a5348');
 /*
  * Copyright (c) 2015 IBM Corporation and others.
  *
@@ -6943,8 +6943,9 @@ $('#keyFields5465da0a, #valueFields5465da0a').droppable({
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h1 id="4.-Analysis-with-Spark-MLlib">4. Analysis with Spark MLlib<a class="anchor-link" href="#4.-Analysis-with-Spark-MLlib">&#182;</a></h1><p>Here we are going to use KMeans clustering algorithm from Spark MLlib.
-Clustering will let us cluster similar tweets together.</p>
+<h1 id="4.-Analysis-with-Spark-MLlib">4. Analysis with Spark MLlib<a class="anchor-link" href="#4.-Analysis-with-Spark-MLlib">&#182;</a></h1><p>Here we are going to use KMeans clustering algorithm from Spark MLlib.</p>
+<p>Clustering will let us cluster similar tweets together.</p>
+<p>We will then display clusters using Brunel library.</p>
 
 </div>
 </div>
@@ -6954,29 +6955,93 @@ Clustering will let us cluster similar tweets together.</p>
 <div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython2"><pre><span class="kn">from</span> <span class="nn">pyspark.mllib.feature</span> <span class="kn">import</span> <span class="n">HashingTF</span>
+<div class=" highlight hl-ipython2"><pre><span class="c1"># TRAINING by hashtag</span>
+<span class="kn">from</span> <span class="nn">pyspark.mllib.feature</span> <span class="kn">import</span> <span class="n">HashingTF</span>
 <span class="kn">from</span> <span class="nn">pyspark.mllib.clustering</span> <span class="kn">import</span> <span class="n">KMeans</span><span class="p">,</span> <span class="n">KMeansModel</span>
 
-<span class="c1"># create an RDD of strings - tweets messages</span>
-<span class="n">tweetsRDD</span> <span class="o">=</span> <span class="n">tweetsDF</span><span class="o">.</span><span class="n">rdd</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">t</span><span class="p">:</span> <span class="n">t</span><span class="o">.</span><span class="n">message</span><span class="o">.</span><span class="n">body</span><span class="p">)</span>
+<span class="c1"># dataframe of tweets&#39; messages and hashtags</span>
+<span class="n">mhDF</span> <span class="o">=</span> <span class="n">sqlContext</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">&quot;SELECT message.body as message, </span><span class="se">\</span>
+<span class="s2">                message.object.twitter_entities.hashtags.text as tags </span><span class="se">\</span>
+<span class="s2">                FROM tweets_DF </span><span class="se">\</span>
+<span class="s2">                WHERE message.object.twitter_entities.hashtags.text IS NOT NULL&quot;</span><span class="p">)</span>
+<span class="n">mhDF</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="c1"># create an RDD of hashtags</span>
+<span class="n">hashtagsRDD</span> <span class="o">=</span> <span class="n">mhDF</span><span class="o">.</span><span class="n">rdd</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">h</span><span class="p">:</span> <span class="n">h</span><span class="o">.</span><span class="n">tags</span><span class="p">)</span>
 
+<span class="c1"># create Feature verctor for every tweet&#39;s hastags</span>
+<span class="c1"># each hashtag represents feature</span>
+<span class="c1"># a function calculates how many time hashtag is in a tweet</span>
 <span class="n">htf</span> <span class="o">=</span> <span class="n">HashingTF</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
-<span class="c1"># create Feature verctor for every tweet</span>
-<span class="c1"># each term represents feature</span>
-<span class="c1"># a function calculates how many time seach term is in a tweet</span>
-<span class="n">vectors</span> <span class="o">=</span> <span class="n">tweetsRDD</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">t</span><span class="p">:</span> <span class="n">htf</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)))</span><span class="o">.</span><span class="n">cache</span><span class="p">()</span>
+<span class="n">vectors</span> <span class="o">=</span> <span class="n">hashtagsRDD</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">hs</span><span class="p">:</span> <span class="n">htf</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">hs</span><span class="p">))</span><span class="o">.</span><span class="n">cache</span><span class="p">()</span>
 <span class="k">print</span><span class="p">(</span><span class="n">vectors</span><span class="o">.</span><span class="n">take</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
 
 <span class="c1"># Build the model (cluster the data)</span>
-<span class="n">numClusters</span> <span class="o">=</span> <span class="mi">2</span> <span class="c1"># number of clusters</span>
+<span class="n">numClusters</span> <span class="o">=</span> <span class="mi">10</span> <span class="c1"># number of clusters</span>
 <span class="n">model</span> <span class="o">=</span> <span class="n">KMeans</span><span class="o">.</span><span class="n">train</span><span class="p">(</span><span class="n">vectors</span><span class="p">,</span> <span class="n">numClusters</span><span class="p">,</span> <span class="n">maxIterations</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">initializationMode</span><span class="o">=</span><span class="s2">&quot;random&quot;</span><span class="p">)</span>
+</pre></div>
 
-<span class="c1"># Use the model to predict what cluster each tweet will be in</span>
-<span class="n">testtweets</span> <span class="o">=</span> <span class="n">tweetsRDD</span><span class="o">.</span><span class="n">take</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
-<span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">testtweets</span><span class="p">:</span>
-    <span class="n">vector</span> <span class="o">=</span> <span class="n">htf</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">))</span>
-    <span class="n">cluster</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">vector</span><span class="p">)</span>
-    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;cluster: {}, tweet:{}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">cluster</span><span class="p">,</span> <span class="n">t</span><span class="p">))</span>
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython2"><pre><span class="kn">from</span> <span class="nn">pyspark.sql.functions</span> <span class="kn">import</span> <span class="n">udf</span>
+<span class="kn">from</span> <span class="nn">pyspark.sql.types</span> <span class="kn">import</span> <span class="n">IntegerType</span><span class="p">,</span> <span class="n">StringType</span>
+
+<span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="n">tags</span><span class="p">):</span>
+    <span class="n">vector</span> <span class="o">=</span> <span class="n">htf</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">tags</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">vector</span><span class="p">)</span>
+<span class="c1"># Creates a Column expression representing a user defined function</span>
+<span class="n">udfPredict</span> <span class="o">=</span> <span class="n">udf</span><span class="p">(</span><span class="n">predict</span><span class="p">,</span> <span class="n">IntegerType</span><span class="p">())</span>
+
+<span class="k">def</span> <span class="nf">formatstr</span><span class="p">(</span><span class="n">message</span><span class="p">):</span>
+    <span class="n">lines</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span>
+    <span class="k">return</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
+<span class="n">udfFormatstr</span> <span class="o">=</span> <span class="n">udf</span><span class="p">(</span><span class="n">formatstr</span><span class="p">,</span> <span class="n">StringType</span><span class="p">())</span>
+
+<span class="c1"># transform mhDF into cmhDF, a dataframe containing formatted messages, </span>
+<span class="c1"># hashtabs and cluster</span>
+<span class="n">mhDF2</span> <span class="o">=</span> <span class="n">mhDF</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">&quot;message&quot;</span><span class="p">,</span> <span class="n">udfFormatstr</span><span class="p">(</span><span class="n">mhDF</span><span class="o">.</span><span class="n">message</span><span class="p">))</span>
+<span class="n">cmhDF</span> <span class="o">=</span> <span class="n">mhDF2</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">&quot;cluster&quot;</span><span class="p">,</span> <span class="n">udfPredict</span><span class="p">(</span><span class="n">mhDF2</span><span class="o">.</span><span class="n">tags</span><span class="p">))</span>
+<span class="n">cmhDF</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython2"><pre><span class="kn">import</span> <span class="nn">sys</span>
+<span class="nb">reload</span><span class="p">(</span><span class="n">sys</span><span class="p">)</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">setdefaultencoding</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython2"><pre><span class="c1"># visualizing clusters</span>
+<span class="kn">import</span> <span class="nn">brunel</span>
+
+<span class="n">cmh_pd</span> <span class="o">=</span> <span class="n">cmhDF</span><span class="o">.</span><span class="n">toPandas</span><span class="p">()</span>
+<span class="n">cmh_pd</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s1">&#39;cmh_pd.csv&#39;</span><span class="p">)</span>
+<span class="o">%</span><span class="k">brunel</span> data(&#39;cmh_pd&#39;) bubble x(cluster) tooltip(message, tags) legends(none)
 </pre></div>
 
 </div>
