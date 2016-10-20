@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head><meta charset="utf-8" />
-<title>wowScala</title>
+<title>Wow16-HOL-Scala-FINA</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
@@ -52,10 +52,8 @@
 .highlight .err { border: 1px solid #FF0000 } /* Error */
 .highlight .k { color: #008000; font-weight: bold } /* Keyword */
 .highlight .o { color: #666666 } /* Operator */
-.highlight .ch { color: #408080; font-style: italic } /* Comment.Hashbang */
 .highlight .cm { color: #408080; font-style: italic } /* Comment.Multiline */
 .highlight .cp { color: #BC7A00 } /* Comment.Preproc */
-.highlight .cpf { color: #408080; font-style: italic } /* Comment.PreprocFile */
 .highlight .c1 { color: #408080; font-style: italic } /* Comment.Single */
 .highlight .cs { color: #408080; font-style: italic } /* Comment.Special */
 .highlight .gd { color: #A00000 } /* Generic.Deleted */
@@ -111,6 +109,309 @@
 .highlight .vg { color: #19177C } /* Name.Variable.Global */
 .highlight .vi { color: #19177C } /* Name.Variable.Instance */
 .highlight .il { color: #666666 } /* Literal.Number.Integer.Long */
+    </style>
+<style type="text/css">
+    /*
+# Licensed Materials - Property of IBM
+# 5725-Y50
+# (C) Copyright IBM Corp. 2015    All Rights Reserved.
+# US Government Users Restricted Rights - Use, duplication or disclosure 
+# restricted by GSA ADP Schedule Contract with IBM Corp. 
+*/
+
+/*.notebook_app only adresses stuff on the notebook ui not the tree*/
+
+/*GENERAL NOTEBOOK SITE*/
+
+html {
+  /*Return the root to 16px for safe usage of rem unit*/
+  font-size: 100%;
+}
+
+.notebook_app {
+  color: #626d72;
+  background-color: #F3F6FB;
+  font-size: 0.875rem;
+}
+
+.notebook_app .container {
+  width: 100% !important;
+}
+
+.notebook_app #notebook {
+  padding-top: 0;
+}
+
+/*HEADER AND NAVBAR*/
+
+.notebook_app div#header-container {
+  display: none;
+}
+
+.notebook_app div#header {
+  background-color: #F3F6FB;
+  box-shadow: none;
+}
+
+.notebook_app #menubar {
+  margin: 0;
+}
+
+.notebook_app .header-bar {
+  display: none;
+}
+
+.notebook_app .navbar-default {
+  background-color: #F3F6FB;
+  border: none;
+}
+
+.notebook_app .navbar-default .navbar-nav>li>a {
+  color: #626d72;
+  padding-left: 0;
+  padding-right: 1.5rem;
+  padding-top: 0;
+}
+
+.notebook_app .navbar-default .navbar-nav>li>a:hover {
+  color: #2e404b;
+}
+
+.notebook_app .navbar-default .navbar-nav>.open>a {
+  background-color: #F3F6FB;
+  color: #2e404b;
+}
+
+.notebook_app .navbar-default .btn-default {
+  color: #ECF0F2;
+}
+
+.notebook_app .navbar-default .btn-default:hover {
+  color: #2e404b;
+  background-color: transparent;
+}
+
+.notebook_app #kernel_indicator {
+  color: #626d72;
+  text-align: right;
+  margin-right: 3em;
+  line-height: normal;
+}
+
+.notebook_app .navbar-btn.btn-xs {
+  margin-top: 0;
+}
+
+/*BUTTONS AND TOOLBAR*/
+
+.notebook_app #maintoolbar {
+  padding: 0;
+  margin: 0;
+}
+
+.notebook_app .toolbar {
+  margin:0;
+  width: 100% !important;
+  /* line-height: 4.5em; */
+}
+
+.notebook_app .btn-group {
+  margin: 0;
+  border-right: solid thin #DFE6EB;
+  /* height: 3em; */
+  display: inline-flex;
+  display: -webkit-inline-box;  /* OLD - iOS 6-, Safari 3.1-6, BB7 */
+  display: -ms-inline-flexbox;  /* TWEENER - IE 10 */
+  display: -webkit-inline-flex; /* NEW - Safari 6.1+. iOS 7.1+, BB10 */
+  align-items: center;
+  line-height: 1.4rem;
+  padding-left: 0.675rem;
+  padding-top: .25rem;
+  padding-bottom: .25rem;
+}
+
+.notebook_app .btn-group:first-child {
+  padding-left: 0;
+}
+
+.notebook_app .btn-group button {
+  margin-right: 0.675rem;
+  border: none;
+  border-radius: 0;
+  background-color: transparent;
+  padding: 0;
+  border-width: 0;
+  fill: #626d72;
+}
+
+.notebook_app .btn-group button:hover {
+  fill: #2e404b;
+}
+
+/*ICONS*/
+
+.notebook_app .icon {
+  height: 1.25rem;
+  width: 1.25rem;
+  vertical-align: middle;
+}
+
+.icon_symbol {
+  fill: inherit;
+}
+
+/*SELECT MENUS*/
+
+.notebook_app .toolbar_select {
+  border: none;
+  display: inline-block;
+  margin-left: .375rem;
+  margin-bottom: .375rem;
+}
+
+.notebook_app .toolbar_select select {
+  border: solid thin #DFE6EB;
+  border-radius: 0;
+  box-shadow: none;
+  background: white;
+  color: #626d72;
+  padding: 0rem 0.375rem;
+  margin: 0;
+  height: 2.25rem
+}
+
+/*SELECT LABELS*/
+.notebook_app .toolbar_select span {
+  display: block;
+  font-size: .75rem;
+  font-weight: bold;
+  height: 1.675rem;
+  text-align: left;
+  margin: 0;
+}
+
+@media all and (min-width: 1024px) {
+  .notebook_app .toolbar_select span {
+    display:inline;
+    margin-right: .5rem;
+  }
+}
+
+/*MENUS*/
+.notebook_app .dropdown-menu {
+  background-color: #F3F6FB;
+  border-color: #DFE6EB;
+  box-sizing: border-box;
+}
+
+.notebook_app .dropdown-menu li a {
+  color: #626d72;
+  padding-left: 1rem;
+}
+
+.notebook_app .dropdown-menu li a:hover {
+  background-color: #DFE6EB;
+  color: #2e404b;
+}
+
+.notebook_app .dropdown-menu li.disabled a {
+  background-color: transparent;
+  color: #94A3AB;
+}
+
+.notebook_app .dropdown-submenu > a::after {
+  color: #626d72;
+}
+
+.notebook_app .dropdown-menu .divider {
+  background-color: #DFE6EB;
+}
+
+.notebook_app .dropdown-submenu > .dropdown-menu {
+  margin-left: 0;
+}
+
+/*NOTEBOOK CONTAINER*/
+.notebook_app #notebook-container {
+  color: #6D7777;
+  box-shadow: none;
+  border: solid thin #DFE6EB;
+}
+
+/*DIALOGS*/
+.notebook_app .modal-dialog {
+  color: #6D7777;
+}
+
+.notebook_app .modal-backdrop {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.notebook_app .modal-dialog .btn {
+  min-height: 2.75rem;
+  min-width: 9.375rem;
+  box-sizing: border-box;
+  padding: 0 1rem;
+  border-radius: 0;
+  cursor: pointer;
+  font-weight: 700;
+  text-transform: uppercase;
+  overflow: visible;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.notebook_app .modal-dialog .btn-default {
+  transition: background-color 0.15s ease-out 0s, color 0.15s ease-out 0s;
+  background-color: transparent;
+  color: #6D7777;
+  border: thin solid #DFE6EB;
+}
+
+.notebook_app .modal-dialog .btn-default:hover,
+.notebook_app .modal-dialog .btn-default:active,
+.notebook_app .modal-dialog .btn-default:focus {
+  background-color: #6D7777;
+  color: white;
+}
+
+.notebook_app .modal-dialog .btn-primary {
+  transition: background-color 0.15s ease-out 0s;
+  background-color: #00A391;
+  color: white;
+  border: none;
+}
+
+.notebook_app .modal-dialog .btn-primary:hover,
+.notebook_app .modal-dialog .btn-primary:active,
+.notebook_app .modal-dialog .btn-primary:focus {
+  background-color: #41D6C3;
+}
+
+.notification_widget.ax_notebook_saved {
+    background-color: #F3F6FB;
+    padding: 0px;
+    margin-right: 0px;
+    margin-bottom: 5px;
+    border-color: #F3F6FB;
+    color: #6ab200;
+    border: 0px;
+}
+
+.notification_widget.ax_notebook_saved:active:hover, .notification_widget.ax_notebook_saved.active:hover,
+.open > .dropdown-toggle.notification_widget.ax_notebook_saved:hover, .notification_widget.ax_notebook_saved:active:focus,
+.notification_widget.ax_notebook_saved.active:focus, .open > .dropdown-toggle.notification_widget.ax_notebook_saved:focus,
+.notification_widget.ax_notebook_saved.focus:active, .notification_widget.ax_notebook_saved.active.focus, .open >
+.dropdown-toggle.notification_widget.ax_notebook_saved.focus {
+  background-color: #F3F6FB;
+  margin-right: 0px;
+  margin-bottom: 5px;
+  padding: 0px;
+  border-color: #F3F6FB;
+  color: #6ab200;
+  border: 0px;
+}
     </style>
 
 
@@ -223,7 +524,7 @@ div#notebook {
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[1]:</div>
+<div class="prompt input_prompt">In&nbsp;[3]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-scala"><pre><span class="k">import</span> <span class="nn">org.apache.spark.streaming.</span><span class="o">{</span> <span class="nc">Seconds</span><span class="o">,</span> <span class="nc">StreamingContext</span><span class="o">,</span> <span class="nc">Time</span> <span class="o">}</span>
@@ -236,10 +537,10 @@ div#notebook {
 
 
 <span class="k">val</span> <span class="n">properties</span> <span class="k">=</span> <span class="nc">Map</span><span class="o">(</span>
-    <span class="s">&quot;cloudant.host&quot;</span><span class="o">-&gt;</span> <span class="s">&quot;ACCOUNT.cloudant.com&quot;</span><span class="o">,</span> 
-    <span class="s">&quot;cloudant.username&quot;</span><span class="o">-&gt;</span> <span class="s">&quot;USERNAME&quot;</span><span class="o">,</span>
-    <span class="s">&quot;cloudant.password&quot;</span><span class="o">-&gt;</span> <span class="s">&quot;PASSWORD&quot;</span><span class="o">,</span>
-    <span class="s">&quot;database&quot;</span><span class="o">-&gt;</span> <span class="s">&quot;election2016&quot;</span>
+    <span class="s">&quot;cloudant.host&quot;</span><span class="o">-&gt;</span> <span class="s">&quot;xxxx.cloudant.com&quot;</span><span class="o">,</span> 
+    <span class="s">&quot;cloudant.username&quot;</span><span class="o">-&gt;</span> <span class="s">&quot;xxxx&quot;</span><span class="o">,</span>
+    <span class="s">&quot;cloudant.password&quot;</span><span class="o">-&gt;</span> <span class="s">&quot;xxxx&quot;</span><span class="o">,</span>
+    <span class="s">&quot;database&quot;</span><span class="o">-&gt;</span> <span class="s">&quot;yyyy&quot;</span>
 <span class="o">)</span>
 </pre></div>
 
@@ -263,7 +564,7 @@ div#notebook {
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[2]:</div>
+<div class="prompt input_prompt">In&nbsp;[4]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-scala"><pre><span class="k">val</span> <span class="n">ssc</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">StreamingContext</span><span class="o">(</span><span class="n">sc</span><span class="o">,</span> <span class="nc">Seconds</span><span class="o">(</span><span class="mi">10</span><span class="o">))</span>
@@ -295,7 +596,7 @@ div#notebook {
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[3]:</div>
+<div class="prompt input_prompt">In&nbsp;[5]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-scala"><pre><span class="k">val</span> <span class="n">sqlContext</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">SQLContext</span><span class="o">(</span><span class="n">sc</span><span class="o">)</span>
@@ -341,7 +642,7 @@ Thus, the steps for demonstrating dynamic nature of Spark Streaming are followin
 <ol>
 <li>Run the cell below of the current <strong>Scala notebook</strong></li>
 <li>After that go back to the <strong>Python notebook</strong>, and run the following two cells of the Python notebook:
-Run:<div class="highlight"><pre><span class="n">query</span> <span class="o">=</span> <span class="s2">&quot;#election2016&quot;</span>
+Run:<div class="highlight"><pre><span class="n">query</span> <span class="o">=</span> <span class="s">&quot;#election2016&quot;</span>
 <span class="n">count</span> <span class="o">=</span> <span class="mi">300</span>
 </pre></div>
 ant then run the following cell:<div class="highlight"><pre><span class="n">TtC</span> <span class="o">=</span> <span class="n">TwitterToCloudant</span><span class="p">()</span>
@@ -354,9 +655,19 @@ ant then run the following cell:<div class="highlight"><pre><span class="n">TtC<
 </div>
 </div>
 </div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Keep iterating through the load of tweets into the database and see how the stream below picks up the changes. Every 10 sec we fetch the next set of tweets available at that point. The analysis results will change appropriately and you can see for example different states showing up at the top of the list.</p>
+
+</div>
+</div>
+</div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[4]:</div>
+<div class="prompt input_prompt">In&nbsp;[6]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-scala"><pre><span class="n">ssc</span><span class="o">.</span><span class="n">start</span><span class="o">()</span>
@@ -374,102 +685,168 @@ ant then run the following cell:<div class="highlight"><pre><span class="n">TtC<
 
 <div class="output_area"><div class="prompt"></div>
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>========= 1473700520000 ms =========
+<pre>========= 1476947750000 ms =========
+========= 1476947760000 ms =========
 +--------------------+--------------------+--------------------+--------------------+--------------------+
 |                 _id|                _rev|                 cde|         cdeInternal|             message|
 +--------------------+--------------------+--------------------+--------------------+--------------------+
-|19e10ed0d84ca4804...|1-e01013f3b419d3c...|[[unknown,[null,n...|[null,WrappedArra...|[[995mu,1041,94,5...|
-|19e10ed0d84ca4804...|1-faa818605292480...|[[male,[Salt Lake...|[null,WrappedArra...|[[Daniel Burton,3...|
-|19e10ed0d84ca4804...|1-ef96819a7a98d1b...|[[male,[Monticell...|[null,WrappedArra...|[[Steven Kurlande...|
-|19e10ed0d84ca4804...|1-9c2f0a4b09ea675...|[[null,[,United S...|[null,WrappedArra...|[[AZ After Party,...|
-|19e10ed0d84ca4804...|1-d8d702846ed578c...|[[male,[,,],[,unk...|[null,WrappedArra...|[[Mormon Democrat...|
-|19e10ed0d84ca4804...|1-bb2f38a4ced7969...|[[unknown,[,Unite...|[null,WrappedArra...|[[utahpolitics,1,...|
-|19e10ed0d84ca4804...|1-0a880a2c012457c...|[[unknown,[Adelai...|[null,WrappedArra...|[[Kerry Seebohm,9...|
-|19e10ed0d84ca4804...|1-85dfdf787bc125e...|[[unknown,[Köln,G...|[null,WrappedArra...|[[Awale Howle,162...|
-|19e10ed0d84ca4804...|1-643e24d6fbda555...|[[male,[BELLE,Uni...|[null,WrappedArra...|[[DR.BROWN-DEAN,3...|
-|19e10ed0d84ca4804...|1-020f864315fe3d6...|[[male,[Elizabeth...|[[true,null,false...|[[Mr. Huesken,164...|
+|d044c4d0b0551cc93...|1-9c2f0a4b09ea675...|[[null,[,United S...|[null,WrappedArra...|[[AZ After Party,...|
+|d044c4d0b0551cc93...|1-bb2f38a4ced7969...|[[unknown,[,Unite...|[null,WrappedArra...|[[utahpolitics,1,...|
+|d044c4d0b0551cc93...|1-7669e192db75074...|[[unknown,[NATION...|[null,WrappedArra...|[[Not On This Wat...|
+|d044c4d0b0551cc93...|1-643e24d6fbda555...|[[male,[BELLE,Uni...|[null,WrappedArra...|[[DR.BROWN-DEAN,3...|
+|d044c4d0b0551cc93...|1-59f8bbeec7c0283...|[[null,[null,null...|                null|[[Arturo Quintero...|
+|d044c4d0b0551cc93...|1-a7e8585adf332e3...|[[female,[null,nu...|                null|[[Gloria Marcelin...|
+|d044c4d0b0551cc93...|1-d8d702846ed578c...|[[male,[,,],[,unk...|[null,WrappedArra...|[[Mormon Democrat...|
+|d044c4d0b0551cc93...|1-682d3282aa29a80...|[[unknown,[Accra,...|[null,WrappedArra...|[[Afoobu,218,621,...|
+|d044c4d0b0551cc93...|1-5aadc76dc336ea6...|[[unknown,[SAN FR...|[[true,null,false...|[[jess,873,74,266...|
+|d044c4d0b0551cc93...|1-e01013f3b419d3c...|[[unknown,[null,n...|[null,WrappedArra...|[[995mu,1041,94,5...|
 +--------------------+--------------------+--------------------+--------------------+--------------------+
 only showing top 10 rows
 
-+-------+---------------+--------+
-| gender|          state|polarity|
-+-------+---------------+--------+
-|unknown|           null| NEUTRAL|
-|   male|           Utah| NEUTRAL|
-|   male|       New York|POSITIVE|
-|   null|        Arizona|    null|
-|   male|               | NEUTRAL|
-|unknown|           Utah| NEUTRAL|
-|unknown|South Australia|NEGATIVE|
-|unknown|               |POSITIVE|
-|   male|       Missouri|NEGATIVE|
-|   male|   Pennsylvania| NEUTRAL|
-+-------+---------------+--------+
++-------+----------+--------+
+| gender|     state|polarity|
++-------+----------+--------+
+|   null|   Arizona|    null|
+|unknown|      Utah| NEUTRAL|
+|unknown|  Maryland|NEGATIVE|
+|   male|  Missouri|NEGATIVE|
+|   null|      null|    null|
+| female|      null| NEUTRAL|
+|   male|          | NEUTRAL|
+|unknown|          | NEUTRAL|
+|unknown|California| NEUTRAL|
+|unknown|      null| NEUTRAL|
++-------+----------+--------+
 only showing top 10 rows
 
-Current total count:1200
-========= 1473700530000 ms =========
-========= 1473700540000 ms =========
-========= 1473700550000 ms =========
+Current total count:5096
+========= 1476947770000 ms =========
+========= 1476947780000 ms =========
+========= 1476947790000 ms =========
 +--------------------+--------------------+--------------------+--------------------+--------------------+
 |                 _id|                _rev|                 cde|         cdeInternal|             message|
 +--------------------+--------------------+--------------------+--------------------+--------------------+
-|39fb4703881bd46a4...|1-9f0eb0d3e8309ac...|[[unknown,[null,n...|[null,WrappedArra...|[[ekajoyce,179,25...|
-|39fb4703881bd46a4...|1-d8d702846ed578c...|[[male,[,,],[,unk...|[null,WrappedArra...|[[Mormon Democrat...|
-|39fb4703881bd46a4...|1-9c2f0a4b09ea675...|[[null,[,United S...|[null,WrappedArra...|[[AZ After Party,...|
-|39fb4703881bd46a4...|1-bb2f38a4ced7969...|[[unknown,[,Unite...|[null,WrappedArra...|[[utahpolitics,1,...|
-|39fb4703881bd46a4...|1-682d3282aa29a80...|[[unknown,[Accra,...|[null,WrappedArra...|[[Afoobu,218,621,...|
-|39fb4703881bd46a4...|1-85dfdf787bc125e...|[[unknown,[Köln,G...|[null,WrappedArra...|[[Awale Howle,162...|
-|39fb4703881bd46a4...|1-e01013f3b419d3c...|[[unknown,[null,n...|[null,WrappedArra...|[[995mu,1041,94,5...|
-|39fb4703881bd46a4...|1-10c4d0c52932bee...|[[male,[,United S...|[[true,null,null,...|[[Chuck Nellis,33...|
-|39fb4703881bd46a4...|1-7669e192db75074...|[[unknown,[NATION...|[null,WrappedArra...|[[Not On This Wat...|
-|39fb4703881bd46a4...|1-faa818605292480...|[[male,[Salt Lake...|[null,WrappedArra...|[[Daniel Burton,3...|
+|bacf66c4896a92d59...|1-e01013f3b419d3c...|[[unknown,[null,n...|[null,WrappedArra...|[[995mu,1041,94,5...|
+|bacf66c4896a92d59...|1-020f864315fe3d6...|[[male,[Elizabeth...|[[true,null,false...|[[Mr. Huesken,164...|
+|bacf66c4896a92d59...|1-faa818605292480...|[[male,[Salt Lake...|[null,WrappedArra...|[[Daniel Burton,3...|
+|bacf66c4896a92d59...|1-e681a6374442ba0...|[[unknown,[Housto...|                null|[[Donirah Andrade...|
+|bacf66c4896a92d59...|1-643e24d6fbda555...|[[male,[BELLE,Uni...|[null,WrappedArra...|[[DR.BROWN-DEAN,3...|
+|bacf66c4896a92d59...|1-9f0eb0d3e8309ac...|[[unknown,[null,n...|[null,WrappedArra...|[[ekajoyce,179,25...|
+|bacf66c4896a92d59...|1-b4839ef8229e31a...|[[male,[,United S...|                null|[[Michael D. Thom...|
+|bacf66c4896a92d59...|1-c33e21907705394...|[[male,[null,null...|                null|[[Nelson B Umanzo...|
+|bacf66c4896a92d59...|1-ac848cef20b071c...|[[null,[null,null...|                null|[[nelsy Benitez,4...|
+|bacf66c4896a92d59...|1-2e527f88c6d9fc9...|[[male,[Chicago,U...|                null|[[Mark Toland,577...|
 +--------------------+--------------------+--------------------+--------------------+--------------------+
 only showing top 10 rows
 
-+-------+--------------+--------+
-| gender|         state|polarity|
-+-------+--------------+--------+
-|unknown|          null| NEUTRAL|
-|   male|              | NEUTRAL|
-|   null|       Arizona|    null|
-|unknown|          Utah| NEUTRAL|
-|unknown|              | NEUTRAL|
-|unknown|              |POSITIVE|
-|unknown|          null| NEUTRAL|
-|   male|North Carolina| NEUTRAL|
-|unknown|      Maryland|NEGATIVE|
-|   male|          Utah| NEUTRAL|
-+-------+--------------+--------+
++-------+------------+--------+
+| gender|       state|polarity|
++-------+------------+--------+
+|unknown|        null| NEUTRAL|
+|   male|Pennsylvania| NEUTRAL|
+|   male|        Utah| NEUTRAL|
+|unknown|       Texas| NEUTRAL|
+|   male|    Missouri|NEGATIVE|
+|unknown|        null| NEUTRAL|
+|   male|    Michigan|POSITIVE|
+|   male|        null| NEUTRAL|
+|   null|        null|    null|
+|   male|    Illinois|NEGATIVE|
++-------+------------+--------+
 only showing top 10 rows
 
-Current total count:1500
-========= 1473700560000 ms =========
-========= 1473700570000 ms =========
-========= 1473700580000 ms =========
-========= 1473700590000 ms =========
-========= 1473700600000 ms =========
-========= 1473700610000 ms =========
-========= 1473700620000 ms =========
-========= 1473700630000 ms =========
-========= 1473700640000 ms =========
-========= 1473700650000 ms =========
-========= 1473700660000 ms =========
-========= 1473700670000 ms =========
-========= 1473700680000 ms =========
-========= 1473700690000 ms =========
-========= 1473700700000 ms =========
-========= 1473700710000 ms =========
-========= 1473700720000 ms =========
-========= 1473700730000 ms =========
-========= 1473700740000 ms =========
-========= 1473700750000 ms =========
-========= 1473700760000 ms =========
-========= 1473700770000 ms =========
-========= 1473700780000 ms =========
-========= 1473700790000 ms =========
-========= 1473700800000 ms =========
-========= 1473700810000 ms =========
+Current total count:5227
+========= 1476947800000 ms =========
+========= 1476947810000 ms =========
++--------------------+--------------------+--------------------+--------------------+--------------------+
+|                 _id|                _rev|                 cde|         cdeInternal|             message|
++--------------------+--------------------+--------------------+--------------------+--------------------+
+|bacf66c4896a92d59...|1-e01013f3b419d3c...|[[unknown,[null,n...|[null,WrappedArra...|[[995mu,1041,94,5...|
+|bacf66c4896a92d59...|1-6d81205ffdb5aeb...|[[male,[WASHINGTO...|                null|[[The Washington ...|
+|bacf66c4896a92d59...|1-d8d702846ed578c...|[[male,[,,],[,unk...|[null,WrappedArra...|[[Mormon Democrat...|
+|bacf66c4896a92d59...|1-bb2f38a4ced7969...|[[unknown,[,Unite...|[null,WrappedArra...|[[utahpolitics,1,...|
+|bacf66c4896a92d59...|1-9f0eb0d3e8309ac...|[[unknown,[null,n...|[null,WrappedArra...|[[ekajoyce,179,25...|
+|bacf66c4896a92d59...|1-79c68d84451c1e5...|[[female,[,United...|                null|[[Sharon Jones,16...|
+|bacf66c4896a92d59...|1-10c4d0c52932bee...|[[male,[,United S...|[[true,null,null,...|[[Chuck Nellis,33...|
+|bacf66c4896a92d59...|1-ef96819a7a98d1b...|[[male,[Monticell...|[null,WrappedArra...|[[Steven Kurlande...|
+|bacf66c4896a92d59...|1-682d3282aa29a80...|[[unknown,[Accra,...|[null,WrappedArra...|[[Afoobu,218,621,...|
+|bacf66c4896a92d59...|1-59f8bbeec7c0283...|[[null,[null,null...|                null|[[Arturo Quintero...|
++--------------------+--------------------+--------------------+--------------------+--------------------+
+only showing top 10 rows
+
++-------+--------------------+--------+
+| gender|               state|polarity|
++-------+--------------------+--------+
+|unknown|                null| NEUTRAL|
+|   male|District of Columbia|NEGATIVE|
+|   male|                    | NEUTRAL|
+|unknown|                Utah| NEUTRAL|
+|unknown|                null| NEUTRAL|
+| female|             Georgia|POSITIVE|
+|   male|      North Carolina| NEUTRAL|
+|   male|            New York|POSITIVE|
+|unknown|                    | NEUTRAL|
+|   null|                null|    null|
++-------+--------------------+--------+
+only showing top 10 rows
+
+Current total count:5374
+========= 1476947820000 ms =========
+========= 1476947830000 ms =========
+========= 1476947840000 ms =========
+========= 1476947850000 ms =========
++--------------------+--------------------+--------------------+--------------------+--------------------+
+|                 _id|                _rev|                 cde|         cdeInternal|             message|
++--------------------+--------------------+--------------------+--------------------+--------------------+
+|c0de2a963229e6554...|1-e01013f3b419d3c...|[[unknown,[null,n...|[null,WrappedArra...|[[995mu,1041,94,5...|
+|c0de2a963229e6554...|1-ef96819a7a98d1b...|[[male,[Monticell...|[null,WrappedArra...|[[Steven Kurlande...|
+|c0de2a963229e6554...|1-9c2f0a4b09ea675...|[[null,[,United S...|[null,WrappedArra...|[[AZ After Party,...|
+|c0de2a963229e6554...|1-6d81205ffdb5aeb...|[[male,[WASHINGTO...|                null|[[The Washington ...|
+|c0de2a963229e6554...|1-10c4d0c52932bee...|[[male,[,United S...|[[true,null,null,...|[[Chuck Nellis,33...|
+|c0de2a963229e6554...|1-682d3282aa29a80...|[[unknown,[Accra,...|[null,WrappedArra...|[[Afoobu,218,621,...|
+|c0de2a963229e6554...|1-643e24d6fbda555...|[[male,[BELLE,Uni...|[null,WrappedArra...|[[DR.BROWN-DEAN,3...|
+|c0de2a963229e6554...|1-2017265ebeb6938...|[[unknown,[York,U...|                null|[[CJ,54,11,90,id:...|
+|c0de2a963229e6554...|1-9f59e2b572a70a0...|[[unknown,[Denver...|                null|[[PeePartyexpress...|
+|c0de2a963229e6554...|1-020f864315fe3d6...|[[male,[Elizabeth...|[[true,false,null...|[[Mr. Huesken,164...|
++--------------------+--------------------+--------------------+--------------------+--------------------+
+only showing top 10 rows
+
++-------+--------------------+--------+
+| gender|               state|polarity|
++-------+--------------------+--------+
+|unknown|                null| NEUTRAL|
+|   male|            New York|POSITIVE|
+|   null|             Arizona|    null|
+|   male|District of Columbia|NEGATIVE|
+|   male|      North Carolina| NEUTRAL|
+|unknown|                    | NEUTRAL|
+|   male|            Missouri|NEGATIVE|
+|unknown|                    | NEUTRAL|
+|unknown|            Colorado|NEGATIVE|
+|   male|        Pennsylvania| NEUTRAL|
++-------+--------------------+--------+
+only showing top 10 rows
+
+Current total count:5518
+========= 1476947860000 ms =========
+========= 1476947870000 ms =========
+========= 1476947880000 ms =========
+========= 1476947890000 ms =========
+========= 1476947900000 ms =========
+========= 1476947910000 ms =========
+========= 1476947920000 ms =========
+========= 1476947930000 ms =========
+========= 1476947940000 ms =========
+========= 1476947950000 ms =========
+========= 1476947960000 ms =========
+========= 1476947970000 ms =========
+========= 1476947980000 ms =========
+========= 1476947990000 ms =========
+========= 1476948000000 ms =========
+========= 1476948010000 ms =========
+========= 1476948020000 ms =========
+========= 1476948030000 ms =========
+========= 1476948040000 ms =========
 </pre>
 </div>
 </div>
