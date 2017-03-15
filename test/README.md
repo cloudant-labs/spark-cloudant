@@ -1,24 +1,36 @@
 ## Pytest test scripts
 
-### Prerequisites
-- python 3  (or use [virtualenv](https://virtualenv.readthedocs.org/en/latest/) to create an isolated python 3 environment)
-- python [Requests module] (http://docs.python-requests.org/en/latest/user/install/)
-- [pytest](http://pytest.org/latest/)
-- spark 1.4 or 1.5 (http://spark.apache.org/docs/latest/spark-standalone.html) up and running 
-- cloudant databases with test data populated by the [acmeair-nodejs app](https://github.com/acmeair/acmeair-nodejs).  See [Data Loader](https://github.com/cloudant-labs/spark-cloudant/tree/master/test#data-loader).
+### Setup testing environment
 
-### Test Setup:
-- Start a python 3 virtualenv
-- Export environment variables:
+1. Clone the repo into a folder, set up a Python 3 [virtual environment](https://virtualenv.pypa.io/en/latest/),
+install the requirements:
+    ```
+    $ git clone git clone git@github.com:cloudant-labs/spark-cloudant.git
+    $ cd spark-cloudant
+    $ virtualenv .
+    $ ./bin/activate
+    $ pip install -r requirements.txt
+    ```
+2. Download the pre-built [Spark 2.1 for Hadoop 2.7 and later](http://d3kbcqa49mib13.cloudfront.net/spark-2.1.0-bin-hadoop2.7.tgz)
+   and run the standalone master server:  ` ./sbin/start-master.sh`
+   [Additional Spark standalone instructions](http://spark.apache.org/docs/latest/spark-standalone.html).
+3. Export environment variables within the Python 3 virtual environment:
 
-  - `CONNECTOR_JAR`  (path to the spark-cloudant connector jar file)
-  - `SPARK_HOME`        (path to the local spark home)
-
+  - `CONNECTOR_JAR`      (path to the spark-cloudant connector jar file)
+  - `SPARK_HOME`         (path to the local spark home)
+  - `CLOUDANT_HOST`      (Cloudant account with read/write access)
+  - `CLOUDANT_USERNAME`  (Cloudant account username)
+  - `CLOUDANT_PASSWORD`  (Cloudant account password)
   ```
-     export CONNECTOR_JAR=/mypath/spark-cloudant/cloudant-spark-sql/target/scala-2.10/cloudant-spark.jar
-     export SPARK_HOME=/Applications/spark-1.4.1-bin-hadoop2.6/
+     export CONNECTOR_JAR=/PATH/spark-cloudant/cloudant-spark-sql/target/scala-2.11/cloudant-spark.jar
+     export SPARK_HOME=/PATH/spark-2.1.0-bin-hadoop2.7/
+     export CLOUDANT_HOST=ACCOUNT.cloudant.com
+     export CLOUDANT_USERNAME=username
+     export CLOUDANT_PASSWORD=password
   ```
-- Edit spark-cloudant/test/conftest.py, update the test_properties fixture (eg. cloudant credentials) 
+
+4. Populate a Cloudant test database with [acmeair-nodejs app](https://github.com/acmeair/acmeair-nodejs) and
+   [Data Loader](#data-loader).
 
 ### Data Loader:
 A utility is included to create test data to the cloudant database.
@@ -29,7 +41,6 @@ A utility is included to create test data to the cloudant database.
   ```
      export ACMEAIR_HOME=/mypath/acmeair-nodejs-master
   ```
-- Edit spark-cloudant/test/conftest.py, update the test_properties fixture.  Note the cloudant credentials need to have rights to **create** and **delete** databases.
 - Go to spark-cloudant/test
 - Run `python -m helpers.dataload [options]` with one of the following arguments:
   - `-cleanup`  (Drop all test databases)
