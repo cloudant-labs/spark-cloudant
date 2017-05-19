@@ -1,6 +1,18 @@
 Spark Cloudant Connector
 ================
 
+This Version is Deprecated
+--------------------------
+
+As of May 2017, `spark-cloudant` project is deprecated in favor of the new 
+project [sql-cloudant](https://github.com/apache/bahir/tree/master/sql-cloudant) 
+as part of [Apache Bahir](http://bahir.apache.org). 
+
+This is the final version of this project -- v2.1.0-rc1. 
+
+**Please use the new library for your new projects and begin to migrate your old projects that have 
+used versions v2.1.0-rc1 and prior.**
+
 Cloudant integration with Spark as Spark SQL external datasource, and Spark Streaming as a custom receiver. 
 
 ##  Contents:
