@@ -14,7 +14,6 @@
 # limitations under the License.
 #******************************************************************************/
 import pytest
-import requests
 import sys
 import os
 
@@ -22,12 +21,12 @@ import os
 @pytest.fixture(scope="session", autouse=True)
 def test_properties():
 	properties = {
-	'cloudanthost':'ACCOUNT.cloudant.com', 
-	'cloudantusername':'USERNAME', 
-	'cloudantpassword':'PASSWORD'}
+	'cloudanthost': os.environ.get('CLOUDANT_HOST'),
+	'cloudantusername': os.environ.get('CLOUDANT_USERNAME'),
+	'cloudantpassword': os.environ.get('CLOUDANT_PASSWORD')}
 	
 	return properties
-	
+
 
 @pytest.fixture(scope="session", autouse=True)
 def setup_test_databases(test_properties):
@@ -60,8 +59,3 @@ def sparksubmit():
 		raise RuntimeError("Environment variable SPARK_HOME not set")
 		
 	return os.path.join(os.environ.get("SPARK_HOME"), "bin", "spark-submit")
-
-
-
-
-	

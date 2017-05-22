@@ -13,43 +13,41 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #******************************************************************************/
-import helpers.utils
 import os
+
+from helpers import utils
+
+util = utils.Utils(os.path.dirname(__file__))
 
 class TestCloudantSparkConnector:
 
-    script_dir = "test-scripts/cloudantapp"
-
     def test_SpecCharPredicate(self, sparksubmit):
         script_name = "SpecCharPredicate.py"
-        helpers.utils.run_test(self.get_script_path(script_name), sparksubmit)
+        util.run_test(util.get_script_path(script_name), sparksubmit)
         
     def test_RegCharPredicate(self, sparksubmit):
         script_name = "RegCharPredicate.py"
-        helpers.utils.run_test(self.get_script_path(script_name), sparksubmit)
+        util.run_test(util.get_script_path(script_name), sparksubmit)
         
     def test_RangePredicate(self, sparksubmit):
         script_name = "RangePredicate.py"
-        helpers.utils.run_test(self.get_script_path(script_name), sparksubmit)  
+        util.run_test(util.get_script_path(script_name), sparksubmit)
 
     def test_SpecCharValuePredicate(self, sparksubmit):
         script_name = "SpecCharValuePredicate.py"
-        helpers.utils.run_test(self.get_script_path(script_name), sparksubmit)
+        util.run_test(util.get_script_path(script_name), sparksubmit)
 
     def test_IndexOption(self, sparksubmit):
         script_name = "IndexOption.py"
-        helpers.utils.run_test(self.get_script_path(script_name), sparksubmit)      
+        util.run_test(util.get_script_path(script_name), sparksubmit)
     
     def test_ViewOption(self, sparksubmit):
         script_name = "ViewOption.py"
-        helpers.utils.run_test(self.get_script_path(script_name), sparksubmit)      
+        util.run_test(util.get_script_path(script_name), sparksubmit)
     
     def test_Save(self, sparksubmit):
         script_name = "Save.py"
-        helpers.utils.run_test(self.get_script_path(script_name), sparksubmit)      
-    
-    def get_script_path(self, script_name):
-        return os.path.join(os.path.dirname(__file__), self.script_dir, script_name)
+        util.run_test(util.get_script_path(script_name), sparksubmit)
             
 
         
