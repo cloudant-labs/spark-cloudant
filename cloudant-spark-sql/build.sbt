@@ -13,17 +13,24 @@ resolvers ++= Seq(
   "typesafe repo" at "http://repo.typesafe.com/typesafe/releases/"
 )
 
+// a 'compileonly' configuation
+ivyConfigurations += config("compileonly").hide
+
 libraryDependencies ++= {
   val sparkV =  "2.0.0"
   Seq(
     "org.apache.spark"    %%  "spark-core"	  %  sparkV % "provided",
     "org.apache.spark"    %%  "spark-sql"	  %  sparkV % "provided",
     "org.apache.spark"    %%  "spark-streaming"   %  sparkV % "provided",
-    "com.typesafe.play"   %%  "play-json"     %  "2.4.8",
+    "com.typesafe.play"   %%  "play-json"     %  "2.4.8" % "provided",
     "org.scalaj" %% "scalaj-http" % "2.3.0",
     "org.slf4j" % "slf4j-api" % "1.7.21"
   )
 }
+
+// appending everything from 'compileonly' to unmanagedClasspath
+unmanagedClasspath in Compile ++=
+  update.value.select(configurationFilter("compileonly"))
 
 assemblyOption in assembly := (assemblyOption in assembly).value.copy(includeScala = false)
 
