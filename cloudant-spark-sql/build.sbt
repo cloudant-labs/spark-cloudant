@@ -22,7 +22,7 @@ libraryDependencies ++= {
     "org.apache.spark"    %%  "spark-core"	  %  sparkV % "provided",
     "org.apache.spark"    %%  "spark-sql"	  %  sparkV % "provided",
     "org.apache.spark"    %%  "spark-streaming"   %  sparkV % "provided",
-    "com.typesafe.play"   %%  "play-json"     %  "2.4.8" % "provided",
+    "com.typesafe.play"   %%  "play-json"     %  "2.5.9" % "provided",
     "org.scalaj" %% "scalaj-http" % "2.3.0",
     "org.slf4j" % "slf4j-api" % "1.7.21"
   )
