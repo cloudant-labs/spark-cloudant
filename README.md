@@ -1,4 +1,4 @@
-Spark Cloudant Connector
+DEPRECATED - Spark Cloudant Connector
 ================
 
 This Version is Deprecated
